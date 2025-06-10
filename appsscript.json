@@ -1,0 +1,27 @@
+{
+  "timeZone": "Africa/Cairo",
+  "dependencies": {
+    "enabledAdvancedServices": [{
+      "userSymbol": "Sheets",
+      "serviceId": "sheets",
+      "version": "v4"
+    }],
+    "libraries": [{
+      "userSymbol": "AFILibrary",
+      "libraryId": "1rddPqArhfhApBuhnOiRqrGv5QIuVbxLsfRyFHxIUnemhu82SkiSOv3Ew",
+      "version": "0",
+      "developmentMode": true
+    }, {
+      "userSymbol": "AFIDBSheetsController",
+      "libraryId": "1GgDAm1rQpVPjg1VUCojtVdBXOHdvpwsoax63IvQWElO7yk0hIKPaX6iF",
+      "version": "0",
+      "developmentMode": true
+    }]
+  },
+  "webapp": {
+    "access": "ANYONE_ANONYMOUS",
+    "executeAs": "USER_DEPLOYING"
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8"
+}

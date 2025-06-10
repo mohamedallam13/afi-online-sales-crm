@@ -1,0 +1,2817 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AFI CRM - إدارة العملاء والطلبات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #3b82f6;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0891b2;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --border-radius: 12px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+    }
+
+    /* ===== LOADING SCREEN ===== */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-content {
+      text-align: center;
+      color: white;
+    }
+
+    .loading-spinner {
+      width: 64px;
+      height: 64px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 2rem;
+    }
+
+    .loading-title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .loading-message {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ===== TOAST NOTIFICATIONS ===== */
+    .toast-container {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      z-index: 9998;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .toast {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-lg);
+      padding: 1rem 1.5rem;
+      min-width: 320px;
+      max-width: 500px;
+      transform: translateX(-120%);
+      transition: var(--transition);
+      border-right: 4px solid;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      border-right-color: var(--success);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .toast.error {
+      border-right-color: var(--danger);
+      background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    }
+
+    .toast-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--danger);
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: var(--transition);
+    }
+
+    .toast-close:hover {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--gray-600);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .app-container {
+      min-height: 100vh;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: var(--border-radius);
+      padding: 2rem 3rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-content h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-content p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    /* ===== NAVIGATION ===== */
+    .main-nav {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .nav-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .nav-tab {
+      flex: 1;
+      padding: 1.25rem 2rem;
+      border: none;
+      background: none;
+      color: var(--gray-600);
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    .nav-tab:hover {
+      background: var(--gray-50);
+      color: var(--gray-800);
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      background: var(--gray-50);
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+
+    /* ===== CONTENT SECTIONS ===== */
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-content {
+      padding: 2rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #047857;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    /* ===== ORDER FILTERS ===== */
+    .order-filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--gray-200);
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-btn.active {
+      border-color: var(--primary);
+      background: rgba(37, 99, 235, 0.05);
+      color: var(--primary);
+    }
+
+    .filter-btn .badge {
+      background: var(--gray-200);
+      color: var(--gray-700);
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .filter-btn.active .badge {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* ===== ORDERS TABLE ===== */
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .orders-table th {
+      background: var(--gray-100);
+      padding: 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .orders-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-200);
+      vertical-align: middle;
+    }
+
+    .orders-table tbody tr:hover {
+      background: var(--gray-50);
+    }
+
+    .orders-table tbody tr {
+      cursor: pointer;
+    }
+
+    .order-row.expanded {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .order-details-row {
+      display: none;
+    }
+
+    .order-details-row.show {
+      display: table-row;
+    }
+
+    .order-details-content {
+      padding: 2rem;
+      background: var(--gray-50);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .order-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .order-items-table th {
+      background: var(--gray-100);
+      padding: 0.75rem 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: var(--gray-700);
+      font-size: 0.9rem;
+    }
+
+    .order-items-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 0.9rem;
+    }
+
+    .order-items-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .order-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-item {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .summary-label {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .expand-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .expand-icon.rotated {
+      transform: rotate(180deg);
+    }
+
+    /* ===== ITEMS TABLE ===== */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .items-table th {
+      background: var(--gray-100);
+      padding: 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .items-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-200);
+      vertical-align: middle;
+    }
+
+    .items-table tbody tr:hover {
+      background: var(--gray-50);
+    }
+
+    .items-table input,
+    .items-table select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .add-item-btn {
+      width: 100%;
+      background: var(--gray-50);
+      color: var(--primary);
+      border: 2px dashed var(--gray-300);
+      padding: 1rem;
+    }
+
+    .add-item-btn:hover {
+      background: rgba(37, 99, 235, 0.05);
+      border-color: var(--primary);
+    }
+
+    /* ===== ADDRESS SELECTION ===== */
+    .address-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .address-card {
+      border: 2px solid var(--gray-200);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .address-card:hover {
+      border-color: var(--primary-light);
+      background: rgba(37, 99, 235, 0.02);
+    }
+
+    .address-card.selected {
+      border-color: var(--primary);
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .address-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 0.75rem;
+    }
+
+    .address-details {
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    .section-divider {
+      margin: 2rem 0;
+      padding-top: 2rem;
+      border-top: 2px solid var(--gray-100);
+    }
+
+    .form-section {
+      display: none;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .form-section.show {
+      display: block;
+    }
+
+    /* ===== CUSTOMER GRID ===== */
+    .customers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .customer-card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transition: var(--transition);
+    }
+
+    .customer-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .customer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .customer-info h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 0.25rem;
+    }
+
+    .customer-info p {
+      color: var(--gray-500);
+      font-size: 0.9rem;
+    }
+
+    .customer-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-lg);
+      max-width: 900px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 2rem;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--gray-400);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .modal-content {
+      padding: 2rem;
+    }
+
+    /* ===== FORMS ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: var(--transition);
+      background: white;
+      color: var(--gray-900);
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-input.error,
+    .form-select.error {
+      border-color: var(--danger);
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* ===== CUSTOMER SEARCH ===== */
+    .customer-search {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 3rem 1rem 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+      font-size: 1.1rem;
+    }
+
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid var(--gray-200);
+      border-top: none;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      box-shadow: var(--shadow-lg);
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+
+    .search-results.show {
+      display: block;
+    }
+
+    .search-result {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .search-result:hover {
+      background: var(--gray-50);
+    }
+
+    .search-result:last-child {
+      border-bottom: none;
+    }
+
+    .new-customer-option {
+      background: var(--gray-100);
+      color: var(--primary);
+      border-top: 2px solid var(--gray-200);
+      font-weight: 500;
+    }
+
+    .new-customer-option:hover {
+      background: var(--gray-200);
+      color: var(--primary-dark);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 1rem;
+      }
+
+      .app-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .header-content h1 {
+        font-size: 2rem;
+      }
+
+      .nav-tabs {
+        flex-direction: column;
+      }
+
+      .order-filters {
+        flex-direction: column;
+      }
+
+      .customers-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .toast-container {
+        left: 1rem;
+        right: 1rem;
+      }
+
+      .toast {
+        min-width: auto;
+      }
+
+      .orders-table {
+        font-size: 0.9rem;
+      }
+
+      .orders-table th,
+      .orders-table td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .hidden {
+      display: none !important;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .mb-0 {
+      margin-bottom: 0;
+    }
+
+    .mb-2 {
+      margin-bottom: 1rem;
+    }
+
+    .mt-2 {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-title">AFI CRM</div>
+      <div class="loading-message" id="loadingMessage">جاري تحميل البيانات...</div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main Application -->
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <h1>
+          <i class="fas fa-chart-line"></i>
+          AFI CRM
+        </h1>
+        <p>نظام إدارة علاقات العملاء والطلبات</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-success" onclick="openNewOrderModal()">
+          <i class="fas fa-plus"></i>
+          طلب جديد
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-section="orders">
+          <i class="fas fa-shopping-cart"></i>
+          الطلبات
+        </button>
+        <button class="nav-tab" data-section="customers">
+          <i class="fas fa-users"></i>
+          العملاء
+        </button>
+        <button class="nav-tab" data-section="leads">
+          <i class="fas fa-user-plus"></i>
+          العملاء المحتملين
+        </button>
+      </div>
+    </nav>
+
+    <!-- Orders Section -->
+    <div class="content-section active" id="orders">
+      <!-- Order Filters -->
+      <div class="order-filters">
+        <button class="filter-btn active" data-filter="all">
+          <span>جميع الطلبات</span>
+          <span class="badge" id="allCount">0</span>
+        </button>
+        <button class="filter-btn" data-filter="pending">
+          <span>في الانتظار</span>
+          <span class="badge" id="pendingCount">0</span>
+        </button>
+        <button class="filter-btn" data-filter="in-progress">
+          <span>قيد التحضير</span>
+          <span class="badge" id="inProgressCount">0</span>
+        </button>
+        <button class="filter-btn" data-filter="out-for-delivery">
+          <span>في التوصيل</span>
+          <span class="badge" id="outForDeliveryCount">0</span>
+        </button>
+        <button class="filter-btn" data-filter="delivered">
+          <span>تم التوصيل</span>
+          <span class="badge" id="deliveredCount">0</span>
+        </button>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fas fa-list"></i>
+            قائمة الطلبات
+          </h2>
+        </div>
+        <div class="card-content">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>العميل</th>
+                <th>التاريخ</th>
+                <th>المبلغ</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customers Section -->
+    <div class="content-section" id="customers">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fas fa-users"></i>
+            قائمة العملاء
+          </h2>
+          <button class="btn btn-primary" onclick="openAddCustomerModal()">
+            <i class="fas fa-user-plus"></i>
+            إضافة عميل
+          </button>
+        </div>
+        <div class="card-content">
+          <div class="customers-grid" id="customersGrid">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leads Section -->
+    <div class="content-section" id="leads">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fas fa-user-plus"></i>
+            العملاء المحتملين (Leads)
+          </h2>
+          <button class="btn btn-success" onclick="openAddLeadModal()">
+            <i class="fas fa-plus"></i>
+            إضافة عميل محتمل
+          </button>
+        </div>
+        <div class="card-content">
+          <div class="leads-grid" id="leadsGrid">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Order Modal -->
+  <div class="modal-overlay" id="newOrderModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fas fa-plus"></i>
+          طلب جديد
+        </h2>
+        <button class="modal-close" onclick="closeNewOrderModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        
+        <!-- Customer Search Section -->
+        <div class="customer-search">
+          <label class="form-label">البحث عن عميل</label>
+          <input type="text" class="search-input" id="customerSearch"
+            placeholder="ابحث عن عميل موجود بالاسم أو رقم الهاتف..." autocomplete="off">
+          <i class="fas fa-search search-icon"></i>
+          <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <!-- Address Selection Section (shows when existing customer is selected) -->
+        <div class="form-section" id="addressSection">
+          <h3 class="card-title mb-2">
+            <i class="fas fa-map-marker-alt"></i>
+            اختر العنوان للتوصيل
+          </h3>
+          <div class="address-grid" id="addressGrid"></div>
+          <button type="button" class="btn btn-primary mb-2" onclick="showNewAddressForm()">
+            <i class="fas fa-plus"></i>
+            إضافة عنوان جديد
+          </button>
+        </div>
+
+        <!-- Customer Details Section (shows only when adding new customer) -->
+        <div class="form-section" id="customerDetailsSection">
+          <h3 class="card-title mb-2">
+            <i class="fas fa-user-plus"></i>
+            بيانات العميل الجديد
+          </h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">اسم العميل *</label>
+              <input type="text" class="form-input" id="customerName" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">رقم الهاتف *</label>
+              <input type="tel" class="form-input" id="customerPhone" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">العنوان *</label>
+              <input type="text" class="form-input" id="customerAddress" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">المنطقة *</label>
+              <select class="form-select" id="customerDistrict" required>
+                <option value="">اختر المنطقة</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">الحي *</label>
+              <select class="form-select" id="customerArea" required>
+                <option value="">اختر الحي</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">مصدر الطلب *</label>
+              <select class="form-select" id="orderSource" required>
+                <option value="">اختر المصدر</option>
+                <option value="website">موقع إلكتروني</option>
+                <option value="social">وسائل التواصل الاجتماعي</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">المصدر الفرعي</label>
+              <select class="form-select" id="orderSecondarySource">
+                <option value="">اختر المصدر الفرعي</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Address Section (shows when adding new address for existing customer) -->
+        <div class="form-section" id="newAddressSection">
+          <h3 class="card-title mb-2">
+            <i class="fas fa-map-marker-alt"></i>
+            إضافة عنوان جديد
+          </h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">العنوان *</label>
+              <input type="text" class="form-input" id="newAddressStreet" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">المنطقة *</label>
+              <select class="form-select" id="newAddressDistrict" required>
+                <option value="">اختر المنطقة</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">الحي *</label>
+              <select class="form-select" id="newAddressArea" required>
+                <option value="">اختر الحي</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">تسمية العنوان</label>
+              <select class="form-select" id="newAddressLabel">
+                <option value="المنزل">المنزل</option>
+                <option value="العمل">العمل</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="saveNewAddress()">
+            <i class="fas fa-save"></i>
+            حفظ العنوان
+          </button>
+          <button type="button" class="btn btn-primary" onclick="cancelNewAddress()">
+            <i class="fas fa-times"></i>
+            إلغاء
+          </button>
+        </div>
+
+        <!-- Order Details Section (always visible once customer/address is set) -->
+        <div class="form-section" id="orderDetailsSection">
+          <h3 class="card-title mb-2">
+            <i class="fas fa-shopping-cart"></i>
+            تفاصيل الطلب
+          </h3>
+
+          <!-- Order Comments -->
+          <div class="form-group mb-2">
+            <label class="form-label">ملاحظات عامة للطلب</label>
+            <textarea class="form-textarea" id="orderComments" placeholder="أضف أي ملاحظات عامة للطلب..."></textarea>
+          </div>
+
+          <!-- Order Items Table -->
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 30%">المنتج</th>
+                <th style="width: 12%">الكمية</th>
+                <th style="width: 12%">الوحدة</th>
+                <th style="width: 12%">السعر</th>
+                <th style="width: 25%">ملاحظات المنتج</th>
+                <th style="width: 9%">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTableBody">
+            </tbody>
+          </table>
+
+          <button type="button" class="btn add-item-btn" onclick="addOrderItem()">
+            <i class="fas fa-plus"></i>
+            إضافة منتج جديد
+          </button>
+
+          <!-- Submit Buttons -->
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button type="button" class="btn btn-success" onclick="submitOrder()">
+              <i class="fas fa-check"></i>
+              تأكيد الطلب
+            </button>
+            <button type="button" class="btn btn-primary" onclick="closeNewOrderModal()">
+              <i class="fas fa-times"></i>
+              إلغاء
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Lead Modal -->
+  <div class="modal-overlay" id="addLeadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fas fa-user-plus"></i>
+          إضافة عميل محتمل جديد
+        </h2>
+        <button class="modal-close" onclick="closeAddLeadModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">الاسم *</label>
+            <input type="text" class="form-input" id="leadName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف *</label>
+            <input type="tel" class="form-input" id="leadPhone" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input type="email" class="form-input" id="leadEmail">
+          </div>
+          <div class="form-group">
+            <label class="form-label">المنطقة</label>
+            <select class="form-select" id="leadDistrict">
+              <option value="">اختر المنطقة</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">مصدر العميل المحتمل *</label>
+            <select class="form-select" id="leadSource" required>
+              <option value="">اختر المصدر</option>
+              <option value="facebook">فيسبوك</option>
+              <option value="instagram">إنستغرام</option>
+              <option value="google">إعلانات جوجل</option>
+              <option value="website">الموقع الإلكتروني</option>
+              <option value="referral">إحالة من عميل</option>
+              <option value="cold-call">اتصال مباشر</option>
+              <option value="other">أخرى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">حالة العميل المحتمل *</label>
+            <select class="form-select" id="leadStatus" required>
+              <option value="">اختر الحالة</option>
+              <option value="new">جديد</option>
+              <option value="contacted">تم التواصل</option>
+              <option value="interested">مهتم</option>
+              <option value="quoted">تم تقديم عرض</option>
+              <option value="negotiating">في مرحلة التفاوض</option>
+              <option value="cold">غير مهتم حالياً</option>
+              <option value="lost">فقدان العميل</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ملاحظات</label>
+          <textarea class="form-textarea" id="leadNotes" placeholder="أضف أي ملاحظات حول العميل المحتمل..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+          <button type="button" class="btn btn-success" onclick="submitLead()">
+            <i class="fas fa-save"></i>
+            حفظ العميل المحتمل
+          </button>
+          <button type="button" class="btn btn-primary" onclick="closeAddLeadModal()">
+            <i class="fas fa-times"></i>
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== GLOBAL DATA =====
+    let mockProducts = [
+      { id: 'PROD_001', name: 'أرز أبيض - كيس 5 كيلو', category: 'أرز', price: 45.00 },
+      { id: 'PROD_002', name: 'أرز بسمتي - كيس 2 كيلو', category: 'أرز', price: 35.00 },
+      { id: 'PROD_003', name: 'معكرونة بنة - 500 جرام', category: 'معكرونة', price: 12.50 },
+      { id: 'PROD_004', name: 'معكرونة حلزونية - 500 جرام', category: 'معكرونة', price: 15.00 },
+      { id: 'PROD_005', name: 'زيت دوار الشمس - لتر', category: 'زيوت', price: 25.00 },
+      { id: 'PROD_006', name: 'زيت زيتون - 500 مل', category: 'زيوت', price: 85.00 },
+      { id: 'PROD_007', name: 'سكر أبيض - كيس كيلو', category: 'سكر', price: 20.00 },
+      { id: 'PROD_008', name: 'دقيق فاخر - كيس 2 كيلو', category: 'دقيق', price: 18.00 },
+      { id: 'PROD_009', name: 'شاي أحمد - 100 كيس', category: 'مشروبات', price: 30.00 },
+      { id: 'PROD_010', name: 'قهوة نسكافيه - 200 جرام', category: 'مشروبات', price: 55.00 }
+    ];
+
+    let mockLocations = {
+      districts: [
+        { id: 'المعادي', name: 'المعادي' },
+        { id: 'مصر الجديدة', name: 'مصر الجديدة' },
+        { id: 'وسط البلد', name: 'وسط البلد' },
+        { id: 'النزهة', name: 'النزهة' },
+        { id: 'مدينة نصر', name: 'مدينة نصر' },
+        { id: 'المهندسين', name: 'المهندسين' },
+        { id: 'الزمالك', name: 'الزمالك' }
+      ],
+      areas: {
+        'المعادي': [
+          { id: 'المعادي الجديدة', name: 'المعادي الجديدة' },
+          { id: 'المعادي القديمة', name: 'المعادي القديمة' },
+          { id: 'دجلة', name: 'دجلة' }
+        ],
+        'مصر الجديدة': [
+          { id: 'هليوبوليس', name: 'هليوبوليس' },
+          { id: 'الكوربة', name: 'الكوربة' },
+          { id: 'روكسي', name: 'روكسي' }
+        ],
+        'وسط البلد': [
+          { id: 'التحرير', name: 'التحرير' },
+          { id: 'طلعت حرب', name: 'طلعت حرب' },
+          { id: 'الأزبكية', name: 'الأزبكية' }
+        ],
+        'النزهة': [
+          { id: 'النزهة الجديدة', name: 'النزهة الجديدة' },
+          { id: 'النزهة القديمة', name: 'النزهة القديمة' }
+        ],
+        'مدينة نصر': [
+          { id: 'الحي الأول', name: 'الحي الأول' },
+          { id: 'الحي السابع', name: 'الحي السابع' },
+          { id: 'الحي العاشر', name: 'الحي العاشر' }
+        ],
+        'المهندسين': [
+          { id: 'الدقي', name: 'الدقي' },
+          { id: 'المهندسين', name: 'المهندسين' },
+          { id: 'العجوزة', name: 'العجوزة' }
+        ],
+        'الزمالك': [
+          { id: 'الزمالك', name: 'الزمالك' }
+        ]
+      }
+    };
+
+    let mockOrders = [
+      {
+        id: 'AFI-001',
+        customerId: 'CUST-001',
+        customerName: 'أحمد محمد علي',
+        customerPhone: '01234567890',
+        date: '2025-06-10',
+        amount: 450.00,
+        status: 'pending',
+        items: [
+          { productId: 'PROD_002', productName: 'أرز بسمتي - كيس 2 كيلو', quantity: 2, unit: 'كيس', price: 35.00, comments: 'يفضل النوع الفاخر' },
+          { productId: 'PROD_005', productName: 'زيت دوار الشمس - لتر', quantity: 1, unit: 'لتر', price: 25.00, comments: '' }
+        ],
+        address: 'المعادي الجديدة',
+        comments: 'يرجى التوصيل قبل المغرب'
+      },
+      {
+        id: 'AFI-002',
+        customerId: 'CUST-002',
+        customerName: 'فاطمة أحمد محمود',
+        customerPhone: '01111111111',
+        date: '2025-06-09',
+        amount: 320.50,
+        status: 'in-progress',
+        items: [
+          { productId: 'PROD_003', productName: 'معكرونة بنة - 500 جرام', quantity: 3, unit: 'عبوة', price: 12.50, comments: 'نوع جيد' },
+          { productId: 'PROD_007', productName: 'سكر أبيض - كيس كيلو', quantity: 2, unit: 'كيس', price: 20.00, comments: '' }
+        ],
+        address: 'هليوبوليس',
+        comments: ''
+      },
+      {
+        id: 'AFI-003',
+        customerId: 'CUST-003',
+        customerName: 'محمد حسن إبراهيم',
+        customerPhone: '01222222222',
+        date: '2025-06-08',
+        amount: 680.75,
+        status: 'out-for-delivery',
+        items: [
+          { productId: 'PROD_008', productName: 'دقيق فاخر - كيس 2 كيلو', quantity: 1, unit: 'كيس', price: 18.00, comments: '' },
+          { productId: 'PROD_009', productName: 'شاي أحمد - 100 كيس', quantity: 2, unit: 'عبوة', price: 30.00, comments: 'تاريخ حديث' }
+        ],
+        address: 'الدقي',
+        comments: 'طلب عاجل'
+      },
+      {
+        id: 'AFI-004',
+        customerId: 'CUST-001',
+        customerName: 'أحمد محمد علي',
+        customerPhone: '01234567890',
+        date: '2025-06-07',
+        amount: 280.00,
+        status: 'delivered',
+        items: [
+          { productId: 'PROD_006', productName: 'زيت زيتون - 500 مل', quantity: 1, unit: 'زجاجة', price: 85.00, comments: 'أصلي 100%' }
+        ],
+        address: 'المعادي الجديدة',
+        comments: ''
+      },
+      {
+        id: 'AFI-005',
+        customerId: 'CUST-004',
+        customerName: 'سارة عبدالله أحمد',
+        customerPhone: '01333333333',
+        date: '2025-06-06',
+        amount: 520.25,
+        status: 'delivered',
+        items: [
+          { productId: 'PROD_001', productName: 'أرز أبيض - كيس 5 كيلو', quantity: 2, unit: 'كيس', price: 45.00, comments: '' },
+          { productId: 'PROD_004', productName: 'معكرونة حلزونية - 500 جرام', quantity: 3, unit: 'عبوة', price: 15.00, comments: 'للأطفال' }
+        ],
+        address: 'مدينة نصر',
+        comments: 'توصيل سريع'
+      }
+    ];
+
+    let mockCustomers = [
+      {
+        id: 'CUST-001',
+        name: 'أحمد محمد علي',
+        phone: '01234567890',
+        addresses: [
+          {
+            id: 'ADDR_001',
+            street: '15 شارع النيل، الطابق الثالث',
+            district: 'المعادي',
+            area: 'المعادي الجديدة',
+            isPrimary: true,
+            label: 'المنزل'
+          },
+          {
+            id: 'ADDR_002',
+            street: '45 شارع التحرير، مكتب 201',
+            district: 'وسط البلد',
+            area: 'التحرير',
+            isPrimary: false,
+            label: 'العمل'
+          }
+        ],
+        totalOrders: 5,
+        totalSpent: 1250.00,
+        lastOrderDate: '2025-06-10'
+      },
+      {
+        id: 'CUST-002',
+        name: 'فاطمة أحمد محمود',
+        phone: '01111111111',
+        addresses: [
+          {
+            id: 'ADDR_003',
+            street: '8 شارع الجمهورية، الطابق الخامس',
+            district: 'مصر الجديدة',
+            area: 'هليوبوليس',
+            isPrimary: true,
+            label: 'المنزل'
+          }
+        ],
+        totalOrders: 3,
+        totalSpent: 890.50,
+        lastOrderDate: '2025-06-09'
+      },
+      {
+        id: 'CUST-003',
+        name: 'محمد حسن إبراهيم',
+        phone: '01222222222',
+        addresses: [
+          {
+            id: 'ADDR_004',
+            street: '22 شارع أحمد عرابي',
+            district: 'المهندسين',
+            area: 'الدقي',
+            isPrimary: true,
+            label: 'المنزل'
+          }
+        ],
+        totalOrders: 2,
+        totalSpent: 680.75,
+        lastOrderDate: '2025-06-08'
+      },
+      {
+        id: 'CUST-004',
+        name: 'سارة عبدالله أحمد',
+        phone: '01333333333',
+        addresses: [
+          {
+            id: 'ADDR_005',
+            street: '10 شارع العروبة، الطابق الثاني',
+            district: 'مدينة نصر',
+            area: 'الحي الأول',
+            isPrimary: true,
+            label: 'المنزل'
+          }
+        ],
+        totalOrders: 1,
+        totalSpent: 520.25,
+        lastOrderDate: '2025-06-06'
+      }
+    ];
+
+    let mockLeads = [
+      {
+        id: 'LEAD-001',
+        name: 'خالد عبدالرحمن',
+        phone: '01544444444',
+        email: 'khalid@email.com',
+        district: 'مدينة نصر',
+        source: 'facebook',
+        status: 'interested',
+        notes: 'مهتم بالمنتجات العضوية، طلب كتالوج',
+        createdDate: '2025-06-08',
+        lastContactDate: '2025-06-09'
+      },
+      {
+        id: 'LEAD-002',
+        name: 'ريم محمود',
+        phone: '01655555555',
+        email: 'reem.m@email.com',
+        district: 'الزمالك',
+        source: 'google',
+        status: 'quoted',
+        notes: 'تم إرسال عرض سعر لطلبية شهرية',
+        createdDate: '2025-06-07',
+        lastContactDate: '2025-06-10'
+      },
+      {
+        id: 'LEAD-003',
+        name: 'عمر الشريف',
+        phone: '01766666666',
+        email: '',
+        district: 'المعادي',
+        source: 'referral',
+        status: 'new',
+        notes: 'إحالة من أحمد محمد علي',
+        createdDate: '2025-06-10',
+        lastContactDate: null
+      },
+      {
+        id: 'LEAD-004',
+        name: 'نورا حسام',
+        phone: '01877777777',
+        email: 'nora.h@email.com',
+        district: 'مصر الجديدة',
+        source: 'instagram',
+        status: 'cold',
+        notes: 'غير مهتمة حالياً، للمتابعة بعد 3 أشهر',
+        createdDate: '2025-06-05',
+        lastContactDate: '2025-06-06'
+      }
+    ];
+
+    // ===== STATE MANAGEMENT =====
+    let appState = {
+      currentSection: 'orders',
+      orderFilter: 'all',
+      selectedCustomer: null,
+      selectedAddress: null,
+      newOrderForm: {
+        customer: null,
+        address: null,
+        items: [],
+        notes: '',
+        source: '',
+        secondarySource: ''
+      },
+      isAddingNewAddress: false
+    };
+
+    // ===== API MODULE =====
+    const API = {
+      activeRequests: {},
+
+      request: function (functionName, data = {}, options = {}) {
+        const {
+          showLoader = true,
+          loaderMessage = 'جاري المعالجة...',
+          hideToastOnSuccess = false,
+          successMessage = 'تم بنجاح',
+          errorMessage = 'حدث خطأ، الرجاء المحاولة مرة أخرى',
+          preventDuplicateSubmission = true,
+          requestId = functionName
+        } = options;
+
+        const trackingId = requestId;
+
+        if (preventDuplicateSubmission && this.activeRequests[trackingId]) {
+          console.warn(`Preventing duplicate submission for: ${trackingId}`);
+          return Promise.reject(new Error(`Request ${trackingId} already in progress`));
+        }
+
+        if (preventDuplicateSubmission) {
+          this.activeRequests[trackingId] = true;
+        }
+
+        return new Promise((resolve, reject) => {
+          if (showLoader) {
+            updateLoadingMessage(loaderMessage);
+            showGlobalLoader();
+          }
+
+          // Simulate API delay
+          setTimeout(() => {
+            try {
+              const result = this.handleMockRequest(functionName, data);
+
+              if (showLoader) {
+                hideGlobalLoader();
+              }
+
+              if (!hideToastOnSuccess) {
+                showToast('success', successMessage);
+              }
+
+              if (preventDuplicateSubmission) {
+                delete this.activeRequests[trackingId];
+              }
+
+              resolve(result);
+            } catch (error) {
+              if (showLoader) {
+                hideGlobalLoader();
+              }
+
+              showToast('error', errorMessage);
+
+              if (preventDuplicateSubmission) {
+                delete this.activeRequests[trackingId];
+              }
+
+              reject(error);
+            }
+          }, 800 + Math.random() * 500);
+        });
+      },
+
+      handleMockRequest: function (functionName, data) {
+        switch (functionName) {
+          case 'getOrders':
+            return mockOrders;
+          case 'getCustomers':
+            return mockCustomers;
+          case 'getLeads':
+            return mockLeads;
+          case 'getProducts':
+            return mockProducts;
+          case 'getLocations':
+            return mockLocations;
+          case 'updateOrderStatus':
+            const order = mockOrders.find(o => o.id === data.orderId);
+            if (order) {
+              order.status = data.status;
+              return order;
+            }
+            throw new Error('Order not found');
+          case 'addOrder':
+            const newOrder = {
+              id: `AFI-${String(mockOrders.length + 1).padStart(3, '0')}`,
+              customerId: data.customer.id || `CUST-${Date.now()}`,
+              customerName: data.customer.name,
+              customerPhone: data.customer.phone,
+              date: new Date().toISOString().split('T')[0],
+              amount: data.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+              status: 'pending',
+              items: data.items,
+              address: data.address ? `${data.address.area}` : data.customer.address,
+              comments: data.notes || ''
+            };
+            mockOrders.unshift(newOrder);
+            return newOrder;
+          case 'addCustomer':
+            const newCustomer = {
+              id: `CUST-${Date.now()}`,
+              name: data.name,
+              phone: data.phone,
+              addresses: [{
+                id: `ADDR-${Date.now()}`,
+                street: data.address,
+                district: data.district,
+                area: data.area,
+                isPrimary: true,
+                label: 'المنزل'
+              }],
+              totalOrders: 0,
+              totalSpent: 0,
+              lastOrderDate: null
+            };
+            mockCustomers.push(newCustomer);
+            return newCustomer;
+          default:
+            throw new Error('Unknown function: ' + functionName);
+        }
+      },
+
+      getOrders: function () {
+        return this.request('getOrders', {}, {
+          loaderMessage: 'جاري تحميل الطلبات...',
+          hideToastOnSuccess: true
+        });
+      },
+
+      getCustomers: function () {
+        return this.request('getCustomers', {}, {
+          loaderMessage: 'جاري تحميل العملاء...',
+          hideToastOnSuccess: true
+        });
+      },
+
+      getProducts: function () {
+        return this.request('getProducts', {}, {
+          loaderMessage: 'جاري تحميل المنتجات...',
+          hideToastOnSuccess: true
+        });
+      },
+
+      getLocations: function () {
+        return this.request('getLocations', {}, {
+          loaderMessage: 'جاري تحميل المواقع...',
+          hideToastOnSuccess: true
+        });
+      },
+
+      updateOrderStatus: function (orderId, status) {
+        return this.request('updateOrderStatus', { orderId, status }, {
+          loaderMessage: 'جاري تحديث حالة الطلب...',
+          successMessage: 'تم تحديث حالة الطلب بنجاح'
+        });
+      },
+
+      addOrder: function (orderData) {
+        return this.request('addOrder', orderData, {
+          loaderMessage: 'جاري إنشاء الطلب...',
+          successMessage: 'تم إنشاء الطلب بنجاح'
+        });
+      },
+
+      addCustomer: function (customerData) {
+        return this.request('addCustomer', customerData, {
+          loaderMessage: 'جاري إضافة العميل...',
+          successMessage: 'تم إضافة العميل بنجاح'
+        });
+      }
+    };
+
+    // ===== UTILITY FUNCTIONS =====
+    function updateLoadingMessage(message) {
+      document.getElementById('loadingMessage').textContent = message;
+    }
+
+    function showGlobalLoader() {
+      document.getElementById('loadingScreen').classList.remove('hidden');
+    }
+
+    function hideGlobalLoader() {
+      document.getElementById('loadingScreen').classList.add('hidden');
+    }
+
+    function showToast(type, title, message = '') {
+      const toastContainer = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icons = {
+        success: 'check-circle',
+        error: 'exclamation-triangle'
+      };
+
+      toast.innerHTML = `
+        <div class="toast-icon"><i class="fas fa-${icons[type]}"></i></div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          ${message ? `<div class="toast-message">${message}</div>` : ''}
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    function formatCurrency(amount) {
+      return `${amount.toFixed(2)} ج.م`;
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ar-EG');
+    }
+
+    // ===== NAVIGATION =====
+    function initializeNavigation() {
+      const navTabs = document.querySelectorAll('.nav-tab');
+      const contentSections = document.querySelectorAll('.content-section');
+
+      navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetSection = tab.dataset.section;
+
+          // Update nav tabs
+          navTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          // Update content sections
+          contentSections.forEach(section => section.classList.remove('active'));
+          document.getElementById(targetSection).classList.add('active');
+
+          appState.currentSection = targetSection;
+
+          // Load section data if needed
+          if (targetSection === 'customers') {
+            loadCustomers();
+          }
+        });
+      });
+    }
+
+    // ===== ORDERS MANAGEMENT =====
+    function initializeOrderFilters() {
+      const filterButtons = document.querySelectorAll('.filter-btn');
+
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.dataset.filter;
+
+          // Update filter buttons
+          filterButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          appState.orderFilter = filter;
+          renderOrders();
+        });
+      });
+    }
+
+    function loadOrders() {
+      API.getOrders().then(orders => {
+        mockOrders = orders;
+        updateOrderCounts();
+        renderOrders();
+      }).catch(error => {
+        console.error('Failed to load orders:', error);
+      });
+    }
+
+    function updateOrderCounts() {
+      const counts = {
+        all: mockOrders.length,
+        pending: mockOrders.filter(o => o.status === 'pending').length,
+        inprogress: mockOrders.filter(o => o.status === 'in-progress').length,
+        outfordelivery: mockOrders.filter(o => o.status === 'out-for-delivery').length,
+        delivered: mockOrders.filter(o => o.status === 'delivered').length
+      };
+
+      // Update badges with correct IDs
+      document.getElementById('allCount').textContent = counts.all;
+      document.getElementById('pendingCount').textContent = counts.pending;
+      document.getElementById('inProgressCount').textContent = counts.inprogress;
+      document.getElementById('outForDeliveryCount').textContent = counts.outfordelivery;
+      document.getElementById('deliveredCount').textContent = counts.delivered;
+    }
+
+    function renderOrders() {
+      const tbody = document.getElementById('ordersTableBody');
+      let filteredOrders = mockOrders;
+
+      if (appState.orderFilter !== 'all') {
+        filteredOrders = mockOrders.filter(order => order.status === appState.orderFilter);
+      }
+
+      tbody.innerHTML = filteredOrders.map(order => {
+        const totalItems = order.items.length;
+        const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+        return `
+          <tr class="order-row" onclick="toggleOrderDetails('${order.id}')" data-order-id="${order.id}">
+            <td><strong>${order.id}</strong></td>
+            <td>
+              <div>
+                <strong>${order.customerName}</strong><br>
+                <small style="color: var(--gray-500);">${order.customerPhone}</small>
+              </div>
+            </td>
+            <td>${formatDate(order.date)}</td>
+            <td><strong>${formatCurrency(order.amount)}</strong></td>
+            <td>
+              <select class="form-select" style="padding: 0.5rem; font-size: 0.875rem;" onchange="changeOrderStatus('${order.id}', this.value)" onclick="event.stopPropagation()">
+                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>في الانتظار</option>
+                <option value="in-progress" ${order.status === 'in-progress' ? 'selected' : ''}>قيد التحضير</option>
+                <option value="out-for-delivery" ${order.status === 'out-for-delivery' ? 'selected' : ''}>في التوصيل</option>
+                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التوصيل</option>
+              </select>
+            </td>
+            <td onclick="event.stopPropagation()">
+              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
+                <i class="fas fa-chevron-down expand-icon" id="expand-${order.id}" style="color: var(--gray-400); cursor: pointer;" onclick="event.stopPropagation(); toggleOrderDetails('${order.id}')"></i>
+              </div>
+            </td>
+          </tr>
+          <tr class="order-details-row" id="details-${order.id}">
+            <td colspan="6">
+              <div class="order-details-content">
+                <div class="order-summary">
+                  <div class="summary-item">
+                    <div class="summary-label">إجمالي المنتجات</div>
+                    <div class="summary-value">${totalItems}</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-label">إجمالي الكمية</div>
+                    <div class="summary-value">${totalQuantity}</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-label">العنوان</div>
+                    <div class="summary-value">${order.address}</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-label">تاريخ الطلب</div>
+                    <div class="summary-value">${formatDate(order.date)}</div>
+                  </div>
+                </div>
+                
+                ${order.comments ? `
+                  <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid var(--info);">
+                    <h5 style="margin-bottom: 0.5rem; color: var(--gray-700);"><i class="fas fa-comment"></i> ملاحظات الطلب:</h5>
+                    <p style="margin: 0; color: var(--gray-600);">${order.comments}</p>
+                  </div>
+                ` : ''}
+                
+                <h4 style="margin-bottom: 1rem; color: var(--gray-700);">
+                  <i class="fas fa-list"></i> تفاصيل المنتجات
+                </h4>
+                
+                <table class="order-items-table">
+                  <thead>
+                    <tr>
+                      <th>المنتج</th>
+                      <th>الكمية</th>
+                      <th>الوحدة</th>
+                      <th>السعر</th>
+                      <th>الإجمالي</th>
+                      <th>ملاحظات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${order.items.map(item => `
+                      <tr>
+                        <td><strong>${item.productName}</strong></td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unit}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td><strong>${formatCurrency(item.price * item.quantity)}</strong></td>
+                        <td>${item.comments || '-'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background: var(--gray-100); font-weight: 600;">
+                      <td colspan="4" style="text-align: left; padding: 1rem;">المجموع الكلي:</td>
+                      <td style="padding: 1rem;"><strong>${formatCurrency(order.amount)}</strong></td>
+                      <td style="padding: 1rem;"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleOrderDetails(orderId) {
+      const detailsRow = document.getElementById(`details-${orderId}`);
+      const expandIcon = document.getElementById(`expand-${orderId}`);
+      const orderRow = document.querySelector(`[data-order-id="${orderId}"]`);
+
+      if (detailsRow.classList.contains('show')) {
+        detailsRow.classList.remove('show');
+        expandIcon.classList.remove('rotated');
+        orderRow.classList.remove('expanded');
+      } else {
+        // Close all other expanded rows first
+        document.querySelectorAll('.order-details-row.show').forEach(row => {
+          row.classList.remove('show');
+        });
+        document.querySelectorAll('.expand-icon.rotated').forEach(icon => {
+          icon.classList.remove('rotated');
+        });
+        document.querySelectorAll('.order-row.expanded').forEach(row => {
+          row.classList.remove('expanded');
+        });
+
+        // Open the clicked row
+        detailsRow.classList.add('show');
+        expandIcon.classList.add('rotated');
+        orderRow.classList.add('expanded');
+      }
+    }
+
+    function changeOrderStatus(orderId, newStatus) {
+      API.updateOrderStatus(orderId, newStatus).then(updatedOrder => {
+        updateOrderCounts();
+        renderOrders();
+      }).catch(error => {
+        console.error('Failed to update order status:', error);
+        // Revert the select to original value
+        loadOrders();
+      });
+    }
+
+    // ===== CUSTOMERS MANAGEMENT =====
+    function loadCustomers() {
+      API.getCustomers().then(customers => {
+        mockCustomers = customers;
+        renderCustomers();
+      }).catch(error => {
+        console.error('Failed to load customers:', error);
+      });
+    }
+
+    function renderCustomers() {
+      const grid = document.getElementById('customersGrid');
+
+      grid.innerHTML = mockCustomers.map(customer => {
+        const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
+        return `
+          <div class="customer-card">
+            <div class="customer-header">
+              <div class="customer-info">
+                <h3>${customer.name}</h3>
+                <p><i class="fas fa-phone"></i> ${customer.phone}</p>
+                <p><i class="fas fa-map-marker-alt"></i> ${primaryAddress.area}, ${primaryAddress.district}</p>
+              </div>
+            </div>
+            <div class="customer-stats">
+              <div class="stat">
+                <div class="stat-value">${customer.totalOrders}</div>
+                <div class="stat-label">عدد الطلبات</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">${formatCurrency(customer.totalSpent)}</div>
+                <div class="stat-label">إجمالي المشتريات</div>
+              </div>
+            </div>
+            ${customer.lastOrderDate ? `
+              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200); text-align: center; color: var(--gray-500); font-size: 0.9rem;">
+                آخر طلب: ${formatDate(customer.lastOrderDate)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ===== NEW ORDER MODAL =====
+    function openNewOrderModal() {
+      document.getElementById('newOrderModal').classList.add('show');
+      resetNewOrderForm();
+    }
+
+    function closeNewOrderModal() {
+      document.getElementById('newOrderModal').classList.remove('show');
+      resetNewOrderForm();
+    }
+
+    function resetNewOrderForm() {
+      const customerSearch = document.getElementById('customerSearch');
+      const searchResults = document.getElementById('searchResults');
+
+      if (customerSearch) customerSearch.value = '';
+      if (searchResults) searchResults.classList.remove('show');
+
+      // Hide all form sections
+      hideAllFormSections();
+
+      // Reset form fields
+      ['customerName', 'customerPhone', 'customerAddress', 'customerDistrict', 'customerArea', 'orderSource', 'orderSecondarySource', 'orderComments'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = '';
+      });
+
+      // Reset new address fields
+      ['newAddressStreet', 'newAddressDistrict', 'newAddressArea', 'newAddressLabel'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = '';
+      });
+
+      // Clear items table
+      const itemsTableBody = document.getElementById('itemsTableBody');
+      if (itemsTableBody) itemsTableBody.innerHTML = '';
+
+      // Reset state
+      appState.newOrderForm = {
+        customer: null,
+        address: null,
+        items: [],
+        notes: '',
+        source: '',
+        secondarySource: ''
+      };
+      appState.selectedCustomer = null;
+      appState.selectedAddress = null;
+      appState.isAddingNewAddress = false;
+    }
+
+    function hideAllFormSections() {
+      document.querySelectorAll('.form-section').forEach(section => {
+        section.classList.remove('show');
+      });
+    }
+
+    function showCustomerDetailsSection() {
+      hideAllFormSections();
+      document.getElementById('customerDetailsSection').classList.add('show');
+      document.getElementById('orderDetailsSection').classList.add('show');
+      
+      // Initialize with one empty item if none exist
+      if (appState.newOrderForm.items.length === 0) {
+        addOrderItem();
+      }
+    }
+
+    function showAddressSection() {
+      hideAllFormSections();
+      document.getElementById('addressSection').classList.add('show');
+    }
+
+    function showNewAddressForm() {
+      hideAllFormSections();
+      appState.isAddingNewAddress = true;
+      document.getElementById('newAddressSection').classList.add('show');
+      populateNewAddressDropdowns();
+    }
+
+    function showOrderDetailsSection() {
+      document.getElementById('orderDetailsSection').classList.add('show');
+      
+      // Initialize with one empty item if none exist
+      if (appState.newOrderForm.items.length === 0) {
+        addOrderItem();
+      }
+    }
+
+    function populateNewAddressDropdowns() {
+      const districtSelect = document.getElementById('newAddressDistrict');
+      const areaSelect = document.getElementById('newAddressArea');
+
+      // Populate districts
+      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
+        mockLocations.districts.map(district =>
+          `<option value="${district.id}">${district.name}</option>`
+        ).join('');
+
+      districtSelect.addEventListener('change', function () {
+        const selectedDistrict = districtSelect.value;
+        areaSelect.innerHTML = '<option value="">اختر الحي</option>';
+
+        if (selectedDistrict && mockLocations.areas[selectedDistrict]) {
+          areaSelect.innerHTML += mockLocations.areas[selectedDistrict].map(area =>
+            `<option value="${area.id}">${area.name}</option>`
+          ).join('');
+        }
+      });
+    }
+
+    function saveNewAddress() {
+      const street = document.getElementById('newAddressStreet').value.trim();
+      const district = document.getElementById('newAddressDistrict').value;
+      const area = document.getElementById('newAddressArea').value;
+      const label = document.getElementById('newAddressLabel').value;
+
+      if (!street || !district || !area) {
+        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+        return;
+      }
+
+      const newAddress = {
+        id: `ADDR-${Date.now()}`,
+        street: street,
+        district: district,
+        area: area,
+        isPrimary: false,
+        label: label
+      };
+
+      // Add to selected customer addresses
+      if (appState.selectedCustomer) {
+        appState.selectedCustomer.addresses.push(newAddress);
+        showAddressSection();
+        renderAddresses(appState.selectedCustomer.addresses);
+        selectAddress(newAddress);
+        showToast('success', 'تم إضافة العنوان بنجاح');
+      }
+    }
+
+    function cancelNewAddress() {
+      if (appState.selectedCustomer && appState.selectedCustomer.addresses.length > 0) {
+        showAddressSection();
+        renderAddresses(appState.selectedCustomer.addresses);
+      } else {
+        hideAllFormSections();
+      }
+    }
+
+    function initializeLocationDropdowns() {
+      const districtSelect = document.getElementById('customerDistrict');
+      const areaSelect = document.getElementById('customerArea');
+
+      // Populate districts
+      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
+        mockLocations.districts.map(district =>
+          `<option value="${district.id}">${district.name}</option>`
+        ).join('');
+
+      districtSelect.addEventListener('change', function () {
+        const selectedDistrict = districtSelect.value;
+        areaSelect.innerHTML = '<option value="">اختر الحي</option>';
+
+        if (selectedDistrict && mockLocations.areas[selectedDistrict]) {
+          areaSelect.innerHTML += mockLocations.areas[selectedDistrict].map(area =>
+            `<option value="${area.id}">${area.name}</option>`
+          ).join('');
+        }
+      });
+    }
+
+    function initializeSourceDropdowns() {
+      const sourceSelect = document.getElementById('orderSource');
+      const secondarySourceSelect = document.getElementById('orderSecondarySource');
+
+      const sourceMappings = {
+        'website': [
+          { value: 'facebook', text: 'فيسبوك' },
+          { value: 'instagram', text: 'إنستغرام' },
+          { value: 'google', text: 'جوجل' },
+          { value: 'direct', text: 'مباشر' },
+          { value: 'linktree', text: 'لينك تري' },
+          { value: 'other', text: 'أخرى' }
+        ],
+        'social': [
+          { value: 'facebook', text: 'فيسبوك' },
+          { value: 'instagram', text: 'إنستغرام' },
+          { value: 'google', text: 'جوجل' }
+        ]
+      };
+
+      sourceSelect.addEventListener('change', function () {
+        const selectedSource = sourceSelect.value;
+        secondarySourceSelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>';
+
+        if (selectedSource && sourceMappings[selectedSource]) {
+          secondarySourceSelect.innerHTML += sourceMappings[selectedSource].map(option =>
+            `<option value="${option.value}">${option.text}</option>`
+          ).join('');
+        }
+      });
+    }
+
+    function selectCustomer(customerId) {
+      const customer = mockCustomers.find(c => c.id === customerId);
+      if (customer) {
+        appState.selectedCustomer = customer;
+        appState.newOrderForm.customer = customer;
+
+        document.getElementById('customerSearch').value = customer.name;
+        document.getElementById('searchResults').classList.remove('show');
+
+        if (customer.addresses.length > 0) {
+          showAddressSection();
+          renderAddresses(customer.addresses);
+        } else {
+          showNewAddressForm();
+        }
+      }
+    }
+
+    function renderAddresses(addresses) {
+      const addressGrid = document.getElementById('addressGrid');
+
+      addressGrid.innerHTML = addresses.map(address => {
+        const icon = address.label === 'المنزل' ? 'home' : address.label === 'العمل' ? 'building' : 'map-marker-alt';
+        return `
+          <div class="address-card" onclick="selectAddress('${address.id}')">
+            <div class="address-label">
+              <i class="fas fa-${icon}"></i>
+              ${address.label}
+            </div>
+            <div class="address-details">
+              ${address.street}<br>
+              ${address.district} - ${address.area}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectAddress(addressId) {
+      let address;
+
+      if (typeof addressId === 'string') {
+        address = appState.selectedCustomer.addresses.find(a => a.id === addressId);
+        // Update UI
+        document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
+        event.target.closest('.address-card').classList.add('selected');
+      } else {
+        address = addressId; // Direct address object
+      }
+
+      if (address) {
+        appState.selectedAddress = address;
+        appState.newOrderForm.address = address;
+        showToast('success', 'تم اختيار العنوان', address.label);
+
+        setTimeout(() => {
+          showOrderDetailsSection();
+        }, 500);
+      }
+    }
+
+    function addOrderItem() {
+      const tbody = document.getElementById('itemsTableBody');
+      const rowIndex = tbody.children.length;
+
+      const row = document.createElement('tr');
+
+      const productOptions = '<option value="">اختر المنتج</option>' +
+        mockProducts.map(product => {
+          return `<option value="${product.id}" data-price="${product.price}">
+            ${product.name} - ${formatCurrency(product.price)}
+          </option>`;
+        }).join('');
+
+      row.innerHTML = `
+        <td>
+          <select class="form-select product-select" onchange="updateOrderItem(${rowIndex})">
+            ${productOptions}
+          </select>
+        </td>
+        <td>
+          <input type="number" class="form-input quantity-input" min="1" placeholder="الكمية" onchange="updateOrderItem(${rowIndex})">
+        </td>
+        <td>
+          <select class="form-select unit-select" onchange="updateOrderItem(${rowIndex})">
+            <option value="قطعة">قطعة</option>
+            <option value="كيلو">كيلو</option>
+            <option value="لتر">لتر</option>
+            <option value="عبوة">عبوة</option>
+            <option value="كيس">كيس</option>
+            <option value="زجاجة">زجاجة</option>
+          </select>
+        </td>
+        <td>
+          <span class="price-display">0.00 ج.م</span>
+        </td>
+        <td>
+          <input type="text" class="form-input comment-input" placeholder="ملاحظات المنتج" onchange="updateOrderItem(${rowIndex})">
+        </td>
+        <td>
+          <button type="button" class="btn btn-danger btn-sm" onclick="removeOrderItem(this)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+
+      const newItem = {
+        id: Date.now(),
+        productId: '',
+        productName: '',
+        quantity: 0,
+        unit: 'قطعة',
+        comments: '',
+        price: 0
+      };
+
+      appState.newOrderForm.items.push(newItem);
+    }
+
+    function removeOrderItem(button) {
+      const row = button.closest('tr');
+      const tbody = row.parentNode;
+      const rowIndex = Array.from(tbody.children).indexOf(row);
+
+      row.remove();
+      appState.newOrderForm.items.splice(rowIndex, 1);
+
+      if (appState.newOrderForm.items.length === 0) {
+        addOrderItem();
+      }
+    }
+
+    function updateOrderItem(rowIndex) {
+      const row = document.getElementById('itemsTableBody').children[rowIndex];
+      const productSelect = row.querySelector('.product-select');
+      const quantityInput = row.querySelector('.quantity-input');
+      const unitSelect = row.querySelector('.unit-select');
+      const commentInput = row.querySelector('.comment-input');
+      const priceDisplay = row.querySelector('.price-display');
+
+      if (appState.newOrderForm.items[rowIndex]) {
+        const selectedOption = productSelect.selectedOptions[0];
+        const product = mockProducts.find(p => p.id === productSelect.value);
+        const price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
+
+        appState.newOrderForm.items[rowIndex] = {
+          id: appState.newOrderForm.items[rowIndex].id,
+          productId: productSelect.value,
+          productName: product ? product.name : '',
+          quantity: parseInt(quantityInput.value) || 0,
+          unit: unitSelect.value,
+          comments: commentInput.value,
+          price: price
+        };
+
+        // Update price display
+        priceDisplay.textContent = formatCurrency(price);
+      }
+    }
+
+    function initializeCustomerSearch() {
+      const searchInput = document.getElementById('customerSearch');
+      const searchResults = document.getElementById('searchResults');
+
+      searchInput.addEventListener('input', debounce(handleCustomerSearch, 300));
+      searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim()) {
+          handleCustomerSearch();
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.customer-search')) {
+          searchResults.classList.remove('show');
+        }
+      });
+    }
+
+    function handleCustomerSearch() {
+      const searchInput = document.getElementById('customerSearch');
+      const searchResults = document.getElementById('searchResults');
+      const term = searchInput.value.trim().toLowerCase();
+
+      if (term.length < 2) {
+        searchResults.classList.remove('show');
+        return;
+      }
+
+      const filtered = mockCustomers.filter(customer =>
+        customer.name.toLowerCase().includes(term) ||
+        customer.phone.includes(term)
+      );
+
+      if (filtered.length > 0) {
+        renderSearchResults(filtered, term);
+        searchResults.classList.add('show');
+      } else {
+        searchResults.innerHTML = `
+          <div class="search-result new-customer-option" onclick="showNewCustomerForm('${term}')">
+            <div>
+              <h4><i class="fas fa-plus"></i> عميل جديد: "${term}"</h4>
+              <p>إضافة عميل جديد بهذا الاسم</p>
+            </div>
+          </div>
+        `;
+        searchResults.classList.add('show');
+      }
+    }
+
+    function showNewCustomerForm(searchTerm = '') {
+      document.getElementById('searchResults').classList.remove('show');
+      
+      // Clear existing customer data
+      appState.selectedCustomer = null;
+      appState.newOrderForm.customer = null;
+      appState.selectedAddress = null;
+      appState.newOrderForm.address = null;
+
+      showCustomerDetailsSection();
+
+      if (searchTerm) {
+        document.getElementById('customerName').value = searchTerm;
+        document.getElementById('customerSearch').value = searchTerm;
+      }
+
+      showToast('success', 'يمكنك الآن إدخال بيانات العميل الجديد');
+    }
+
+    function renderSearchResults(customers, searchTerm) {
+      const searchResults = document.getElementById('searchResults');
+
+      let html = customers.map(customer => {
+        const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
+        return `
+          <div class="search-result" onclick="selectCustomer('${customer.id}')">
+            <div>
+              <h4>${highlightMatch(customer.name, searchTerm)}</h4>
+              <p>${highlightMatch(customer.phone, searchTerm)} - ${primaryAddress.area}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      html += `
+        <div class="search-result new-customer-option" onclick="showNewCustomerForm('${searchTerm}')">
+          <div>
+            <h4><i class="fas fa-plus"></i> عميل جديد: "${searchTerm}"</h4>
+            <p>إضافة عميل جديد بهذا الاسم</p>
+          </div>
+        </div>
+      `;
+
+      searchResults.innerHTML = html;
+    }
+
+    function highlightMatch(text, searchTerm) {
+      if (!searchTerm) return text;
+      const regex = new RegExp(`(${searchTerm})`, 'gi');
+      return text.replace(regex, '<mark style="background: #fef3c7; padding: 2px 4px; border-radius: 3px;">$1</mark>');
+    }
+
+    function validateOrderForm() {
+      let isValid = true;
+      const errors = [];
+
+      // Check customer selection or form completion
+      if (!appState.selectedCustomer) {
+        const requiredFields = ['customerName', 'customerPhone', 'customerAddress', 'customerDistrict', 'customerArea', 'orderSource'];
+        for (const fieldId of requiredFields) {
+          const field = document.getElementById(fieldId);
+          if (!field || !field.value.trim()) {
+            if (field) {
+              field.classList.add('error');
+              setTimeout(() => field.classList.remove('error'), 3000);
+            }
+            isValid = false;
+          }
+        }
+      }
+
+      // Check address selection
+      if (!appState.selectedAddress && !appState.isAddingNewAddress) {
+        errors.push('يجب اختيار عنوان للتوصيل');
+        isValid = false;
+      }
+
+      // Check items
+      if (appState.newOrderForm.items.length === 0) {
+        errors.push('يجب إضافة منتج واحد على الأقل');
+        isValid = false;
+      }
+
+      // Validate individual items
+      let itemsValid = true;
+      for (let i = 0; i < appState.newOrderForm.items.length; i++) {
+        const row = document.getElementById('itemsTableBody').children[i];
+        if (!row) continue;
+        
+        const productSelect = row.querySelector('.product-select');
+        const quantityInput = row.querySelector('.quantity-input');
+
+        if (!productSelect.value) {
+          productSelect.classList.add('error');
+          setTimeout(() => productSelect.classList.remove('error'), 3000);
+          itemsValid = false;
+        }
+
+        if (!quantityInput.value || quantityInput.value <= 0) {
+          quantityInput.classList.add('error');
+          setTimeout(() => quantityInput.classList.remove('error'), 3000);
+          itemsValid = false;
+        }
+      }
+
+      if (!itemsValid) {
+        errors.push('يجب تحديد المنتج والكمية لكل صف');
+        isValid = false;
+      }
+
+      if (!isValid) {
+        showToast('error', 'خطأ في البيانات', errors.join(' • '));
+      }
+
+      return isValid;
+    }
+
+    function submitOrder() {
+      // Validate form
+      if (!validateOrderForm()) {
+        return;
+      }
+
+      // Update all items from form
+      for (let i = 0; i < appState.newOrderForm.items.length; i++) {
+        updateOrderItem(i);
+      }
+
+      // Filter out empty items
+      const validItems = appState.newOrderForm.items.filter(item =>
+        item.productId && item.quantity > 0
+      );
+
+      let customer = appState.selectedCustomer;
+
+      // If no existing customer selected, create new one
+      if (!customer) {
+        const customerData = {
+          name: document.getElementById('customerName').value.trim(),
+          phone: document.getElementById('customerPhone').value.trim(),
+          address: document.getElementById('customerAddress').value.trim(),
+          district: document.getElementById('customerDistrict').value,
+          area: document.getElementById('customerArea').value
+        };
+
+        // Create new customer first
+        API.addCustomer(customerData).then(newCustomer => {
+          mockCustomers.push(newCustomer);
+          return createOrderWithCustomer(newCustomer, validItems);
+        }).then(newOrder => {
+          handleOrderCreated(newOrder);
+        }).catch(error => {
+          console.error('Failed to create customer:', error);
+        });
+
+        return;
+      }
+
+      createOrderWithCustomer(customer, validItems).then(newOrder => {
+        handleOrderCreated(newOrder);
+      }).catch(error => {
+        console.error('Failed to create order:', error);
+      });
+    }
+
+    function createOrderWithCustomer(customer, items) {
+      const orderData = {
+        customer: customer,
+        address: appState.selectedAddress,
+        items: items,
+        notes: document.getElementById('orderComments').value.trim(),
+        source: document.getElementById('orderSource') ? document.getElementById('orderSource').value : '',
+        secondarySource: document.getElementById('orderSecondarySource') ? document.getElementById('orderSecondarySource').value : ''
+      };
+
+      return API.addOrder(orderData);
+    }
+
+    function handleOrderCreated(newOrder) {
+      closeNewOrderModal();
+      loadOrders(); // Refresh orders list
+      showToast('success', 'تم إنشاء الطلب بنجاح', `رقم الطلب: ${newOrder.id}`);
+    }
+
+    // ===== INITIALIZATION =====
+    function initializeApp() {
+      updateLoadingMessage('جاري تحميل البيانات...');
+
+      // Initialize components
+      initializeNavigation();
+      initializeOrderFilters();
+      initializeCustomerSearch();
+      initializeLocationDropdowns();
+      initializeSourceDropdowns();
+
+      // Load initial data
+      Promise.all([
+        API.getOrders(),
+        API.getProducts(),
+        API.getLocations()
+      ]).then(([orders, products, locations]) => {
+        mockOrders = orders;
+        mockProducts = products;
+        mockLocations = locations;
+
+        updateOrderCounts();
+        renderOrders();
+        hideGlobalLoader();
+        showToast('success', 'تم تحميل النظام بنجاح');
+      }).catch(error => {
+        hideGlobalLoader();
+        showToast('error', 'خطأ في تحميل البيانات');
+        console.error('App initialization failed:', error);
+      });
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
+    // Global functions for onclick handlers
+    window.openNewOrderModal = openNewOrderModal;
+    window.closeNewOrderModal = closeNewOrderModal;
+    window.selectCustomer = selectCustomer;
+    window.showNewCustomerForm = showNewCustomerForm;
+    window.showNewAddressForm = showNewAddressForm;
+    window.saveNewAddress = saveNewAddress;
+    window.cancelNewAddress = cancelNewAddress;
+    window.selectAddress = selectAddress;
+    window.addOrderItem = addOrderItem;
+    window.removeOrderItem = removeOrderItem;
+    window.updateOrderItem = updateOrderItem;
+    window.submitOrder = submitOrder;
+    window.changeOrderStatus = changeOrderStatus;
+    window.toggleOrderDetails = toggleOrderDetails;
+  </script>
+</body>
+
+</html>
