@@ -9,28 +9,68 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --primary-light: #3b82f6;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --info: #0891b2;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-400: #9ca3af;
-      --gray-500: #6b7280;
-      --gray-600: #4b5563;
-      --gray-700: #374151;
-      --gray-800: #1f2937;
-      --gray-900: #111827;
-      --border-radius: 12px;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --primary: #6161ff;
+      --primary-dark: #4545d4;
+      --primary-light: #7e7eff;
+      --success: #00c875;
+      --success-light: #00d084;
+      --warning: #ffcb00;
+      --warning-light: #ffd533;
+      --danger: #e2445c;
+      --danger-light: #ff6b7d;
+      --info: #0086c0;
+      --info-light: #00a8f0;
+      --purple: #a25ddc;
+      --purple-light: #b56eef;
+      
+      /* Status Colors */
+      --status-pending: #fdab3d;
+      --status-pending-bg: #fef4e6;
+      --status-in-progress: #007fff;
+      --status-in-progress-bg: #e6f4ff;
+      --status-ready: #9747ff;
+      --status-ready-bg: #f3e6ff;
+      --status-delivery: #ff6b35;
+      --status-delivery-bg: #fff0e6;
+      --status-delivered: #00c875;
+      --status-delivered-bg: #e6f9f0;
+      
+      /* Modern Grays */
+      --gray-25: #fcfcfc;
+      --gray-50: #f8f9fa;
+      --gray-75: #f1f3f4;
+      --gray-100: #e8eaed;
+      --gray-200: #dadce0;
+      --gray-300: #c4c7c5;
+      --gray-400: #9aa0a6;
+      --gray-500: #5f6368;
+      --gray-600: #3c4043;
+      --gray-700: #202124;
+      --gray-800: #171717;
+      --gray-900: #0a0a0a;
+      
+      /* Modern Styling */
+      --border-radius: 8px;
+      --border-radius-lg: 12px;
+      --border-radius-xl: 16px;
+      --border-radius-pill: 50px;
+      
+      /* Modern Shadows */
+      --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+      --shadow-md: 0 6px 16px -6px rgb(0 0 0 / 0.12), 0 0 0 1px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 24px -8px rgb(0 0 0 / 0.15), 0 0 0 1px rgb(0 0 0 / 0.05);
+      --shadow-xl: 0 20px 40px -12px rgb(0 0 0 / 0.20), 0 0 0 1px rgb(0 0 0 / 0.05);
+      
+      /* Glass Effect */
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      
+      /* Transitions */
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -41,9 +81,10 @@
 
     body {
       font-family: 'Cairo', sans-serif;
-      background: var(--gray-50);
-      color: var(--gray-900);
+      background: linear-gradient(135deg, var(--gray-25) 0%, var(--gray-75) 100%);
+      color: var(--gray-700);
       line-height: 1.6;
+      min-height: 100vh;
     }
 
     /* ===== LOADING SCREEN ===== */
@@ -53,12 +94,13 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      background: rgba(97, 97, 255, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
       transition: opacity 0.5s ease, visibility 0.5s ease;
+      backdrop-filter: blur(10px);
     }
 
     .loading-screen.hidden {
@@ -69,12 +111,17 @@
     .loading-content {
       text-align: center;
       color: white;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 3rem;
+      border-radius: var(--border-radius-xl);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .loading-spinner {
       width: 64px;
       height: 64px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
+      border: 4px solid rgba(255, 255, 255, 0.2);
       border-top: 4px solid white;
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -115,14 +162,14 @@
 
     .toast {
       background: white;
-      border-radius: var(--border-radius);
+      border-radius: var(--border-radius-lg);
       box-shadow: var(--shadow-lg);
       padding: 1rem 1.5rem;
       min-width: 320px;
       max-width: 500px;
       transform: translateX(-120%);
       transition: var(--transition);
-      border-right: 4px solid;
+      border: 1px solid var(--gray-200);
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -133,13 +180,15 @@
     }
 
     .toast.success {
-      border-right-color: var(--success);
       background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-color: var(--success);
+      border-left: 4px solid var(--success);
     }
 
     .toast.error {
-      border-right-color: var(--danger);
       background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+      border-color: var(--danger);
+      border-left: 4px solid var(--danger);
     }
 
     .toast-icon {
@@ -163,21 +212,28 @@
       font-weight: 600;
       font-size: 0.95rem;
       margin-bottom: 0.25rem;
+      color: var(--gray-700);
     }
 
     .toast-close {
-      background: none;
+      background: var(--gray-100);
       border: none;
-      color: var(--gray-400);
+      color: var(--gray-500);
       cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 4px;
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
       transition: var(--transition);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .toast-close:hover {
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--gray-600);
+      background: var(--gray-200);
+      color: var(--gray-700);
+      transform: scale(1.05);
     }
 
     /* ===== MAIN LAYOUT ===== */
@@ -190,14 +246,27 @@
 
     .app-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      border-radius: var(--border-radius);
-      padding: 2rem 3rem;
+      border-radius: var(--border-radius-xl);
+      padding: 2.5rem 3rem;
       margin-bottom: 2rem;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-xl);
       color: white;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .header-content h1 {
@@ -207,38 +276,47 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      position: relative;
+      z-index: 1;
     }
 
     .header-content p {
       font-size: 1.1rem;
       opacity: 0.9;
+      position: relative;
+      z-index: 1;
     }
 
     .header-actions {
       display: flex;
       gap: 1rem;
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== NAVIGATION ===== */
     .main-nav {
-      background: white;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
+      background: var(--glass-bg);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
       margin-bottom: 2rem;
       overflow: hidden;
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
     }
 
     .nav-tabs {
       display: flex;
-      border-bottom: 1px solid var(--gray-200);
+      padding: 0.5rem;
+      gap: 0.25rem;
     }
 
     .nav-tab {
       flex: 1;
-      padding: 1.25rem 2rem;
+      padding: 1rem 1.5rem;
       border: none;
-      background: none;
-      color: var(--gray-600);
+      background: transparent;
+      color: var(--gray-500);
       font-weight: 500;
       font-size: 1rem;
       cursor: pointer;
@@ -247,27 +325,33 @@
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
+      border-radius: var(--border-radius);
       position: relative;
     }
 
     .nav-tab:hover {
-      background: var(--gray-50);
-      color: var(--gray-800);
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--gray-700);
+      transform: translateY(-1px);
     }
 
     .nav-tab.active {
       color: var(--primary);
-      background: var(--gray-50);
+      background: white;
+      box-shadow: var(--shadow-sm);
+      font-weight: 600;
     }
 
-    .nav-tab.active::after {
+    .nav-tab.active::before {
       content: '';
       position: absolute;
       bottom: 0;
-      left: 0;
-      right: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
       height: 3px;
       background: var(--primary);
+      border-radius: var(--border-radius-pill);
     }
 
     /* ===== CONTENT SECTIONS ===== */
@@ -281,16 +365,18 @@
 
     /* ===== CARDS ===== */
     .card {
-      background: white;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
+      background: var(--glass-bg);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
       overflow: hidden;
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
     }
 
     .card-header {
       padding: 1.5rem 2rem;
       border-bottom: 1px solid var(--gray-200);
-      background: var(--gray-50);
+      background: rgba(255, 255, 255, 0.5);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -299,7 +385,7 @@
     .card-title {
       font-size: 1.25rem;
       font-weight: 600;
-      color: var(--gray-800);
+      color: var(--gray-700);
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -307,6 +393,7 @@
 
     .card-content {
       padding: 2rem;
+      background: rgba(255, 255, 255, 0.3);
     }
 
     /* ===== BUTTONS ===== */
@@ -316,43 +403,63 @@
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--border-radius);
       font-weight: 500;
       font-size: 0.95rem;
       cursor: pointer;
       transition: var(--transition);
       text-decoration: none;
       justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: white;
+      box-shadow: var(--shadow-sm);
     }
 
     .btn-primary:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
       box-shadow: var(--shadow-lg);
     }
 
     .btn-success {
-      background: var(--success);
+      background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
       color: white;
+      box-shadow: var(--shadow-sm);
     }
 
     .btn-success:hover {
-      background: #047857;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
 
     .btn-danger {
-      background: var(--danger);
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-light) 100%);
       color: white;
+      box-shadow: var(--shadow-sm);
     }
 
     .btn-danger:hover {
-      background: #b91c1c;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
 
     .btn-sm {
@@ -371,33 +478,62 @@
     .filter-btn {
       padding: 0.75rem 1.5rem;
       border: 2px solid var(--gray-200);
-      background: white;
-      border-radius: 8px;
+      background: var(--glass-bg);
+      border-radius: var(--border-radius-pill);
       cursor: pointer;
       transition: var(--transition);
       font-weight: 500;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filter-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .filter-btn:hover::before {
+      opacity: 1;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-light);
     }
 
     .filter-btn.active {
       border-color: var(--primary);
-      background: rgba(37, 99, 235, 0.05);
-      color: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
     }
 
     .filter-btn .badge {
-      background: var(--gray-200);
+      background: rgba(255, 255, 255, 0.9);
       color: var(--gray-700);
-      padding: 0.25rem 0.5rem;
-      border-radius: 12px;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--border-radius-pill);
       font-size: 0.8rem;
       font-weight: 600;
+      min-width: 20px;
+      text-align: center;
     }
 
     .filter-btn.active .badge {
-      background: var(--primary);
+      background: rgba(255, 255, 255, 0.2);
       color: white;
     }
 
@@ -405,33 +541,80 @@
     .orders-table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
+      background: transparent;
+      margin: 0;
+      border-spacing: 0;
+    }
+
+    /* Define specific column widths for the main orders table */
+    .orders-table th:nth-child(1),
+    .orders-table td:nth-child(1) {
+      width: 15%; /* رقم الطلب */
+    }
+
+    .orders-table th:nth-child(2),
+    .orders-table td:nth-child(2) {
+      width: 25%; /* العميل */
+    }
+
+    .orders-table th:nth-child(3),
+    .orders-table td:nth-child(3) {
+      width: 15%; /* التاريخ */
+    }
+
+    .orders-table th:nth-child(4),
+    .orders-table td:nth-child(4) {
+      width: 15%; /* المبلغ */
+    }
+
+    .orders-table th:nth-child(5),
+    .orders-table td:nth-child(5) {
+      width: 30%; /* الحالة */
+    }
+
+    .orders-table th,
+    .orders-table td {
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      vertical-align: middle;
+      text-align: right;
+      box-sizing: border-box;
     }
 
     .orders-table th {
-      background: var(--gray-100);
-      padding: 1rem;
-      text-align: right;
+      background: linear-gradient(135deg, white 0%, var(--gray-100) 100%);
       font-weight: 600;
       color: var(--gray-700);
-      border-bottom: 2px solid var(--gray-200);
+      border-bottom: 2px solid var(--gray-300);
+      text-align: right;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .orders-table td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--gray-200);
-      vertical-align: middle;
-    }
-
-    .orders-table tbody tr:hover {
-      background: var(--gray-50);
+      text-align: right;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
     }
 
     .orders-table tbody tr {
       cursor: pointer;
+      transition: var(--transition);
+      border-radius: var(--border-radius);
+    }
+
+    .orders-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.6);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
     }
 
     .order-row.expanded {
-      background: rgba(37, 99, 235, 0.05);
+      background: rgba(97, 97, 255, 0.1);
+      box-shadow: var(--shadow-sm);
     }
 
     .order-details-row {
@@ -444,65 +627,448 @@
 
     .order-details-content {
       padding: 2rem;
-      background: var(--gray-50);
-      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      border-radius: var(--border-radius-lg);
       margin: 1rem 0;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
+    /* Fix for table container */
+    .card-content {
+      padding: 0;
+      background: rgba(255, 255, 255, 0.3);
+      overflow-x: auto;
+    }
+
+    .orders-table-container {
+      width: 100%;
+      min-width: 100%;
+      overflow-x: auto;
+    }
+
+    /* Ensure order details row spans full width */
+    .order-details-row td {
+      width: 100% !important;
+      padding: 1rem !important;
+      box-sizing: border-box;
+    }
+
+    .order-details-content {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* ===== MODERN STATUS CHIPS ===== */
+    .status-select {
+      appearance: none;
+      background: transparent;
+      border: none;
+      padding: 0.6rem 2.5rem 0.6rem 1.2rem;
+      border-radius: var(--border-radius-pill);
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      color: white;
+      min-width: 150px;
+      position: relative;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Status Chip Colors */
+    .status-pending {
+      background: linear-gradient(135deg, #ff9f43 0%, #ff6b35 100%);
+      box-shadow: 0 4px 15px rgba(255, 159, 67, 0.4);
+    }
+
+    .status-pending::before {
+      content: '⏳';
+      margin-left: 0.5rem;
+    }
+
+    .status-in-progress {
+      background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%);
+      box-shadow: 0 4px 15px rgba(55, 66, 250, 0.4);
+    }
+
+    .status-in-progress::before {
+      content: '⚡';
+      margin-left: 0.5rem;
+    }
+
+    .status-ready-for-shipment {
+      background: linear-gradient(135deg, #a55eea 0%, #8b5cf6 100%);
+      box-shadow: 0 4px 15px rgba(165, 94, 234, 0.4);
+    }
+
+    .status-ready-for-shipment::before {
+      content: '📦';
+      margin-left: 0.5rem;
+    }
+
+    .status-out-for-delivery {
+      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+      box-shadow: 0 4px 15px rgba(253, 121, 168, 0.4);
+    }
+
+    .status-out-for-delivery::before {
+      content: '🚚';
+      margin-left: 0.5rem;
+    }
+
+    .status-delivered {
+      background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+      box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
+    }
+
+    .status-delivered::before {
+      content: '✅';
+      margin-left: 0.5rem;
+    }
+
+    .status-select:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .status-select:focus {
+      outline: none;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .status-select:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* Custom dropdown arrow with modern styling */
+    .status-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: left calc(100% - 0.75rem) center;
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+    }
+
+    /* CHIP-STYLE DROPDOWN OPTIONS */
+    .status-select option {
+      background: white !important;
+      color: var(--gray-700) !important;
+      padding: 0.75rem 1rem !important;
+      margin: 0.25rem !important;
+      border-radius: var(--border-radius-pill) !important;
+      font-weight: 600 !important;
+      font-size: 0.85rem !important;
+      border: 2px solid transparent !important;
+      transition: var(--transition) !important;
+    }
+
+    .status-select option:hover {
+      transform: scale(1.02) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Individual option colors */
+    .status-select option[value="pending"] {
+      background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%) !important;
+      color: #e67e22 !important;
+      border-color: rgba(255, 159, 67, 0.3) !important;
+    }
+
+    .status-select option[value="pending"]::before {
+      content: '⏳ ';
+    }
+
+    .status-select option[value="pending"]:hover {
+      background: linear-gradient(135deg, #ff9f43 0%, #ff6b35 100%) !important;
+      color: white !important;
+    }
+
+    .status-select option[value="in-progress"] {
+      background: linear-gradient(135deg, #e8eaff 0%, #d4d7ff 100%) !important;
+      color: #3742fa !important;
+      border-color: rgba(55, 66, 250, 0.3) !important;
+    }
+
+    .status-select option[value="in-progress"]::before {
+      content: '⚡ ';
+    }
+
+    .status-select option[value="in-progress"]:hover {
+      background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%) !important;
+      color: white !important;
+    }
+
+    .status-select option[value="ready-for-shipment"] {
+      background: linear-gradient(135deg, #f3eaff 0%, #e8d5ff 100%) !important;
+      color: #a55eea !important;
+      border-color: rgba(165, 94, 234, 0.3) !important;
+    }
+
+    .status-select option[value="ready-for-shipment"]::before {
+      content: '📦 ';
+    }
+
+    .status-select option[value="ready-for-shipment"]:hover {
+      background: linear-gradient(135deg, #a55eea 0%, #8b5cf6 100%) !important;
+      color: white !important;
+    }
+
+    .status-select option[value="out-for-delivery"] {
+      background: linear-gradient(135deg, #ffe8f0 0%, #ffd1e1 100%) !important;
+      color: #e84393 !important;
+      border-color: rgba(253, 121, 168, 0.3) !important;
+    }
+
+    .status-select option[value="out-for-delivery"]::before {
+      content: '🚚 ';
+    }
+
+    .status-select option[value="out-for-delivery"]:hover {
+      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%) !important;
+      color: white !important;
+    }
+
+    .status-select option[value="delivered"] {
+      background: linear-gradient(135deg, #e6f9f6 0%, #ccf2ec 100%) !important;
+      color: #00b894 !important;
+      border-color: rgba(0, 184, 148, 0.3) !important;
+    }
+
+    .status-select option[value="delivered"]::before {
+      content: '✅ ';
+    }
+
+    .status-select option[value="delivered"]:hover {
+      background: linear-gradient(135deg, #00b894 0%, #00cec9 100%) !important;
+      color: white !important;
+    }
+
+    /* Enhanced dropdown styling */
+    .status-select:focus option {
+      background: white;
+      border-radius: var(--border-radius-pill);
+      margin: 0.2rem 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+
+    /* Status Badge Styles for Filter Buttons - Enhanced */
+    .filter-btn[data-filter="pending"] .badge {
+      background: linear-gradient(135deg, #ff9f43 0%, #ff6b35 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
+    }
+
+    .filter-btn[data-filter="in-progress"] .badge {
+      background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(55, 66, 250, 0.3);
+    }
+
+    .filter-btn[data-filter="ready-for-shipment"] .badge {
+      background: linear-gradient(135deg, #a55eea 0%, #8b5cf6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(165, 94, 234, 0.3);
+    }
+
+    .filter-btn[data-filter="out-for-delivery"] .badge {
+      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(253, 121, 168, 0.3);
+    }
+
+    .filter-btn[data-filter="delivered"] .badge {
+      background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 184, 148, 0.3);
+    }
+
+    .filter-btn[data-filter="all"] .badge {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(97, 97, 255, 0.3);
+    }
+
+    /* Enhanced filter button badges */
+    .filter-btn .badge {
+      border-radius: var(--border-radius-pill);
+      padding: 0.3rem 0.7rem;
+      font-weight: 700;
+      min-width: 24px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    /* Override active filter button badge colors */
+    .filter-btn.active .badge {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: white !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Pulse animation for active status */
+    .status-select {
+      animation: none;
+    }
+
+    .status-select:focus {
+      animation: statusPulse 2s infinite;
+    }
+
+    @keyframes statusPulse {
+      0% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+      50% {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+      100% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    /* ===== ORDER ITEMS TABLE (inside details) - SEPARATE STYLING ===== */
     .order-items-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
-      background: white;
-      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: var(--border-radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-sm);
+      table-layout: auto; /* Different from main table */
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Specific column widths for items table - More Even Distribution */
+    .order-items-table th.order-items-table-product,
+    .order-items-table td.order-items-table-product {
+      width: 20%; /* المنتج */
+      text-align: right;
+    }
+
+    .order-items-table th.order-items-table-quantity,
+    .order-items-table td.order-items-table-quantity {
+      width: 13%; /* الكمية */
+      text-align: center;
+    }
+
+    .order-items-table th.order-items-table-unit,
+    .order-items-table td.order-items-table-unit {
+      width: 13%; /* الوحدة */
+      text-align: center;
+    }
+
+    .order-items-table th.order-items-table-price,
+    .order-items-table td.order-items-table-price {
+      width: 17%; /* السعر */
+      text-align: center;
+    }
+
+    .order-items-table th.order-items-table-total,
+    .order-items-table td.order-items-table-total {
+      width: 17%; /* الإجمالي */
+      text-align: center;
+    }
+
+    .order-items-table th.order-items-table-notes,
+    .order-items-table td.order-items-table-notes {
+      width: 20%; /* ملاحظات */
+      text-align: right;
     }
 
     .order-items-table th {
-      background: var(--gray-100);
-      padding: 0.75rem 1rem;
-      text-align: right;
+      background: linear-gradient(135deg, var(--gray-75) 0%, var(--gray-100) 100%);
+      padding: 0.875rem 0.75rem;
+      text-align: center;
       font-weight: 600;
       color: var(--gray-700);
-      font-size: 0.9rem;
+      font-size: 0.875rem;
+      border-bottom: 2px solid var(--gray-200);
+      white-space: nowrap;
+    }
+
+    .order-items-table th:first-child,
+    .order-items-table th:last-child {
+      text-align: right;
     }
 
     .order-items-table td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--gray-200);
-      font-size: 0.9rem;
+      padding: 0.875rem 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 0.875rem;
+      background: rgba(255, 255, 255, 0.6);
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .order-items-table td:first-child,
+    .order-items-table td:last-child {
+      text-align: right;
     }
 
     .order-items-table tbody tr:last-child td {
       border-bottom: none;
     }
 
+    .order-items-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Footer styling for items table */
+    .order-items-table tfoot tr {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+      color: white !important;
+    }
+
+    .order-items-table tfoot td {
+      background: none !important;
+      color: white !important;
+      font-weight: 600;
+      border-bottom: none;
+      padding: 1rem 0.75rem;
+    }
+
     .order-summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .summary-item {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      padding: 1.5rem;
+      border-radius: var(--border-radius-lg);
       text-align: center;
       box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: var(--transition);
+    }
+
+    .summary-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
     .summary-label {
       font-size: 0.85rem;
       color: var(--gray-500);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
     }
 
     .summary-value {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--gray-800);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-700);
     }
 
     .expand-icon {
@@ -513,7 +1079,7 @@
       transform: rotate(180deg);
     }
 
-    /* ===== ITEMS TABLE ===== */
+    /* ===== ITEMS TABLE (for forms) - SEPARATE STYLING ===== */
     .items-table {
       width: 100%;
       border-collapse: collapse;
@@ -521,21 +1087,26 @@
       overflow: hidden;
       box-shadow: var(--shadow);
       margin-bottom: 1.5rem;
+      table-layout: auto;
+      background: white;
     }
 
     .items-table th {
-      background: var(--gray-100);
-      padding: 1rem;
-      text-align: right;
+      background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+      padding: 0.875rem 0.75rem;
+      text-align: center;
       font-weight: 600;
       color: var(--gray-700);
-      border-bottom: 2px solid var(--gray-200);
+      border-bottom: 2px solid var(--gray-300);
+      font-size: 0.875rem;
+      white-space: nowrap;
     }
 
     .items-table td {
-      padding: 1rem;
+      padding: 0.75rem;
       border-bottom: 1px solid var(--gray-200);
       vertical-align: middle;
+      text-align: center;
     }
 
     .items-table tbody tr:hover {
@@ -560,7 +1131,7 @@
     }
 
     .add-item-btn:hover {
-      background: rgba(37, 99, 235, 0.05);
+      background: rgba(97, 97, 255, 0.05);
       border-color: var(--primary);
     }
 
@@ -941,12 +1512,39 @@
       }
 
       .orders-table {
+        width: 100%;
         font-size: 0.9rem;
       }
 
       .orders-table th,
       .orders-table td {
         padding: 0.75rem 0.5rem;
+      }
+
+      /* Adjust column widths for mobile */
+      .orders-table th:nth-child(1),
+      .orders-table td:nth-child(1) {
+        width: 20%; /* رقم الطلب */
+      }
+
+      .orders-table th:nth-child(2),
+      .orders-table td:nth-child(2) {
+        width: 30%; /* العميل */
+      }
+
+      .orders-table th:nth-child(3),
+      .orders-table td:nth-child(3) {
+        width: 20%; /* التاريخ */
+      }
+
+      .orders-table th:nth-child(4),
+      .orders-table td:nth-child(4) {
+        width: 15%; /* المبلغ */
+      }
+
+      .orders-table th:nth-child(5),
+      .orders-table td:nth-child(5) {
+        width: 15%; /* الحالة */
       }
     }
 
@@ -969,6 +1567,14 @@
 
     .mt-2 {
       margin-top: 1rem;
+    }
+
+    .order-details-row td {
+      width: 100%;
+      padding: 0;
+    }
+    .order-details-content {
+      width: 100%;
     }
   </style>
 </head>
@@ -1039,6 +1645,10 @@
           <span>قيد التحضير</span>
           <span class="badge" id="inProgressCount">0</span>
         </button>
+        <button class="filter-btn" data-filter="ready-for-shipment">
+          <span>جاهز للشحن</span>
+          <span class="badge" id="readyForShipmentCount">0</span>
+        </button>
         <button class="filter-btn" data-filter="out-for-delivery">
           <span>في التوصيل</span>
           <span class="badge" id="outForDeliveryCount">0</span>
@@ -1058,20 +1668,21 @@
           </h2>
         </div>
         <div class="card-content">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th>رقم الطلب</th>
-                <th>العميل</th>
-                <th>التاريخ</th>
-                <th>المبلغ</th>
-                <th>الحالة</th>
-                <th>الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody">
-            </tbody>
-          </table>
+          <div class="orders-table-container">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>العميل</th>
+                  <th>التاريخ</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1169,33 +1780,37 @@
               <input type="tel" class="form-input" id="customerPhone" required>
             </div>
             <div class="form-group">
-              <label class="form-label">العنوان *</label>
-              <input type="text" class="form-input" id="customerAddress" required>
+              <label class="form-label">واتساب</label>
+              <input type="tel" class="form-input" id="customerWhatsapp">
             </div>
             <div class="form-group">
-              <label class="form-label">المنطقة *</label>
-              <select class="form-select" id="customerDistrict" required>
-                <option value="">اختر المنطقة</option>
-              </select>
+              <label class="form-label">البريد الإلكتروني</label>
+              <input type="email" class="form-input" id="customerEmail">
             </div>
             <div class="form-group">
-              <label class="form-label">الحي *</label>
-              <select class="form-select" id="customerArea" required>
-                <option value="">اختر الحي</option>
-              </select>
+              <label class="form-label">ملاحظات/تعليق</label>
+              <textarea class="form-textarea" id="customerComment" placeholder="أضف أي ملاحظات عن العميل..."></textarea>
             </div>
+            <input type="hidden" id="customerType" value="customer">
             <div class="form-group">
               <label class="form-label">مصدر الطلب *</label>
-              <select class="form-select" id="orderSource" required>
+              <select class="form-select" id="primarySourceOfSale" required>
                 <option value="">اختر المصدر</option>
-                <option value="website">موقع إلكتروني</option>
-                <option value="social">وسائل التواصل الاجتماعي</option>
+                <option value="Online">أونلاين</option>
+                <option value="InStore">من المتجر</option>
+                <option value="Phone">هاتف</option>
+                <option value="Other">أخرى</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">المصدر الفرعي</label>
-              <select class="form-select" id="orderSecondarySource">
+              <select class="form-select" id="secondarySourceOfSale">
                 <option value="">اختر المصدر الفرعي</option>
+                <option value="Referral">إحالة</option>
+                <option value="Facebook">فيسبوك</option>
+                <option value="Instagram">إنستغرام</option>
+                <option value="Google">جوجل</option>
+                <option value="Other">أخرى</option>
               </select>
             </div>
           </div>
@@ -1208,29 +1823,60 @@
             إضافة عنوان جديد
           </h3>
           <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">العنوان *</label>
-              <input type="text" class="form-input" id="newAddressStreet" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">المنطقة *</label>
-              <select class="form-select" id="newAddressDistrict" required>
-                <option value="">اختر المنطقة</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">الحي *</label>
-              <select class="form-select" id="newAddressArea" required>
-                <option value="">اختر الحي</option>
-              </select>
-            </div>
+            <!-- Address Label -->
             <div class="form-group">
               <label class="form-label">تسمية العنوان</label>
               <select class="form-select" id="newAddressLabel">
-                <option value="المنزل">المنزل</option>
-                <option value="العمل">العمل</option>
-                <option value="أخرى">أخرى</option>
+                <option value="Home" data-icon="fa-home">🏠 المنزل</option>
+                <option value="Work" data-icon="fa-building">🏢 العمل</option>
+                <option value="Family" data-icon="fa-users">👪 العائلة</option>
+                <option value="Friend" data-icon="fa-handshake">🤝 صديق</option>
+                <option value="Warehouse" data-icon="fa-warehouse">🏬 مستودع</option>
+                <option value="Chalet" data-icon="fa-umbrella-beach">🏖️ شاليه</option>
+                <option value="Farm" data-icon="fa-tractor">🌾 مزرعة</option>
+                <option value="Shop" data-icon="fa-store">🛒 متجر</option>
+                <option value="Other" data-icon="fa-map-marker-alt">📍 أخرى</option>
               </select>
+            </div>
+            <!-- Building Number -->
+            <div class="form-group">
+              <label class="form-label">رقم المنزل</label>
+              <input type="text" class="form-input" id="newHouseNumber">
+            </div>
+            <!-- Flat Number -->
+            <div class="form-group">
+              <label class="form-label">رقم الشقة</label>
+              <input type="text" class="form-input" id="newFlatNumber">
+            </div>
+            <!-- Floor Number -->
+            <div class="form-group">
+              <label class="form-label">رقم الدور</label>
+              <input type="text" class="form-input" id="newFloorNumber">
+            </div>
+            <!-- Street Name -->
+            <div class="form-group">
+              <label class="form-label">اسم الشارع *</label>
+              <input type="text" class="form-input" id="newStreetName" required>
+            </div>
+            <!-- District (searchable) -->
+            <div class="form-group" style="position:relative;">
+              <label class="form-label">المنطقة *</label>
+              <input type="text" class="form-input" id="newAddressDistrictSearch" placeholder="ابحث عن المنطقة..." autocomplete="off" required style="padding-left: 2.5rem; padding-right: 1rem;">
+              <i class="fas fa-chevron-down" id="districtChevron" style="position:absolute; left:1.25rem; top:50%; transform:translateY(-50%); color:#aaa; font-size:1.2em; pointer-events:none; line-height:1;"></i>
+              <div class="search-results" id="districtSearchResults"></div>
+              <input type="hidden" id="newAddressDistrict">
+              <input type="hidden" id="newAddressGovernorate">
+              <input type="hidden" id="newDistrictId">
+            </div>
+            <!-- Landmark -->
+            <div class="form-group">
+              <label class="form-label">علامة مميزة</label>
+              <input type="text" class="form-input" id="newAddressMarking">
+            </div>
+            <!-- Comment -->
+            <div class="form-group">
+              <label class="form-label">ملاحظات/تعليق</label>
+              <textarea class="form-textarea" id="newAddressComment" placeholder="أضف أي ملاحظات عن العنوان..."></textarea>
             </div>
           </div>
           <button type="button" class="btn btn-primary" onclick="saveNewAddress()">
@@ -1294,75 +1940,136 @@
     </div>
   </div>
 
-  <!-- Add Lead Modal -->
-  <div class="modal-overlay" id="addLeadModal">
+  <!-- Add Lead Modal (dedicated) -->
+  <div class="modal-overlay" id="addLeadModalDedicated">
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">
           <i class="fas fa-user-plus"></i>
           إضافة عميل محتمل جديد
         </h2>
-        <button class="modal-close" onclick="closeAddLeadModal()">
+        <button class="modal-close" onclick="closeAddLeadModalDedicated()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-content">
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">الاسم *</label>
-            <input type="text" class="form-input" id="leadName" required>
+            <label class="form-label">اسم العميل المحتمل *</label>
+            <input type="text" class="form-input" id="addLeadName" required>
           </div>
           <div class="form-group">
             <label class="form-label">رقم الهاتف *</label>
-            <input type="tel" class="form-input" id="leadPhone" required>
+            <input type="tel" class="form-input" id="addLeadPhone" required>
           </div>
           <div class="form-group">
             <label class="form-label">البريد الإلكتروني</label>
-            <input type="email" class="form-input" id="leadEmail">
+            <input type="email" class="form-input" id="addLeadEmail">
           </div>
           <div class="form-group">
-            <label class="form-label">المنطقة</label>
-            <select class="form-select" id="leadDistrict">
-              <option value="">اختر المنطقة</option>
-            </select>
+            <label class="form-label">ملاحظات/تعليق</label>
+            <textarea class="form-textarea" id="addLeadComment" placeholder="أضف أي ملاحظات عن العميل المحتمل..."></textarea>
           </div>
+          <input type="hidden" id="addLeadType" value="customer">
           <div class="form-group">
-            <label class="form-label">مصدر العميل المحتمل *</label>
-            <select class="form-select" id="leadSource" required>
+            <label class="form-label">مصدر الطلب *</label>
+            <select class="form-select" id="addLeadPrimarySourceOfSale" required>
               <option value="">اختر المصدر</option>
-              <option value="facebook">فيسبوك</option>
-              <option value="instagram">إنستغرام</option>
-              <option value="google">إعلانات جوجل</option>
-              <option value="website">الموقع الإلكتروني</option>
-              <option value="referral">إحالة من عميل</option>
-              <option value="cold-call">اتصال مباشر</option>
-              <option value="other">أخرى</option>
+              <option value="Online">أونلاين</option>
+              <option value="InStore">من المتجر</option>
+              <option value="Phone">هاتف</option>
+              <option value="Other">أخرى</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">حالة العميل المحتمل *</label>
-            <select class="form-select" id="leadStatus" required>
-              <option value="">اختر الحالة</option>
-              <option value="new">جديد</option>
-              <option value="contacted">تم التواصل</option>
-              <option value="interested">مهتم</option>
-              <option value="quoted">تم تقديم عرض</option>
-              <option value="negotiating">في مرحلة التفاوض</option>
-              <option value="cold">غير مهتم حالياً</option>
-              <option value="lost">فقدان العميل</option>
+            <label class="form-label">المصدر الفرعي</label>
+            <select class="form-select" id="addLeadSecondarySourceOfSale">
+              <option value="">اختر المصدر الفرعي</option>
+              <option value="Referral">إحالة</option>
+              <option value="Facebook">فيسبوك</option>
+              <option value="Instagram">إنستغرام</option>
+              <option value="Google">جوجل</option>
+              <option value="Other">أخرى</option>
             </select>
           </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">ملاحظات</label>
-          <textarea class="form-textarea" id="leadNotes" placeholder="أضف أي ملاحظات حول العميل المحتمل..."></textarea>
         </div>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-          <button type="button" class="btn btn-success" onclick="submitLead()">
+          <button type="button" class="btn btn-success" onclick="submitAddLead()">
             <i class="fas fa-save"></i>
             حفظ العميل المحتمل
           </button>
-          <button type="button" class="btn btn-primary" onclick="closeAddLeadModal()">
+          <button type="button" class="btn btn-primary" onclick="closeAddLeadModalDedicated()">
+            <i class="fas fa-times"></i>
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Customer Modal -->
+  <div class="modal-overlay" id="addCustomerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fas fa-user-plus"></i>
+          إضافة عميل جديد
+        </h2>
+        <button class="modal-close" onclick="closeAddCustomerModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">اسم العميل *</label>
+            <input type="text" class="form-input" id="addCustomerName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف *</label>
+            <input type="tel" class="form-input" id="addCustomerPhone" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">واتساب</label>
+            <input type="tel" class="form-input" id="addCustomerWhatsapp">
+          </div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input type="email" class="form-input" id="addCustomerEmail">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ملاحظات/تعليق</label>
+            <textarea class="form-textarea" id="addCustomerComment" placeholder="أضف أي ملاحظات عن العميل..."></textarea>
+          </div>
+          <input type="hidden" id="addCustomerType" value="customer">
+          <div class="form-group">
+            <label class="form-label">مصدر الطلب *</label>
+            <select class="form-select" id="addCustomerPrimarySourceOfSale" required>
+              <option value="">اختر المصدر</option>
+              <option value="Online">أونلاين</option>
+              <option value="InStore">من المتجر</option>
+              <option value="Phone">هاتف</option>
+              <option value="Other">أخرى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">المصدر الفرعي</label>
+            <select class="form-select" id="addCustomerSecondarySourceOfSale">
+              <option value="">اختر المصدر الفرعي</option>
+              <option value="Referral">إحالة</option>
+              <option value="Facebook">فيسبوك</option>
+              <option value="Instagram">إنستغرام</option>
+              <option value="Google">جوجل</option>
+              <option value="Other">أخرى</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+          <button type="button" class="btn btn-success" onclick="submitAddCustomer()">
+            <i class="fas fa-save"></i>
+            حفظ العميل
+          </button>
+          <button type="button" class="btn btn-primary" onclick="closeAddCustomerModal()">
             <i class="fas fa-times"></i>
             إلغاء
           </button>
@@ -1388,46 +2095,46 @@
 
     let mockLocations = {
       districts: [
-        { id: 'المعادي', name: 'المعادي' },
-        { id: 'مصر الجديدة', name: 'مصر الجديدة' },
-        { id: 'وسط البلد', name: 'وسط البلد' },
-        { id: 'النزهة', name: 'النزهة' },
-        { id: 'مدينة نصر', name: 'مدينة نصر' },
-        { id: 'المهندسين', name: 'المهندسين' },
-        { id: 'الزمالك', name: 'الزمالك' }
+        { district_id: '420000000000001', district_name: 'المعادي', governorate_name: 'القاهرة' },
+        { district_id: '420000000000002', district_name: 'مصر الجديدة', governorate_name: 'القاهرة' },
+        { district_id: '420000000000003', district_name: 'وسط البلد', governorate_name: 'القاهرة' },
+        { district_id: '420000000000004', district_name: 'النزهة', governorate_name: 'القاهرة' },
+        { district_id: '420000000000005', district_name: 'مدينة نصر', governorate_name: 'القاهرة' },
+        { district_id: '420000000000006', district_name: 'المهندسين', governorate_name: 'الجيزة' },
+        { district_id: '420000000000007', district_name: 'الزمالك', governorate_name: 'القاهرة' }
       ],
       areas: {
         'المعادي': [
-          { id: 'المعادي الجديدة', name: 'المعادي الجديدة' },
-          { id: 'المعادي القديمة', name: 'المعادي القديمة' },
-          { id: 'دجلة', name: 'دجلة' }
+          { id: '420000000000101', name: 'المعادي الجديدة' },
+          { id: '420000000000102', name: 'المعادي القديمة' },
+          { id: '420000000000103', name: 'دجلة' }
         ],
         'مصر الجديدة': [
-          { id: 'هليوبوليس', name: 'هليوبوليس' },
-          { id: 'الكوربة', name: 'الكوربة' },
-          { id: 'روكسي', name: 'روكسي' }
+          { id: '420000000000201', name: 'هليوبوليس' },
+          { id: '420000000000202', name: 'الكوربة' },
+          { id: '420000000000203', name: 'روكسي' }
         ],
         'وسط البلد': [
-          { id: 'التحرير', name: 'التحرير' },
-          { id: 'طلعت حرب', name: 'طلعت حرب' },
-          { id: 'الأزبكية', name: 'الأزبكية' }
+          { id: '420000000000301', name: 'التحرير' },
+          { id: '420000000000302', name: 'طلعت حرب' },
+          { id: '420000000000303', name: 'الأزبكية' }
         ],
         'النزهة': [
-          { id: 'النزهة الجديدة', name: 'النزهة الجديدة' },
-          { id: 'النزهة القديمة', name: 'النزهة القديمة' }
+          { id: '420000000000401', name: 'النزهة الجديدة' },
+          { id: '420000000000402', name: 'النزهة القديمة' }
         ],
         'مدينة نصر': [
-          { id: 'الحي الأول', name: 'الحي الأول' },
-          { id: 'الحي السابع', name: 'الحي السابع' },
-          { id: 'الحي العاشر', name: 'الحي العاشر' }
+          { id: '420000000000501', name: 'الحي الأول' },
+          { id: '420000000000502', name: 'الحي السابع' },
+          { id: '420000000000503', name: 'الحي العاشر' }
         ],
         'المهندسين': [
-          { id: 'الدقي', name: 'الدقي' },
-          { id: 'المهندسين', name: 'المهندسين' },
-          { id: 'العجوزة', name: 'العجوزة' }
+          { id: '420000000000601', name: 'الدقي' },
+          { id: '420000000000602', name: 'المهندسين' },
+          { id: '420000000000603', name: 'العجوزة' }
         ],
         'الزمالك': [
-          { id: 'الزمالك', name: 'الزمالك' }
+          { id: '420000000000701', name: 'الزمالك' }
         ]
       }
     };
@@ -1517,19 +2224,37 @@
         addresses: [
           {
             id: 'ADDR_001',
-            street: '15 شارع النيل، الطابق الثالث',
-            district: 'المعادي',
+            address_label: 'Home',
+            address_type: 'Home',
+            address_comment: 'عنوان رئيسي',
+            house_number: '15',
+            flat_number: '3',
+            floor_number: '2',
+            street_name: 'شارع النيل',
+            address_marking: 'قرب محطة المترو',
+            address_district: 'المعادي',
+            address_governorate: 'القاهرة',
+            district_id: '420000000000001',
+            area_id: '420000000000101',
             area: 'المعادي الجديدة',
-            isPrimary: true,
-            label: 'المنزل'
+            isPrimary: true
           },
           {
             id: 'ADDR_002',
-            street: '45 شارع التحرير، مكتب 201',
-            district: 'وسط البلد',
+            address_label: 'Work',
+            address_type: 'Work',
+            address_comment: 'مكتب الشركة',
+            house_number: '45',
+            flat_number: '201',
+            floor_number: '5',
+            street_name: 'شارع التحرير',
+            address_marking: '',
+            address_district: 'وسط البلد',
+            address_governorate: 'القاهرة',
+            district_id: '420000000000003',
+            area_id: '420000000000301',
             area: 'التحرير',
-            isPrimary: false,
-            label: 'العمل'
+            isPrimary: false
           }
         ],
         totalOrders: 5,
@@ -1543,11 +2268,20 @@
         addresses: [
           {
             id: 'ADDR_003',
-            street: '8 شارع الجمهورية، الطابق الخامس',
-            district: 'مصر الجديدة',
+            address_label: 'Home',
+            address_type: 'Home',
+            address_comment: '',
+            house_number: '8',
+            flat_number: '5',
+            floor_number: '5',
+            street_name: 'شارع الجمهورية',
+            address_marking: '',
+            address_district: 'مصر الجديدة',
+            address_governorate: 'القاهرة',
+            district_id: '420000000000002',
+            area_id: '420000000000201',
             area: 'هليوبوليس',
-            isPrimary: true,
-            label: 'المنزل'
+            isPrimary: true
           }
         ],
         totalOrders: 3,
@@ -1561,11 +2295,20 @@
         addresses: [
           {
             id: 'ADDR_004',
-            street: '22 شارع أحمد عرابي',
-            district: 'المهندسين',
+            address_label: 'Home',
+            address_type: 'Home',
+            address_comment: '',
+            house_number: '22',
+            flat_number: '',
+            floor_number: '',
+            street_name: 'شارع أحمد عرابي',
+            address_marking: '',
+            address_district: 'المهندسين',
+            address_governorate: 'الجيزة',
+            district_id: '420000000000006',
+            area_id: '420000000000601',
             area: 'الدقي',
-            isPrimary: true,
-            label: 'المنزل'
+            isPrimary: true
           }
         ],
         totalOrders: 2,
@@ -1579,11 +2322,20 @@
         addresses: [
           {
             id: 'ADDR_005',
-            street: '10 شارع العروبة، الطابق الثاني',
-            district: 'مدينة نصر',
+            address_label: 'Home',
+            address_type: 'Home',
+            address_comment: '',
+            house_number: '10',
+            flat_number: '2',
+            floor_number: '2',
+            street_name: 'شارع العروبة',
+            address_marking: '',
+            address_district: 'مدينة نصر',
+            address_governorate: 'القاهرة',
+            district_id: '420000000000005',
+            area_id: '420000000000501',
             area: 'الحي الأول',
-            isPrimary: true,
-            label: 'المنزل'
+            isPrimary: true
           }
         ],
         totalOrders: 1,
@@ -1594,52 +2346,40 @@
 
     let mockLeads = [
       {
-        id: 'LEAD-001',
-        name: 'خالد عبدالرحمن',
-        phone: '01544444444',
-        email: 'khalid@email.com',
-        district: 'مدينة نصر',
-        source: 'facebook',
-        status: 'interested',
-        notes: 'مهتم بالمنتجات العضوية، طلب كتالوج',
-        createdDate: '2025-06-08',
-        lastContactDate: '2025-06-09'
+        lead_name: 'خالد عبدالرحمن',
+        lead_type: 'customer',
+        lead_comment: 'مهتم بالمنتجات العضوية، طلب كتالوج',
+        lead_phone: '01544444444',
+        lead_email: 'khalid@email.com',
+        primary_source_of_sale: 'Online',
+        secondary_source_of_sale: 'Facebook'
       },
       {
-        id: 'LEAD-002',
-        name: 'ريم محمود',
-        phone: '01655555555',
-        email: 'reem.m@email.com',
-        district: 'الزمالك',
-        source: 'google',
-        status: 'quoted',
-        notes: 'تم إرسال عرض سعر لطلبية شهرية',
-        createdDate: '2025-06-07',
-        lastContactDate: '2025-06-10'
+        lead_name: 'ريم محمود',
+        lead_type: 'customer',
+        lead_comment: 'تم إرسال عرض سعر لطلبية شهرية',
+        lead_phone: '01655555555',
+        lead_email: 'reem.m@email.com',
+        primary_source_of_sale: 'Online',
+        secondary_source_of_sale: 'Google'
       },
       {
-        id: 'LEAD-003',
-        name: 'عمر الشريف',
-        phone: '01766666666',
-        email: '',
-        district: 'المعادي',
-        source: 'referral',
-        status: 'new',
-        notes: 'إحالة من أحمد محمد علي',
-        createdDate: '2025-06-10',
-        lastContactDate: null
+        lead_name: 'عمر الشريف',
+        lead_type: 'customer',
+        lead_comment: 'إحالة من أحمد محمد علي',
+        lead_phone: '01766666666',
+        lead_email: '',
+        primary_source_of_sale: 'Referral',
+        secondary_source_of_sale: ''
       },
       {
-        id: 'LEAD-004',
-        name: 'نورا حسام',
-        phone: '01877777777',
-        email: 'nora.h@email.com',
-        district: 'مصر الجديدة',
-        source: 'instagram',
-        status: 'cold',
-        notes: 'غير مهتمة حالياً، للمتابعة بعد 3 أشهر',
-        createdDate: '2025-06-05',
-        lastContactDate: '2025-06-06'
+        lead_name: 'نورا حسام',
+        lead_type: 'customer',
+        lead_comment: 'غير مهتمة حالياً، للمتابعة بعد 3 أشهر',
+        lead_phone: '01877777777',
+        lead_email: 'nora.h@email.com',
+        primary_source_of_sale: 'Online',
+        secondary_source_of_sale: 'Instagram'
       }
     ];
 
@@ -1959,6 +2699,7 @@
         all: mockOrders.length,
         pending: mockOrders.filter(o => o.status === 'pending').length,
         inprogress: mockOrders.filter(o => o.status === 'in-progress').length,
+        readyforshipment: mockOrders.filter(o => o.status === 'ready-for-shipment').length,
         outfordelivery: mockOrders.filter(o => o.status === 'out-for-delivery').length,
         delivered: mockOrders.filter(o => o.status === 'delivered').length
       };
@@ -1967,6 +2708,7 @@
       document.getElementById('allCount').textContent = counts.all;
       document.getElementById('pendingCount').textContent = counts.pending;
       document.getElementById('inProgressCount').textContent = counts.inprogress;
+      document.getElementById('readyForShipmentCount').textContent = counts.readyforshipment;
       document.getElementById('outForDeliveryCount').textContent = counts.outfordelivery;
       document.getElementById('deliveredCount').textContent = counts.delivered;
     }
@@ -1998,14 +2740,10 @@
               <select class="form-select" style="padding: 0.5rem; font-size: 0.875rem;" onchange="changeOrderStatus('${order.id}', this.value)" onclick="event.stopPropagation()">
                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>في الانتظار</option>
                 <option value="in-progress" ${order.status === 'in-progress' ? 'selected' : ''}>قيد التحضير</option>
+                <option value="ready-for-shipment" ${order.status === 'ready-for-shipment' ? 'selected' : ''}>جاهز للشحن</option>
                 <option value="out-for-delivery" ${order.status === 'out-for-delivery' ? 'selected' : ''}>في التوصيل</option>
                 <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التوصيل</option>
               </select>
-            </td>
-            <td onclick="event.stopPropagation()">
-              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
-                <i class="fas fa-chevron-down expand-icon" id="expand-${order.id}" style="color: var(--gray-400); cursor: pointer;" onclick="event.stopPropagation(); toggleOrderDetails('${order.id}')"></i>
-              </div>
             </td>
           </tr>
           <tr class="order-details-row" id="details-${order.id}">
@@ -2086,7 +2824,7 @@
 
       if (detailsRow.classList.contains('show')) {
         detailsRow.classList.remove('show');
-        expandIcon.classList.remove('rotated');
+        if (expandIcon) expandIcon.classList.remove('rotated');
         orderRow.classList.remove('expanded');
       } else {
         // Close all other expanded rows first
@@ -2102,7 +2840,7 @@
 
         // Open the clicked row
         detailsRow.classList.add('show');
-        expandIcon.classList.add('rotated');
+        if (expandIcon) expandIcon.classList.add('rotated');
         orderRow.classList.add('expanded');
       }
     }
@@ -2139,7 +2877,7 @@
               <div class="customer-info">
                 <h3>${customer.name}</h3>
                 <p><i class="fas fa-phone"></i> ${customer.phone}</p>
-                <p><i class="fas fa-map-marker-alt"></i> ${primaryAddress.area}, ${primaryAddress.district}</p>
+                <p><i class="fas fa-map-marker-alt"></i> ${primaryAddress.area}${primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : ''}</p>
               </div>
             </div>
             <div class="customer-stats">
@@ -2239,7 +2977,7 @@
       hideAllFormSections();
       appState.isAddingNewAddress = true;
       document.getElementById('newAddressSection').classList.add('show');
-      populateNewAddressDropdowns();
+      initializeDistrictSearch();
     }
 
     function showOrderDetailsSection() {
@@ -2251,46 +2989,120 @@
       }
     }
 
-    function populateNewAddressDropdowns() {
-      const districtSelect = document.getElementById('newAddressDistrict');
-      const areaSelect = document.getElementById('newAddressArea');
+    function initializeDistrictSearch() {
+      const input = document.getElementById('newAddressDistrictSearch');
+      const results = document.getElementById('districtSearchResults');
+      const chevron = document.getElementById('districtChevron');
+      const hiddenDistrict = document.getElementById('newAddressDistrict');
+      const hiddenGovernorate = document.getElementById('newAddressGovernorate');
+      const hiddenDistrictId = document.getElementById('newDistrictId');
+      let isOpen = false;
 
-      // Populate districts
-      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
-        mockLocations.districts.map(district =>
-          `<option value="${district.id}">${district.name}</option>`
+      function highlightMatch(text, term) {
+        if (!term) return text;
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.replace(regex, '<mark style="background: #fef3c7; padding: 2px 4px; border-radius: 3px;">$1</mark>');
+      }
+
+      function renderDistrictResults(filtered, term) {
+        if (!filtered.length) {
+          results.innerHTML = '<div class="search-result">لا توجد نتائج</div>';
+          results.classList.add('show');
+          isOpen = true;
+          chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+          return;
+        }
+        results.innerHTML = filtered.map(d =>
+          `<div class="search-result" data-id="${d.district_id}" data-name="${d.district_name}" data-gov="${d.governorate_name}">
+            ${highlightMatch(d.district_name, term)} - ${highlightMatch(d.governorate_name, term)}
+          </div>`
         ).join('');
+        results.classList.add('show');
+        isOpen = true;
+        chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+      }
 
-      districtSelect.addEventListener('change', function () {
-        const selectedDistrict = districtSelect.value;
-        areaSelect.innerHTML = '<option value="">اختر الحي</option>';
+      function closeDropdown() {
+        results.classList.remove('show');
+        isOpen = false;
+        chevron.style.transform = 'translateY(-50%)';
+      }
 
-        if (selectedDistrict && mockLocations.areas[selectedDistrict]) {
-          areaSelect.innerHTML += mockLocations.areas[selectedDistrict].map(area =>
-            `<option value="${area.id}">${area.name}</option>`
-          ).join('');
+      function filterDistricts(term) {
+        term = term.trim().toLowerCase();
+        if (!term) return mockLocations.districts;
+        return mockLocations.districts.filter(d =>
+          d.district_name.toLowerCase().includes(term) ||
+          d.governorate_name.toLowerCase().includes(term)
+        );
+      }
+
+      input.addEventListener('input', function() {
+        const filtered = filterDistricts(input.value);
+        renderDistrictResults(filtered, input.value.trim());
+      });
+      input.addEventListener('focus', function() {
+        if (!isOpen) {
+          renderDistrictResults(mockLocations.districts, input.value.trim());
+        }
+      });
+      input.addEventListener('click', function() {
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          renderDistrictResults(mockLocations.districts, input.value.trim());
+        }
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.form-group')) {
+          closeDropdown();
+        }
+      });
+      results.addEventListener('click', function(e) {
+        const item = e.target.closest('.search-result[data-id]');
+        if (item) {
+          input.value = item.dataset.name + ' - ' + item.dataset.gov;
+          hiddenDistrict.value = item.dataset.name;
+          hiddenGovernorate.value = item.dataset.gov;
+          hiddenDistrictId.value = item.dataset.id;
+          closeDropdown();
         }
       });
     }
 
     function saveNewAddress() {
-      const street = document.getElementById('newAddressStreet').value.trim();
-      const district = document.getElementById('newAddressDistrict').value;
-      const area = document.getElementById('newAddressArea').value;
       const label = document.getElementById('newAddressLabel').value;
+      const comment = document.getElementById('newAddressComment').value.trim();
+      const houseNumber = document.getElementById('newHouseNumber').value.trim();
+      const flatNumber = document.getElementById('newFlatNumber').value.trim();
+      const floorNumber = document.getElementById('newFloorNumber').value.trim();
+      const street = document.getElementById('newStreetName').value.trim();
+      const marking = document.getElementById('newAddressMarking').value.trim();
+      const districtId = document.getElementById('newDistrictId').value;
+      const governorate = document.getElementById('newAddressGovernorate').value;
 
-      if (!street || !district || !area) {
+      if (!street || !districtId) {
         showToast('error', 'يجب ملء جميع الحقول المطلوبة');
         return;
       }
 
+      const selectedDistrict = mockLocations.districts.find(d => d.district_id === districtId);
+      const addressDistrict = selectedDistrict ? selectedDistrict.district_name : '';
+      const addressGovernorate = selectedDistrict ? selectedDistrict.governorate_name : '';
+
       const newAddress = {
         id: `ADDR-${Date.now()}`,
-        street: street,
-        district: district,
-        area: area,
-        isPrimary: false,
-        label: label
+        address_label: label,
+        address_comment: comment,
+        house_number: houseNumber,
+        flat_number: flatNumber,
+        floor_number: floorNumber,
+        street_name: street,
+        address_marking: marking,
+        address_district: addressDistrict,
+        address_governorate: addressGovernorate,
+        district_id: districtId,
+        isPrimary: false
       };
 
       // Add to selected customer addresses
@@ -2316,6 +3128,9 @@
       const districtSelect = document.getElementById('customerDistrict');
       const areaSelect = document.getElementById('customerArea');
 
+      // Only proceed if both elements exist
+      if (!districtSelect || !areaSelect) return;
+
       // Populate districts
       districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
         mockLocations.districts.map(district =>
@@ -2337,6 +3152,9 @@
     function initializeSourceDropdowns() {
       const sourceSelect = document.getElementById('orderSource');
       const secondarySourceSelect = document.getElementById('orderSecondarySource');
+
+      // Only proceed if both elements exist
+      if (!sourceSelect || !secondarySourceSelect) return;
 
       const sourceMappings = {
         'website': [
@@ -2388,17 +3206,29 @@
       const addressGrid = document.getElementById('addressGrid');
 
       addressGrid.innerHTML = addresses.map(address => {
-        const icon = address.label === 'المنزل' ? 'home' : address.label === 'العمل' ? 'building' : 'map-marker-alt';
+        let icon = 'map-marker-alt';
+        switch (address.address_label) {
+          case 'Home': icon = 'home'; break;
+          case 'Work': icon = 'building'; break;
+          case 'Family': icon = 'users'; break;
+          case 'Friend': icon = 'handshake'; break;
+          case 'Warehouse': icon = 'warehouse'; break;
+          case 'Chalet': icon = 'umbrella-beach'; break;
+          case 'Farm': icon = 'tractor'; break;
+          case 'Shop': icon = 'store'; break;
+          case 'Other': icon = 'map-marker-alt'; break;
+        }
         return `
           <div class="address-card" onclick="selectAddress('${address.id}')">
             <div class="address-label">
               <i class="fas fa-${icon}"></i>
-              ${address.label}
+              ${address.address_label}
             </div>
             <div class="address-details">
-              ${address.street}<br>
-              ${address.district} - ${address.area}
+              ${address.street_name}، منزل ${address.house_number}${address.flat_number ? '، شقة ' + address.flat_number : ''}${address.floor_number ? '، دور ' + address.floor_number : ''}<br>
+              ${address.address_district} - ${address.address_governorate}
             </div>
+            ${address.address_comment ? `<div class="address-comment">${address.address_comment}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -2419,7 +3249,7 @@
       if (address) {
         appState.selectedAddress = address;
         appState.newOrderForm.address = address;
-        showToast('success', 'تم اختيار العنوان', address.label);
+        showToast('success', 'تم اختيار العنوان', address.address_label);
 
         setTimeout(() => {
           showOrderDetailsSection();
@@ -2714,15 +3544,31 @@
 
       // If no existing customer selected, create new one
       if (!customer) {
+        const name = document.getElementById('customerName').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+        const whatsapp = document.getElementById('customerWhatsapp').value.trim();
+        const email = document.getElementById('customerEmail').value.trim();
+        const comment = document.getElementById('customerComment').value.trim();
+        const primarySource = document.getElementById('primarySourceOfSale').value;
+        const secondarySource = document.getElementById('secondarySourceOfSale').value;
+        const customerType = document.getElementById('customerType').value;
+
+        if (!name || !phone || !primarySource) {
+          showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+          return;
+        }
+
         const customerData = {
-          name: document.getElementById('customerName').value.trim(),
-          phone: document.getElementById('customerPhone').value.trim(),
-          address: document.getElementById('customerAddress').value.trim(),
-          district: document.getElementById('customerDistrict').value,
-          area: document.getElementById('customerArea').value
+          customer_name: name,
+          customer_type: customerType,
+          customer_comment: comment,
+          primary_source_of_sale: primarySource,
+          secondary_source_of_sale: secondarySource,
+          customer_phone: phone,
+          customer_whatsapp: whatsapp,
+          customer_email: email
         };
 
-        // Create new customer first
         API.addCustomer(customerData).then(newCustomer => {
           mockCustomers.push(newCustomer);
           return createOrderWithCustomer(newCustomer, validItems);
@@ -2811,6 +3657,193 @@
     window.submitOrder = submitOrder;
     window.changeOrderStatus = changeOrderStatus;
     window.toggleOrderDetails = toggleOrderDetails;
+
+    // ===== ADD CUSTOMER MODAL LOGIC =====
+    function openAddCustomerModal() {
+      document.getElementById('addCustomerModal').classList.add('show');
+      resetAddCustomerForm();
+      initializeAddCustomerLocationDropdowns();
+    }
+    function closeAddCustomerModal() {
+      document.getElementById('addCustomerModal').classList.remove('show');
+      resetAddCustomerForm();
+    }
+    function resetAddCustomerForm() {
+      ['addCustomerName', 'addCustomerPhone', 'addCustomerAddress', 'addCustomerDistrict', 'addCustomerArea'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+    function initializeAddCustomerLocationDropdowns() {
+      const districtSelect = document.getElementById('addCustomerDistrict');
+      const areaSelect = document.getElementById('addCustomerArea');
+      if (!districtSelect || !areaSelect) return;
+      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
+        mockLocations.districts.map(district =>
+          `<option value="${district.id}">${district.name}</option>`
+        ).join('');
+      districtSelect.addEventListener('change', function () {
+        const selectedDistrict = districtSelect.value;
+        areaSelect.innerHTML = '<option value="">اختر الحي</option>';
+        if (selectedDistrict && mockLocations.areas[selectedDistrict]) {
+          areaSelect.innerHTML += mockLocations.areas[selectedDistrict].map(area =>
+            `<option value="${area.id}">${area.name}</option>`
+          ).join('');
+        }
+      });
+    }
+    function submitAddCustomer() {
+      const name = document.getElementById('addCustomerName').value.trim();
+      const phone = document.getElementById('addCustomerPhone').value.trim();
+      const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
+      const email = document.getElementById('addCustomerEmail').value.trim();
+      const comment = document.getElementById('addCustomerComment').value.trim();
+      const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
+      const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
+      const customerType = document.getElementById('addCustomerType').value;
+
+      if (!name || !phone || !primarySource) {
+        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+        return;
+      }
+
+      const customerData = {
+        customer_name: name,
+        customer_type: customerType,
+        customer_comment: comment,
+        primary_source_of_sale: primarySource,
+        secondary_source_of_sale: secondarySource,
+        customer_phone: phone,
+        customer_whatsapp: whatsapp,
+        customer_email: email
+      };
+
+      API.addCustomer(customerData).then(newCustomer => {
+        mockCustomers.push(newCustomer);
+        showToast('success', 'تم إضافة العميل بنجاح');
+        closeAddCustomerModal();
+        loadCustomers();
+      }).catch(error => {
+        showToast('error', 'حدث خطأ أثناء إضافة العميل');
+      });
+    }
+    window.openAddCustomerModal = openAddCustomerModal;
+    window.closeAddCustomerModal = closeAddCustomerModal;
+    window.submitAddCustomer = submitAddCustomer;
+
+    // ===== ADD LEAD MODAL LOGIC =====
+    function openAddLeadModal() {
+      document.getElementById('addLeadModalDedicated').classList.add('show');
+      resetAddLeadForm();
+      initializeAddLeadDistrictDropdown();
+    }
+    function closeAddLeadModalDedicated() {
+      document.getElementById('addLeadModalDedicated').classList.remove('show');
+      resetAddLeadForm();
+    }
+    function resetAddLeadForm() {
+      ['addLeadName', 'addLeadPhone', 'addLeadEmail', 'addLeadDistrict', 'addLeadSource', 'addLeadStatus', 'addLeadNotes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+    function initializeAddLeadDistrictDropdown() {
+      const districtSelect = document.getElementById('addLeadDistrict');
+      if (!districtSelect) return;
+      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
+        mockLocations.districts.map(district =>
+          `<option value="${district.id}">${district.name}</option>`
+        ).join('');
+    }
+    function submitAddLead() {
+      const name = document.getElementById('addLeadName').value.trim();
+      const phone = document.getElementById('addLeadPhone').value.trim();
+      const email = document.getElementById('addLeadEmail').value.trim();
+      const comment = document.getElementById('addLeadComment').value.trim();
+      const primarySource = document.getElementById('addLeadPrimarySourceOfSale').value;
+      const secondarySource = document.getElementById('addLeadSecondarySourceOfSale').value;
+      const leadType = document.getElementById('addLeadType').value;
+
+      if (!name || !phone || !primarySource) {
+        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+        return;
+      }
+
+      const leadData = {
+        lead_name: name,
+        lead_type: leadType,
+        lead_comment: comment,
+        lead_phone: phone,
+        lead_email: email,
+        primary_source_of_sale: primarySource,
+        secondary_source_of_sale: secondarySource
+      };
+
+      mockLeads.push(leadData);
+      showToast('success', 'تم إضافة العميل المحتمل بنجاح');
+      closeAddLeadModalDedicated();
+      loadLeads();
+    }
+    window.openAddLeadModal = openAddLeadModal;
+    window.closeAddLeadModalDedicated = closeAddLeadModalDedicated;
+    window.submitAddLead = submitAddLead;
+
+    // ===== GLOBAL SOURCES MAP =====
+    let sourcesMap = {
+      Online: [
+        { value: 'Referral', label: 'إحالة' },
+        { value: 'Facebook', label: 'فيسبوك' },
+        { value: 'Instagram', label: 'إنستغرام' },
+        { value: 'Google', label: 'جوجل' },
+        { value: 'Other', label: 'أخرى' }
+      ],
+      InStore: [
+        { value: 'WalkIn', label: 'زيارة مباشرة' },
+        { value: 'Referral', label: 'إحالة' },
+        { value: 'Other', label: 'أخرى' }
+      ],
+      Phone: [
+        { value: 'Referral', label: 'إحالة' },
+        { value: 'Ad', label: 'إعلان' },
+        { value: 'Other', label: 'أخرى' }
+      ],
+      Other: [
+        { value: 'Other', label: 'أخرى' }
+      ]
+    };
+    let primarySources = [
+      { value: 'Online', label: 'أونلاين' },
+      { value: 'InStore', label: 'من المتجر' },
+      { value: 'Phone', label: 'هاتف' },
+      { value: 'Other', label: 'أخرى' }
+    ];
+
+    function populateSourceDropdowns(primaryId, secondaryId) {
+      const primarySelect = document.getElementById(primaryId);
+      const secondarySelect = document.getElementById(secondaryId);
+      if (!primarySelect || !secondarySelect) return;
+      // Populate primary
+      primarySelect.innerHTML = '<option value="">اختر المصدر</option>' +
+        primarySources.map(src => `<option value="${src.value}">${src.label}</option>`).join('');
+      // Populate secondary on primary change
+      primarySelect.addEventListener('change', function () {
+        const selected = primarySelect.value;
+        const options = sourcesMap[selected] || [];
+        secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>' +
+          options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+      });
+      // Initial clear
+      secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Customer modal
+      populateSourceDropdowns('primarySourceOfSale', 'secondarySourceOfSale');
+      // Add customer modal
+      populateSourceDropdowns('addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale');
+      // Add lead modal
+      populateSourceDropdowns('addLeadPrimarySourceOfSale', 'addLeadSecondarySourceOfSale');
+    });
   </script>
 </body>
 
