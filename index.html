@@ -2080,7 +2080,7 @@
 
   <script>
     // ===== GLOBAL DATA =====
-    let mockProducts = [
+    let products = [
       { id: 'PROD_001', name: 'أرز أبيض - كيس 5 كيلو', category: 'أرز', price: 45.00 },
       { id: 'PROD_002', name: 'أرز بسمتي - كيس 2 كيلو', category: 'أرز', price: 35.00 },
       { id: 'PROD_003', name: 'معكرونة بنة - 500 جرام', category: 'معكرونة', price: 12.50 },
@@ -2093,53 +2093,17 @@
       { id: 'PROD_010', name: 'قهوة نسكافيه - 200 جرام', category: 'مشروبات', price: 55.00 }
     ];
 
-    let mockLocations = {
-      districts: [
-        { district_id: '420000000000001', district_name: 'المعادي', governorate_name: 'القاهرة' },
-        { district_id: '420000000000002', district_name: 'مصر الجديدة', governorate_name: 'القاهرة' },
-        { district_id: '420000000000003', district_name: 'وسط البلد', governorate_name: 'القاهرة' },
-        { district_id: '420000000000004', district_name: 'النزهة', governorate_name: 'القاهرة' },
-        { district_id: '420000000000005', district_name: 'مدينة نصر', governorate_name: 'القاهرة' },
-        { district_id: '420000000000006', district_name: 'المهندسين', governorate_name: 'الجيزة' },
-        { district_id: '420000000000007', district_name: 'الزمالك', governorate_name: 'القاهرة' }
-      ],
-      areas: {
-        'المعادي': [
-          { id: '420000000000101', name: 'المعادي الجديدة' },
-          { id: '420000000000102', name: 'المعادي القديمة' },
-          { id: '420000000000103', name: 'دجلة' }
-        ],
-        'مصر الجديدة': [
-          { id: '420000000000201', name: 'هليوبوليس' },
-          { id: '420000000000202', name: 'الكوربة' },
-          { id: '420000000000203', name: 'روكسي' }
-        ],
-        'وسط البلد': [
-          { id: '420000000000301', name: 'التحرير' },
-          { id: '420000000000302', name: 'طلعت حرب' },
-          { id: '420000000000303', name: 'الأزبكية' }
-        ],
-        'النزهة': [
-          { id: '420000000000401', name: 'النزهة الجديدة' },
-          { id: '420000000000402', name: 'النزهة القديمة' }
-        ],
-        'مدينة نصر': [
-          { id: '420000000000501', name: 'الحي الأول' },
-          { id: '420000000000502', name: 'الحي السابع' },
-          { id: '420000000000503', name: 'الحي العاشر' }
-        ],
-        'المهندسين': [
-          { id: '420000000000601', name: 'الدقي' },
-          { id: '420000000000602', name: 'المهندسين' },
-          { id: '420000000000603', name: 'العجوزة' }
-        ],
-        'الزمالك': [
-          { id: '420000000000701', name: 'الزمالك' }
-        ]
-      }
-    };
+    let districts = [
+      { district_id: '420000000000001', district_name: 'المعادي', governorate_name: 'القاهرة' },
+      { district_id: '420000000000002', district_name: 'مصر الجديدة', governorate_name: 'القاهرة' },
+      { district_id: '420000000000003', district_name: 'وسط البلد', governorate_name: 'القاهرة' },
+      { district_id: '420000000000004', district_name: 'النزهة', governorate_name: 'القاهرة' },
+      { district_id: '420000000000005', district_name: 'مدينة نصر', governorate_name: 'القاهرة' },
+      { district_id: '420000000000006', district_name: 'المهندسين', governorate_name: 'الجيزة' },
+      { district_id: '420000000000007', district_name: 'الزمالك', governorate_name: 'القاهرة' }
+    ];
 
-    let mockOrders = [
+    let orders = [
       {
         id: 'AFI-001',
         customerId: 'CUST-001',
@@ -2216,7 +2180,7 @@
       }
     ];
 
-    let mockCustomers = [
+    let customers = [
       {
         id: 'CUST-001',
         name: 'أحمد محمد علي',
@@ -2344,7 +2308,7 @@
       }
     ];
 
-    let mockLeads = [
+    let leads = [
       {
         lead_name: 'خالد عبدالرحمن',
         lead_type: 'customer',
@@ -2470,17 +2434,17 @@
       handleMockRequest: function (functionName, data) {
         switch (functionName) {
           case 'getOrders':
-            return mockOrders;
+            return orders;
           case 'getCustomers':
-            return mockCustomers;
+            return customers;
           case 'getLeads':
-            return mockLeads;
+            return leads;
           case 'getProducts':
-            return mockProducts;
+            return products;
           case 'getLocations':
-            return mockLocations;
+            return districts;
           case 'updateOrderStatus':
-            const order = mockOrders.find(o => o.id === data.orderId);
+            const order = orders.find(o => o.id === data.orderId);
             if (order) {
               order.status = data.status;
               return order;
@@ -2488,7 +2452,7 @@
             throw new Error('Order not found');
           case 'addOrder':
             const newOrder = {
-              id: `AFI-${String(mockOrders.length + 1).padStart(3, '0')}`,
+              id: `AFI-${String(orders.length + 1).padStart(3, '0')}`,
               customerId: data.customer.id || `CUST-${Date.now()}`,
               customerName: data.customer.name,
               customerPhone: data.customer.phone,
@@ -2499,7 +2463,7 @@
               address: data.address ? `${data.address.area}` : data.customer.address,
               comments: data.notes || ''
             };
-            mockOrders.unshift(newOrder);
+            orders.unshift(newOrder);
             return newOrder;
           case 'addCustomer':
             const newCustomer = {
@@ -2518,7 +2482,7 @@
               totalSpent: 0,
               lastOrderDate: null
             };
-            mockCustomers.push(newCustomer);
+            customers.push(newCustomer);
             return newCustomer;
           default:
             throw new Error('Unknown function: ' + functionName);
@@ -2571,6 +2535,13 @@
         return this.request('addCustomer', customerData, {
           loaderMessage: 'جاري إضافة العميل...',
           successMessage: 'تم إضافة العميل بنجاح'
+        });
+      },
+
+      getLeads: function () {
+        return this.request('getLeads', {}, {
+          loaderMessage: 'جاري تحميل العملاء المحتملين...',
+          hideToastOnSuccess: true
         });
       }
     };
@@ -2661,6 +2632,8 @@
           // Load section data if needed
           if (targetSection === 'customers') {
             loadCustomers();
+          } else if (targetSection === 'leads') {
+            loadLeads();
           }
         });
       });
@@ -2686,7 +2659,7 @@
 
     function loadOrders() {
       API.getOrders().then(orders => {
-        mockOrders = orders;
+        orders = orders;
         updateOrderCounts();
         renderOrders();
       }).catch(error => {
@@ -2696,12 +2669,12 @@
 
     function updateOrderCounts() {
       const counts = {
-        all: mockOrders.length,
-        pending: mockOrders.filter(o => o.status === 'pending').length,
-        inprogress: mockOrders.filter(o => o.status === 'in-progress').length,
-        readyforshipment: mockOrders.filter(o => o.status === 'ready-for-shipment').length,
-        outfordelivery: mockOrders.filter(o => o.status === 'out-for-delivery').length,
-        delivered: mockOrders.filter(o => o.status === 'delivered').length
+        all: orders.length,
+        pending: orders.filter(o => o.status === 'pending').length,
+        inprogress: orders.filter(o => o.status === 'in-progress').length,
+        readyforshipment: orders.filter(o => o.status === 'ready-for-shipment').length,
+        outfordelivery: orders.filter(o => o.status === 'out-for-delivery').length,
+        delivered: orders.filter(o => o.status === 'delivered').length
       };
 
       // Update badges with correct IDs
@@ -2715,10 +2688,10 @@
 
     function renderOrders() {
       const tbody = document.getElementById('ordersTableBody');
-      let filteredOrders = mockOrders;
+      let filteredOrders = orders;
 
       if (appState.orderFilter !== 'all') {
-        filteredOrders = mockOrders.filter(order => order.status === appState.orderFilter);
+        filteredOrders = orders.filter(order => order.status === appState.orderFilter);
       }
 
       tbody.innerHTML = filteredOrders.map(order => {
@@ -2859,7 +2832,7 @@
     // ===== CUSTOMERS MANAGEMENT =====
     function loadCustomers() {
       API.getCustomers().then(customers => {
-        mockCustomers = customers;
+        customers = customers;
         renderCustomers();
       }).catch(error => {
         console.error('Failed to load customers:', error);
@@ -2869,7 +2842,7 @@
     function renderCustomers() {
       const grid = document.getElementById('customersGrid');
 
-      grid.innerHTML = mockCustomers.map(customer => {
+      grid.innerHTML = customers.map(customer => {
         const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
         return `
           <div class="customer-card">
@@ -3030,8 +3003,8 @@
 
       function filterDistricts(term) {
         term = term.trim().toLowerCase();
-        if (!term) return mockLocations.districts;
-        return mockLocations.districts.filter(d =>
+        if (!term) return districts;
+        return districts.filter(d =>
           d.district_name.toLowerCase().includes(term) ||
           d.governorate_name.toLowerCase().includes(term)
         );
@@ -3043,14 +3016,14 @@
       });
       input.addEventListener('focus', function() {
         if (!isOpen) {
-          renderDistrictResults(mockLocations.districts, input.value.trim());
+          renderDistrictResults(districts, input.value.trim());
         }
       });
       input.addEventListener('click', function() {
         if (isOpen) {
           closeDropdown();
         } else {
-          renderDistrictResults(mockLocations.districts, input.value.trim());
+          renderDistrictResults(districts, input.value.trim());
         }
       });
       document.addEventListener('click', function(e) {
@@ -3086,7 +3059,7 @@
         return;
       }
 
-      const selectedDistrict = mockLocations.districts.find(d => d.district_id === districtId);
+      const selectedDistrict = districts.find(d => d.district_id === districtId);
       const addressDistrict = selectedDistrict ? selectedDistrict.district_name : '';
       const addressGovernorate = selectedDistrict ? selectedDistrict.governorate_name : '';
 
@@ -3133,7 +3106,7 @@
 
       // Populate districts
       districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
-        mockLocations.districts.map(district =>
+        districts.map(district =>
           `<option value="${district.id}">${district.name}</option>`
         ).join('');
 
@@ -3141,8 +3114,8 @@
         const selectedDistrict = districtSelect.value;
         areaSelect.innerHTML = '<option value="">اختر الحي</option>';
 
-        if (selectedDistrict && mockLocations.areas[selectedDistrict]) {
-          areaSelect.innerHTML += mockLocations.areas[selectedDistrict].map(area =>
+        if (selectedDistrict && locations.areas[selectedDistrict]) {
+          areaSelect.innerHTML += locations.areas[selectedDistrict].map(area =>
             `<option value="${area.id}">${area.name}</option>`
           ).join('');
         }
@@ -3185,7 +3158,7 @@
     }
 
     function selectCustomer(customerId) {
-      const customer = mockCustomers.find(c => c.id === customerId);
+      const customer = customers.find(c => c.id === customerId);
       if (customer) {
         appState.selectedCustomer = customer;
         appState.newOrderForm.customer = customer;
@@ -3264,7 +3237,7 @@
       const row = document.createElement('tr');
 
       const productOptions = '<option value="">اختر المنتج</option>' +
-        mockProducts.map(product => {
+        products.map(product => {
           return `<option value="${product.id}" data-price="${product.price}">
             ${product.name} - ${formatCurrency(product.price)}
           </option>`;
@@ -3340,7 +3313,7 @@
 
       if (appState.newOrderForm.items[rowIndex]) {
         const selectedOption = productSelect.selectedOptions[0];
-        const product = mockProducts.find(p => p.id === productSelect.value);
+        const product = products.find(p => p.id === productSelect.value);
         const price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
 
         appState.newOrderForm.items[rowIndex] = {
@@ -3386,7 +3359,7 @@
         return;
       }
 
-      const filtered = mockCustomers.filter(customer =>
+      const filtered = customers.filter(customer =>
         customer.name.toLowerCase().includes(term) ||
         customer.phone.includes(term)
       );
@@ -3570,7 +3543,7 @@
         };
 
         API.addCustomer(customerData).then(newCustomer => {
-          mockCustomers.push(newCustomer);
+          customers.push(newCustomer);
           return createOrderWithCustomer(newCustomer, validItems);
         }).then(newOrder => {
           handleOrderCreated(newOrder);
@@ -3624,9 +3597,9 @@
         API.getProducts(),
         API.getLocations()
       ]).then(([orders, products, locations]) => {
-        mockOrders = orders;
-        mockProducts = products;
-        mockLocations = locations;
+        orders = orders;
+        products = products;
+        locations = locations;
 
         updateOrderCounts();
         renderOrders();
@@ -3679,14 +3652,14 @@
       const areaSelect = document.getElementById('addCustomerArea');
       if (!districtSelect || !areaSelect) return;
       districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
-        mockLocations.districts.map(district =>
+        districts.map(district =>
           `<option value="${district.id}">${district.name}</option>`
         ).join('');
       districtSelect.addEventListener('change', function () {
         const selectedDistrict = districtSelect.value;
         areaSelect.innerHTML = '<option value="">اختر الحي</option>';
-        if (selectedDistrict && mockLocations.areas[selectedDistrict]) {
-          areaSelect.innerHTML += mockLocations.areas[selectedDistrict].map(area =>
+        if (selectedDistrict && locations.areas[selectedDistrict]) {
+          areaSelect.innerHTML += locations.areas[selectedDistrict].map(area =>
             `<option value="${area.id}">${area.name}</option>`
           ).join('');
         }
@@ -3719,7 +3692,7 @@
       };
 
       API.addCustomer(customerData).then(newCustomer => {
-        mockCustomers.push(newCustomer);
+        customers.push(newCustomer);
         showToast('success', 'تم إضافة العميل بنجاح');
         closeAddCustomerModal();
         loadCustomers();
@@ -3751,7 +3724,7 @@
       const districtSelect = document.getElementById('addLeadDistrict');
       if (!districtSelect) return;
       districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
-        mockLocations.districts.map(district =>
+        districts.map(district =>
           `<option value="${district.id}">${district.name}</option>`
         ).join('');
     }
@@ -3779,7 +3752,7 @@
         secondary_source_of_sale: secondarySource
       };
 
-      mockLeads.push(leadData);
+      leads.push(leadData);
       showToast('success', 'تم إضافة العميل المحتمل بنجاح');
       closeAddLeadModalDedicated();
       loadLeads();
@@ -3843,7 +3816,58 @@
       populateSourceDropdowns('addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale');
       // Add lead modal
       populateSourceDropdowns('addLeadPrimarySourceOfSale', 'addLeadSecondarySourceOfSale');
+
+      // Initialize navigation
+      initializeNavigation();
+      initializeOrderFilters();
+
+      // Load initial data based on active section
+      if (appState.currentSection === 'orders') {
+        loadOrders();
+      } else if (appState.currentSection === 'customers') {
+        loadCustomers();
+      } else if (appState.currentSection === 'leads') {
+        loadLeads();
+      }
     });
+
+    function loadLeads() {
+      if (API.getLeads) {
+        API.getLeads().then(apiLeads => {
+          leads = apiLeads;
+          renderLeads();
+        }).catch(error => {
+          console.error('Failed to load leads from API, falling back to hardcoded leads:', error);
+          renderLeads(); // fallback to hardcoded leads
+        });
+      } else {
+        renderLeads(); // fallback if API.getLeads is not defined
+      }
+    }
+
+    function renderLeads() {
+      const grid = document.getElementById('leadsGrid');
+
+      grid.innerHTML = leads.map(lead => {
+        return `
+          <div class="customer-card">
+            <div class="customer-header">
+              <div class="customer-info">
+                <h3>${lead.lead_name}</h3>
+                <p><i class="fas fa-phone"></i> ${lead.lead_phone}</p>
+                ${lead.lead_email ? `<p><i class="fas fa-envelope"></i> ${lead.lead_email}</p>` : ''}
+                <p><i class="fas fa-tag"></i> ${lead.primary_source_of_sale}${lead.secondary_source_of_sale ? ' - ' + lead.secondary_source_of_sale : ''}</p>
+              </div>
+            </div>
+            ${lead.lead_comment ? `
+              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200); color: var(--gray-600);">
+                <i class="fas fa-comment"></i> ${lead.lead_comment}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
   </script>
 </body>
 
