@@ -1576,6 +1576,96 @@
     .order-details-content {
       width: 100%;
     }
+
+    /* ===== CUSTOM SEARCHABLE DROPDOWN ===== */
+    .custom-dropdown {
+      position: relative;
+      width: 100%;
+      font-family: inherit;
+      overflow: visible;
+    }
+    .custom-dropdown-box {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      background: white;
+      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+      cursor: pointer;
+      min-height: 40px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .custom-dropdown-box:focus-within, .custom-dropdown-box.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(97, 97, 255, 0.08);
+    }
+    .custom-dropdown-input {
+      border: none;
+      outline: none;
+      flex: 1;
+      font-size: 1rem;
+      background: transparent;
+      color: var(--gray-900);
+      padding: 0;
+    }
+    .custom-dropdown-chevron {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%) rotate(0deg);
+      color: #aaa;
+      font-size: 1.2em;
+      pointer-events: none;
+      transition: transform 0.2s;
+    }
+    .custom-dropdown-box.active .custom-dropdown-chevron {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .custom-dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      box-shadow: var(--shadow-lg);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 9999;
+      display: none;
+      direction: rtl;
+    }
+    .custom-dropdown-list.show {
+      display: block;
+    }
+    .custom-dropdown-item {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 1rem;
+      color: var(--gray-900);
+      display: block;
+      text-align: right;
+      direction: rtl;
+    }
+    .custom-dropdown-item.selected, .custom-dropdown-item:hover {
+      background: var(--gray-50);
+      color: var(--primary);
+    }
+    .custom-dropdown-item mark {
+      background: #fef3c7;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .items-table,
+    .items-table tbody,
+    .items-table tr {
+      overflow: visible !important;
+    }
   </style>
 </head>
 
@@ -3224,11 +3314,19 @@
         appState.newOrderForm.address = address;
         showToast('success', 'تم اختيار العنوان', address.address_label);
 
-        setTimeout(() => {
-          showOrderDetailsSection();
-        }, 500);
+        showOrderDetailsSection();
       }
     }
+
+    // ===== UNITS ARRAY =====
+    const units = [
+      { id: 'piece', name: 'قطعة' },
+      { id: 'kilo', name: 'كيلو' },
+      { id: 'liter', name: 'لتر' },
+      { id: 'pack', name: 'عبوة' },
+      { id: 'bag', name: 'كيس' },
+      { id: 'bottle', name: 'زجاجة' }
+    ];
 
     function addOrderItem() {
       const tbody = document.getElementById('itemsTableBody');
@@ -3236,30 +3334,23 @@
 
       const row = document.createElement('tr');
 
-      const productOptions = '<option value="">اختر المنتج</option>' +
-        products.map(product => {
-          return `<option value="${product.id}" data-price="${product.price}">
-            ${product.name} - ${formatCurrency(product.price)}
-          </option>`;
-        }).join('');
-
+      // Custom searchable dropdown for products
       row.innerHTML = `
         <td>
-          <select class="form-select product-select" onchange="updateOrderItem(${rowIndex})">
-            ${productOptions}
-          </select>
+          <div class="custom-dropdown" data-row-index="${rowIndex}">
+            <div class="custom-dropdown-box" tabindex="0">
+              <input type="text" class="custom-dropdown-input" placeholder="اختر المنتج..." readonly />
+              <i class="fas fa-chevron-down custom-dropdown-chevron"></i>
+            </div>
+            <div class="custom-dropdown-list"></div>
+          </div>
         </td>
         <td>
           <input type="number" class="form-input quantity-input" min="1" placeholder="الكمية" onchange="updateOrderItem(${rowIndex})">
         </td>
         <td>
           <select class="form-select unit-select" onchange="updateOrderItem(${rowIndex})">
-            <option value="قطعة">قطعة</option>
-            <option value="كيلو">كيلو</option>
-            <option value="لتر">لتر</option>
-            <option value="عبوة">عبوة</option>
-            <option value="كيس">كيس</option>
-            <option value="زجاجة">زجاجة</option>
+            ${units.map(unit => `<option value="${unit.id}">${unit.name}</option>`).join('')}
           </select>
         </td>
         <td>
@@ -3282,12 +3373,15 @@
         productId: '',
         productName: '',
         quantity: 0,
-        unit: 'قطعة',
+        unit: units[0].id,
         comments: '',
         price: 0
       };
 
       appState.newOrderForm.items.push(newItem);
+
+      // Initialize the custom dropdown for this row
+      initializeProductDropdown(row, rowIndex);
     }
 
     function removeOrderItem(button) {
@@ -3305,27 +3399,42 @@
 
     function updateOrderItem(rowIndex) {
       const row = document.getElementById('itemsTableBody').children[rowIndex];
-      const productSelect = row.querySelector('.product-select');
+      // Support custom product dropdown
+      const productInput = row.querySelector('.custom-dropdown-input');
+      let productId = '';
+      let productName = '';
+      let price = 0;
+
+      if (productInput) {
+        productId = productInput.getAttribute('data-id') || '';
+        productName = productInput.value || '';
+        price = parseFloat(productInput.getAttribute('data-price')) || 0;
+      } else {
+        // fallback for select (legacy)
+        const productSelect = row.querySelector('.product-select');
+        if (productSelect) {
+          const selectedOption = productSelect.selectedOptions[0];
+          productId = productSelect.value;
+          productName = selectedOption ? selectedOption.textContent : '';
+          price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
+        }
+      }
+
       const quantityInput = row.querySelector('.quantity-input');
       const unitSelect = row.querySelector('.unit-select');
       const commentInput = row.querySelector('.comment-input');
       const priceDisplay = row.querySelector('.price-display');
 
       if (appState.newOrderForm.items[rowIndex]) {
-        const selectedOption = productSelect.selectedOptions[0];
-        const product = products.find(p => p.id === productSelect.value);
-        const price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
-
         appState.newOrderForm.items[rowIndex] = {
           id: appState.newOrderForm.items[rowIndex].id,
-          productId: productSelect.value,
-          productName: product ? product.name : '',
+          productId: productId,
+          productName: productName,
           quantity: parseInt(quantityInput.value) || 0,
           unit: unitSelect.value,
           comments: commentInput.value,
           price: price
         };
-
         // Update price display
         priceDisplay.textContent = formatCurrency(price);
       }
@@ -3432,20 +3541,24 @@
       return text.replace(regex, '<mark style="background: #fef3c7; padding: 2px 4px; border-radius: 3px;">$1</mark>');
     }
 
-    function validateOrderForm() {
+  function validateOrderForm() {
       let isValid = true;
       const errors = [];
 
       // Check customer selection or form completion
       if (!appState.selectedCustomer) {
-        const requiredFields = ['customerName', 'customerPhone', 'customerAddress', 'customerDistrict', 'customerArea', 'orderSource'];
+        const requiredFields = ['customerName', 'customerPhone', 'primarySourceOfSale'];
         for (const fieldId of requiredFields) {
           const field = document.getElementById(fieldId);
-          if (!field || !field.value.trim()) {
-            if (field) {
-              field.classList.add('error');
-              setTimeout(() => field.classList.remove('error'), 3000);
-            }
+          if (!field) {
+            errors.push(`حقل مطلوب غير موجود: ${fieldId}`);
+            isValid = false;
+            continue;
+          }
+          if (!field.value || !field.value.trim()) {
+            field.classList.add('error');
+            setTimeout(() => field.classList.remove('error'), 3000);
+            errors.push(`يجب ملء الحقل المطلوب`);
             isValid = false;
           }
         }
@@ -3458,30 +3571,52 @@
       }
 
       // Check items
-      if (appState.newOrderForm.items.length === 0) {
+      if (!appState.newOrderForm.items || appState.newOrderForm.items.length === 0) {
         errors.push('يجب إضافة منتج واحد على الأقل');
         isValid = false;
       }
 
       // Validate individual items
       let itemsValid = true;
-      for (let i = 0; i < appState.newOrderForm.items.length; i++) {
-        const row = document.getElementById('itemsTableBody').children[i];
-        if (!row) continue;
-        
-        const productSelect = row.querySelector('.product-select');
-        const quantityInput = row.querySelector('.quantity-input');
+      const itemsTableBody = document.getElementById('itemsTableBody');
+      
+      if (itemsTableBody && appState.newOrderForm.items) {
+        for (let i = 0; i < appState.newOrderForm.items.length; i++) {
+          const row = itemsTableBody.children[i];
+          if (!row) continue;
+          
+          // Check for custom dropdown or regular select
+          const productInput = row.querySelector('.custom-dropdown-input');
+          const productSelect = row.querySelector('.product-select');
+          const quantityInput = row.querySelector('.quantity-input');
 
-        if (!productSelect.value) {
-          productSelect.classList.add('error');
-          setTimeout(() => productSelect.classList.remove('error'), 3000);
-          itemsValid = false;
-        }
+          // Validate product selection
+          let productSelected = false;
+          if (productInput && productInput.getAttribute('data-id')) {
+            productSelected = true;
+          } else if (productSelect && productSelect.value) {
+            productSelected = true;
+          }
 
-        if (!quantityInput.value || quantityInput.value <= 0) {
-          quantityInput.classList.add('error');
-          setTimeout(() => quantityInput.classList.remove('error'), 3000);
-          itemsValid = false;
+          if (!productSelected) {
+            if (productInput) {
+              productInput.classList.add('error');
+              setTimeout(() => productInput.classList.remove('error'), 3000);
+            } else if (productSelect) {
+              productSelect.classList.add('error');
+              setTimeout(() => productSelect.classList.remove('error'), 3000);
+            }
+            itemsValid = false;
+          }
+
+          // Validate quantity
+          if (!quantityInput || !quantityInput.value || quantityInput.value <= 0) {
+            if (quantityInput) {
+              quantityInput.classList.add('error');
+              setTimeout(() => quantityInput.classList.remove('error'), 3000);
+            }
+            itemsValid = false;
+          }
         }
       }
 
@@ -3615,7 +3750,7 @@
     // ===== EVENT LISTENERS =====
     document.addEventListener('DOMContentLoaded', initializeApp);
 
-    // Global functions for onclick handlers
+    // ===== Global functions for onclick handlers (moved to very end for guaranteed global exposure) =====
     window.openNewOrderModal = openNewOrderModal;
     window.closeNewOrderModal = closeNewOrderModal;
     window.selectCustomer = selectCustomer;
@@ -3867,6 +4002,134 @@
           </div>
         `;
       }).join('');
+    }
+
+    // 3. Add JS to handle the custom searchable dropdown
+    function initializeProductDropdown(row, rowIndex) {
+      const dropdown = row.querySelector('.custom-dropdown');
+      const box = dropdown.querySelector('.custom-dropdown-box');
+      const input = dropdown.querySelector('.custom-dropdown-input');
+      const chevron = dropdown.querySelector('.custom-dropdown-chevron');
+      const list = dropdown.querySelector('.custom-dropdown-list');
+
+      let isOpen = false;
+      let selectedIndex = -1;
+      let filteredProducts = products;
+
+      function renderList(term = '') {
+        filteredProducts = products.filter(p =>
+          p.name.toLowerCase().includes(term.toLowerCase())
+        );
+        if (filteredProducts.length === 0) {
+          list.innerHTML = '<div class="custom-dropdown-item">لا توجد نتائج</div>';
+        } else {
+          list.innerHTML = filteredProducts.map((product, idx) => {
+            let highlighted;
+            if (term && term.trim() !== '') {
+              highlighted = product.name.replace(
+                new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                '<mark>$1</mark>'
+              );
+            } else {
+              highlighted = product.name;
+            }
+            return `<div class="custom-dropdown-item${idx === selectedIndex ? ' selected' : ''}" data-id="${product.id}" data-price="${product.price}" data-idx="${idx}" style="direction: rtl; text-align: right;">${highlighted} <span style='color:#888;font-size:0.95em;'>${formatCurrency(product.price)}</span></div>`;
+          }).join('');
+        }
+      }
+
+      function openDropdown() {
+        isOpen = true;
+        box.classList.add('active');
+        list.classList.add('show');
+        chevron.classList.add('active');
+        input.removeAttribute('readonly');
+        renderList(input.value);
+      }
+      function closeDropdown() {
+        isOpen = false;
+        box.classList.remove('active');
+        list.classList.remove('show');
+        chevron.classList.remove('active');
+        selectedIndex = -1;
+        input.setAttribute('readonly', 'readonly');
+      }
+
+      box.addEventListener('click', function(e) {
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          openDropdown();
+          input.focus();
+          input.select();
+        }
+      });
+      input.addEventListener('focus', function() {
+        openDropdown();
+        input.select();
+      });
+      input.addEventListener('input', function() {
+        renderList(input.value);
+        selectedIndex = -1;
+        if (!isOpen) openDropdown();
+      });
+      input.addEventListener('keydown', function(e) {
+        if (!isOpen) return;
+        if (e.key === 'ArrowDown') {
+          selectedIndex = Math.min(selectedIndex + 1, filteredProducts.length - 1);
+          renderList(input.value);
+          e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+          selectedIndex = Math.max(selectedIndex - 1, 0);
+          renderList(input.value);
+          e.preventDefault();
+        } else if (e.key === 'Enter') {
+          if (selectedIndex >= 0 && filteredProducts[selectedIndex]) {
+            selectProduct(filteredProducts[selectedIndex]);
+            closeDropdown();
+          }
+          e.preventDefault();
+        } else if (e.key === 'Escape') {
+          closeDropdown();
+          e.preventDefault();
+        }
+      });
+      list.addEventListener('mousedown', function(e) {
+        const item = e.target.closest('.custom-dropdown-item[data-id]');
+        if (item) {
+          const product = products.find(p => p.id === item.dataset.id);
+          selectProduct(product);
+          closeDropdown();
+        }
+      });
+      // Use blur to close dropdown only when focus leaves input and dropdown
+      input.addEventListener('blur', function(e) {
+        setTimeout(closeDropdown, 150);
+      });
+      // Prevent closing when clicking inside the dropdown list
+      list.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+      });
+
+      function selectProduct(product) {
+        input.value = product.name;
+        input.setAttribute('data-id', product.id);
+        input.setAttribute('data-price', product.price);
+        // Update the order item in appState
+        appState.newOrderForm.items[rowIndex].productId = product.id;
+        appState.newOrderForm.items[rowIndex].productName = product.name;
+        appState.newOrderForm.items[rowIndex].price = product.price;
+        // Update price display
+        const priceDisplay = row.querySelector('.price-display');
+        if (priceDisplay) priceDisplay.textContent = formatCurrency(product.price);
+        // Optionally, trigger updateOrderItem
+        updateOrderItem(rowIndex);
+        closeDropdown(); // Always close after selection
+      }
+
+      // Initial render
+      renderList();
+      input.setAttribute('readonly', 'readonly');
     }
   </script>
 </body>
