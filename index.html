@@ -22,7 +22,7 @@
       --info-light: #00a8f0;
       --purple: #a25ddc;
       --purple-light: #b56eef;
-      
+
       /* Status Colors */
       --status-pending: #fdab3d;
       --status-pending-bg: #fef4e6;
@@ -34,7 +34,7 @@
       --status-delivery-bg: #fff0e6;
       --status-delivered: #00c875;
       --status-delivered-bg: #e6f9f0;
-      
+
       /* Modern Grays */
       --gray-25: #fcfcfc;
       --gray-50: #f8f9fa;
@@ -48,13 +48,13 @@
       --gray-700: #202124;
       --gray-800: #171717;
       --gray-900: #0a0a0a;
-      
+
       /* Modern Styling */
       --border-radius: 8px;
       --border-radius-lg: 12px;
       --border-radius-xl: 16px;
       --border-radius-pill: 50px;
-      
+
       /* Modern Shadows */
       --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
       --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
@@ -62,11 +62,11 @@
       --shadow-md: 0 6px 16px -6px rgb(0 0 0 / 0.12), 0 0 0 1px rgb(0 0 0 / 0.05);
       --shadow-lg: 0 10px 24px -8px rgb(0 0 0 / 0.15), 0 0 0 1px rgb(0 0 0 / 0.05);
       --shadow-xl: 0 20px 40px -12px rgb(0 0 0 / 0.20), 0 0 0 1px rgb(0 0 0 / 0.05);
-      
+
       /* Glass Effect */
       --glass-bg: rgba(255, 255, 255, 0.85);
       --glass-border: rgba(255, 255, 255, 0.2);
-      
+
       /* Transitions */
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -550,27 +550,32 @@
     /* Define specific column widths for the main orders table */
     .orders-table th:nth-child(1),
     .orders-table td:nth-child(1) {
-      width: 15%; /* رقم الطلب */
+      width: 15%;
+      /* رقم الطلب */
     }
 
     .orders-table th:nth-child(2),
     .orders-table td:nth-child(2) {
-      width: 25%; /* العميل */
+      width: 25%;
+      /* العميل */
     }
 
     .orders-table th:nth-child(3),
     .orders-table td:nth-child(3) {
-      width: 15%; /* التاريخ */
+      width: 15%;
+      /* التاريخ */
     }
 
     .orders-table th:nth-child(4),
     .orders-table td:nth-child(4) {
-      width: 15%; /* المبلغ */
+      width: 15%;
+      /* المبلغ */
     }
 
     .orders-table th:nth-child(5),
     .orders-table td:nth-child(5) {
-      width: 30%; /* الحالة */
+      width: 30%;
+      /* الحالة */
     }
 
     .orders-table th,
@@ -924,9 +929,11 @@
       0% {
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
+
       50% {
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       }
+
       100% {
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
@@ -941,7 +948,8 @@
       border-radius: var(--border-radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-sm);
-      table-layout: auto; /* Different from main table */
+      table-layout: auto;
+      /* Different from main table */
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.3);
     }
@@ -949,37 +957,43 @@
     /* Specific column widths for items table - More Even Distribution */
     .order-items-table th.order-items-table-product,
     .order-items-table td.order-items-table-product {
-      width: 20%; /* المنتج */
+      width: 20%;
+      /* المنتج */
       text-align: right;
     }
 
     .order-items-table th.order-items-table-quantity,
     .order-items-table td.order-items-table-quantity {
-      width: 13%; /* الكمية */
+      width: 13%;
+      /* الكمية */
       text-align: center;
     }
 
     .order-items-table th.order-items-table-unit,
     .order-items-table td.order-items-table-unit {
-      width: 13%; /* الوحدة */
+      width: 13%;
+      /* الوحدة */
       text-align: center;
     }
 
     .order-items-table th.order-items-table-price,
     .order-items-table td.order-items-table-price {
-      width: 17%; /* السعر */
+      width: 17%;
+      /* السعر */
       text-align: center;
     }
 
     .order-items-table th.order-items-table-total,
     .order-items-table td.order-items-table-total {
-      width: 17%; /* الإجمالي */
+      width: 17%;
+      /* الإجمالي */
       text-align: center;
     }
 
     .order-items-table th.order-items-table-notes,
     .order-items-table td.order-items-table-notes {
-      width: 20%; /* ملاحظات */
+      width: 20%;
+      /* ملاحظات */
       text-align: right;
     }
 
@@ -1283,9 +1297,10 @@
       box-shadow: var(--shadow-lg);
       max-width: 900px;
       width: 90%;
-      max-height: 90vh;
+      max-height: 96vh;
+      min-height: 650px;
       overflow-y: auto;
-      transform: scale(0.9);
+      transform: scale(0.95);
       transition: transform 0.3s ease;
     }
 
@@ -1470,6 +1485,158 @@
       color: var(--primary-dark);
     }
 
+    /* ===== VALIDATION ERROR STYLES ===== */
+
+    /* Base error class for form inputs */
+    .form-input.error,
+    .form-select.error,
+    .form-textarea.error {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+      background-color: rgba(226, 68, 92, 0.05) !important;
+      animation: shake 0.3s ease-in-out !important;
+    }
+
+    /* Custom dropdown error styling */
+    .custom-dropdown-box.error,
+    .custom-dropdown-input.error {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+      background-color: rgba(226, 68, 92, 0.05) !important;
+    }
+
+    /* Error shake animation */
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    /* Focus state for error fields */
+    .form-input.error:focus,
+    .form-select.error:focus,
+    .form-textarea.error:focus {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 4px rgba(226, 68, 92, 0.15) !important;
+      outline: none !important;
+    }
+
+    /* Error state for different input types */
+    input.error,
+    select.error,
+    textarea.error {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+      background-color: rgba(226, 68, 92, 0.05) !important;
+    }
+
+    /* Custom dropdown wrapper error state */
+    .custom-dropdown.error .custom-dropdown-box {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+      background-color: rgba(226, 68, 92, 0.05) !important;
+    }
+
+    /* Error label styling */
+    .form-label.error {
+      color: #e2445c !important;
+      font-weight: 600 !important;
+    }
+
+    /* Pulsing effect for severe errors */
+    .error.pulse {
+      animation: errorPulse 1s infinite alternate !important;
+    }
+
+    @keyframes errorPulse {
+      0% {
+        box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1);
+      }
+
+      100% {
+        box-shadow: 0 0 0 6px rgba(226, 68, 92, 0.2);
+      }
+    }
+
+    /* Error message tooltip */
+    .field-error-tooltip {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #e2445c;
+      color: white;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      z-index: 1000;
+      margin-top: 0.25rem;
+      opacity: 0;
+      transform: translateY(-5px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .field-error-tooltip.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .field-error-tooltip::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 1rem;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 5px 5px 5px;
+      border-color: transparent transparent #e2445c transparent;
+    }
+
+    /* Form group error state */
+    .form-group.error {
+      position: relative;
+    }
+
+    .form-group.error .form-label {
+      color: #e2445c !important;
+    }
+
+    /* Override any conflicting styles */
+    .error {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+    }
+
+    /* High specificity overrides for stubborn styles */
+    div .form-input.error,
+    div .form-select.error,
+    div .form-textarea.error {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+      background-color: rgba(226, 68, 92, 0.05) !important;
+    }
+
+    /* Ensure error styles work in modals */
+    .modal .form-input.error,
+    .modal .form-select.error,
+    .modal .form-textarea.error {
+      border-color: #e2445c !important;
+      box-shadow: 0 0 0 3px rgba(226, 68, 92, 0.1) !important;
+      background-color: rgba(226, 68, 92, 0.05) !important;
+    }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
       .app-container {
@@ -1524,27 +1691,32 @@
       /* Adjust column widths for mobile */
       .orders-table th:nth-child(1),
       .orders-table td:nth-child(1) {
-        width: 20%; /* رقم الطلب */
+        width: 20%;
+        /* رقم الطلب */
       }
 
       .orders-table th:nth-child(2),
       .orders-table td:nth-child(2) {
-        width: 30%; /* العميل */
+        width: 30%;
+        /* العميل */
       }
 
       .orders-table th:nth-child(3),
       .orders-table td:nth-child(3) {
-        width: 20%; /* التاريخ */
+        width: 20%;
+        /* التاريخ */
       }
 
       .orders-table th:nth-child(4),
       .orders-table td:nth-child(4) {
-        width: 15%; /* المبلغ */
+        width: 15%;
+        /* المبلغ */
       }
 
       .orders-table th:nth-child(5),
       .orders-table td:nth-child(5) {
-        width: 15%; /* الحالة */
+        width: 15%;
+        /* الحالة */
       }
     }
 
@@ -1573,6 +1745,7 @@
       width: 100%;
       padding: 0;
     }
+
     .order-details-content {
       width: 100%;
     }
@@ -1666,6 +1839,17 @@
     .items-table tr {
       overflow: visible !important;
     }
+
+    .customer-details-box {
+      /* Remove transition */
+    }
+
+    .customer-details-box.show {
+      display: block;
+      /* Remove animation */
+    }
+
+    /* Remove the slideDown animation since it's no longer needed */
   </style>
 </head>
 
@@ -1831,14 +2015,35 @@
         </button>
       </div>
       <div class="modal-content">
-        
+
         <!-- Customer Search Section -->
         <div class="customer-search">
           <label class="form-label">البحث عن عميل</label>
-          <input type="text" class="search-input" id="customerSearch"
-            placeholder="ابحث عن عميل موجود بالاسم أو رقم الهاتف..." autocomplete="off">
-          <i class="fas fa-search search-icon"></i>
-          <div class="search-results" id="searchResults"></div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; width:100%;">
+            <div id="customerInputWrap" style="position:relative; flex:1;">
+              <input type="text" class="search-input" id="customerSearch"
+                placeholder="ابحث عن عميل موجود بالاسم أو رقم الهاتف..." autocomplete="off" style="width:100%; height: 44px; font-size: 1.1rem;">
+              <div class="search-results" id="searchResults" style="position:absolute; top:100%; left:0; right:0; width:100%; min-width:0;"></div>
+              <i class="fas fa-search search-icon"></i>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="addCustomerUnderSearchBtn" style="flex:0 0 auto; height:44px; padding:0 1rem; margin:0; display:flex; align-items:center; justify-content:center; font-size:1.1rem;" onclick="showNewCustomerForm()">
+              <i class="fas fa-user-plus"></i>
+            </button>
+          </div>
+          <!-- Add customer details box -->
+          <div id="selectedCustomerDetails" class="customer-details-box" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--gray-50); border-radius: var(--border-radius); border: 1px solid var(--gray-200);">
+            <div class="customer-details-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <h4 style="margin: 0; font-size: 1.1rem; color: var(--gray-800);" id="selectedCustomerName"></h4>
+              <button type="button" class="btn btn-sm btn-text" onclick="clearSelectedCustomer()" style="padding: 0.25rem 0.5rem;">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="customer-details-content" style="color: var(--gray-600); font-size: 0.9rem;">
+              <p style="margin: 0.25rem 0;"><i class="fas fa-phone"></i> <span id="selectedCustomerPhone"></span></p>
+              <p style="margin: 0.25rem 0;"><i class="fas fa-map-marker-alt"></i> <span id="selectedCustomerAddress"></span></p>
+              <p style="margin: 0.25rem 0;"><i class="fas fa-shopping-cart"></i> <span id="selectedCustomerOrders"></span></p>
+            </div>
+          </div>
         </div>
 
         <!-- Address Selection Section (shows when existing customer is selected) -->
@@ -1854,7 +2059,7 @@
           </button>
         </div>
 
-        <!-- Customer Details Section (shows only when adding new customer) -->
+        <!-- NEW ORDER MODAL - Customer Details Section -->
         <div class="form-section" id="customerDetailsSection">
           <h3 class="card-title mb-2">
             <i class="fas fa-user-plus"></i>
@@ -1863,28 +2068,29 @@
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label">اسم العميل *</label>
-              <input type="text" class="form-input" id="customerName" required>
+              <input type="text" class="form-input" id="customerName" required data-label="اسم العميل">
             </div>
             <div class="form-group">
               <label class="form-label">رقم الهاتف *</label>
-              <input type="tel" class="form-input" id="customerPhone" required>
+              <input type="tel" class="form-input" id="customerPhone" required data-label="رقم الهاتف">
             </div>
             <div class="form-group">
               <label class="form-label">واتساب</label>
-              <input type="tel" class="form-input" id="customerWhatsapp">
+              <input type="tel" class="form-input" id="customerWhatsapp" data-label="واتساب">
             </div>
             <div class="form-group">
               <label class="form-label">البريد الإلكتروني</label>
-              <input type="email" class="form-input" id="customerEmail">
+              <input type="email" class="form-input" id="customerEmail" data-label="البريد الإلكتروني">
             </div>
             <div class="form-group">
               <label class="form-label">ملاحظات/تعليق</label>
-              <textarea class="form-textarea" id="customerComment" placeholder="أضف أي ملاحظات عن العميل..."></textarea>
+              <textarea class="form-textarea" id="customerComment" data-label="ملاحظات"
+                placeholder="أضف أي ملاحظات عن العميل..."></textarea>
             </div>
             <input type="hidden" id="customerType" value="customer">
             <div class="form-group">
               <label class="form-label">مصدر الطلب *</label>
-              <select class="form-select" id="primarySourceOfSale" required>
+              <select class="form-select" id="primarySourceOfSale" required data-label="مصدر الطلب">
                 <option value="">اختر المصدر</option>
                 <option value="Online">أونلاين</option>
                 <option value="InStore">من المتجر</option>
@@ -1893,20 +2099,26 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">المصدر الفرعي</label>
-              <select class="form-select" id="secondarySourceOfSale">
-                <option value="">اختر المصدر الفرعي</option>
-                <option value="Referral">إحالة</option>
+              <label class="form-label">مصدر ثانوي</label>
+              <select class="form-select" id="secondarySourceOfSale" data-label="مصدر ثانوي">
+                <option value="">اختر المصدر</option>
                 <option value="Facebook">فيسبوك</option>
-                <option value="Instagram">إنستغرام</option>
+                <option value="Instagram">انستجرام</option>
                 <option value="Google">جوجل</option>
+                <option value="Referral">إحالة</option>
                 <option value="Other">أخرى</option>
               </select>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <button type="button" class="btn btn-primary" onclick="submitNewCustomer()">
+                <i class="fas fa-check"></i>
+                إضافة العميل
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- New Address Section (shows when adding new address for existing customer) -->
+        <!-- NEW ADDRESS SECTION -->
         <div class="form-section" id="newAddressSection">
           <h3 class="card-title mb-2">
             <i class="fas fa-map-marker-alt"></i>
@@ -1946,17 +2158,19 @@
             <!-- Street Name -->
             <div class="form-group">
               <label class="form-label">اسم الشارع *</label>
-              <input type="text" class="form-input" id="newStreetName" required>
+              <input type="text" class="form-input" id="newStreetName" required data-label="اسم الشارع">
             </div>
             <!-- District (searchable) -->
             <div class="form-group" style="position:relative;">
               <label class="form-label">المنطقة *</label>
-              <input type="text" class="form-input" id="newAddressDistrictSearch" placeholder="ابحث عن المنطقة..." autocomplete="off" required style="padding-left: 2.5rem; padding-right: 1rem;">
-              <i class="fas fa-chevron-down" id="districtChevron" style="position:absolute; left:1.25rem; top:50%; transform:translateY(-50%); color:#aaa; font-size:1.2em; pointer-events:none; line-height:1;"></i>
+              <input type="text" class="form-input" id="newAddressDistrictSearch" placeholder="ابحث عن المنطقة..."
+                autocomplete="off" required data-label="المنطقة" style="padding-left: 2.5rem; padding-right: 1rem;">
+              <i class="fas fa-chevron-down" id="districtChevron"
+                style="position:absolute; left:1.25rem; top:50%; transform:translateY(-50%); color:#aaa; font-size:1.2em; pointer-events:none; line-height:1;"></i>
               <div class="search-results" id="districtSearchResults"></div>
               <input type="hidden" id="newAddressDistrict">
               <input type="hidden" id="newAddressGovernorate">
-              <input type="hidden" id="newDistrictId">
+              <input type="hidden" id="newDistrictId" required data-label="المنطقة">
             </div>
             <!-- Landmark -->
             <div class="form-group">
@@ -1966,17 +2180,21 @@
             <!-- Comment -->
             <div class="form-group">
               <label class="form-label">ملاحظات/تعليق</label>
-              <textarea class="form-textarea" id="newAddressComment" placeholder="أضف أي ملاحظات عن العنوان..."></textarea>
+              <textarea class="form-textarea" id="newAddressComment"
+                placeholder="أضف أي ملاحظات عن العنوان..."></textarea>
             </div>
           </div>
-          <button type="button" class="btn btn-primary" onclick="saveNewAddress()">
-            <i class="fas fa-save"></i>
-            حفظ العنوان
-          </button>
-          <button type="button" class="btn btn-primary" onclick="cancelNewAddress()">
-            <i class="fas fa-times"></i>
-            إلغاء
-          </button>
+          <!-- Save/Cancel Buttons for Address -->
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button type="button" class="btn btn-success" onclick="saveNewAddress()">
+              <i class="fas fa-save"></i>
+              حفظ العنوان
+            </button>
+            <button type="button" class="btn btn-primary" onclick="cancelNewAddress()">
+              <i class="fas fa-times"></i>
+              إلغاء
+            </button>
+          </div>
         </div>
 
         <!-- Order Details Section (always visible once customer/address is set) -->
@@ -2046,24 +2264,25 @@
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">اسم العميل المحتمل *</label>
-            <input type="text" class="form-input" id="addLeadName" required>
+            <input type="text" class="form-input" id="addLeadName" required data-label="اسم العميل المحتمل">
           </div>
           <div class="form-group">
             <label class="form-label">رقم الهاتف *</label>
-            <input type="tel" class="form-input" id="addLeadPhone" required>
+            <input type="tel" class="form-input" id="addLeadPhone" required data-label="رقم الهاتف">
           </div>
           <div class="form-group">
             <label class="form-label">البريد الإلكتروني</label>
-            <input type="email" class="form-input" id="addLeadEmail">
+            <input type="email" class="form-input" id="addLeadEmail" data-label="البريد الإلكتروني">
           </div>
           <div class="form-group">
             <label class="form-label">ملاحظات/تعليق</label>
-            <textarea class="form-textarea" id="addLeadComment" placeholder="أضف أي ملاحظات عن العميل المحتمل..."></textarea>
+            <textarea class="form-textarea" id="addLeadComment" data-label="ملاحظات"
+              placeholder="أضف أي ملاحظات عن العميل المحتمل..."></textarea>
           </div>
           <input type="hidden" id="addLeadType" value="customer">
           <div class="form-group">
             <label class="form-label">مصدر الطلب *</label>
-            <select class="form-select" id="addLeadPrimarySourceOfSale" required>
+            <select class="form-select" id="addLeadPrimarySourceOfSale" required data-label="مصدر الطلب">
               <option value="">اختر المصدر</option>
               <option value="Online">أونلاين</option>
               <option value="InStore">من المتجر</option>
@@ -2073,7 +2292,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">المصدر الفرعي</label>
-            <select class="form-select" id="addLeadSecondarySourceOfSale">
+            <select class="form-select" id="addLeadSecondarySourceOfSale" data-label="المصدر الفرعي">
               <option value="">اختر المصدر الفرعي</option>
               <option value="Referral">إحالة</option>
               <option value="Facebook">فيسبوك</option>
@@ -2082,16 +2301,6 @@
               <option value="Other">أخرى</option>
             </select>
           </div>
-        </div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-          <button type="button" class="btn btn-success" onclick="submitAddLead()">
-            <i class="fas fa-save"></i>
-            حفظ العميل المحتمل
-          </button>
-          <button type="button" class="btn btn-primary" onclick="closeAddLeadModalDedicated()">
-            <i class="fas fa-times"></i>
-            إلغاء
-          </button>
         </div>
       </div>
     </div>
@@ -2113,28 +2322,29 @@
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">اسم العميل *</label>
-            <input type="text" class="form-input" id="addCustomerName" required>
+            <input type="text" class="form-input" id="addCustomerName" required data-label="اسم العميل">
           </div>
           <div class="form-group">
             <label class="form-label">رقم الهاتف *</label>
-            <input type="tel" class="form-input" id="addCustomerPhone" required>
+            <input type="tel" class="form-input" id="addCustomerPhone" required data-label="رقم الهاتف">
           </div>
           <div class="form-group">
             <label class="form-label">واتساب</label>
-            <input type="tel" class="form-input" id="addCustomerWhatsapp">
+            <input type="tel" class="form-input" id="addCustomerWhatsapp" data-label="واتساب">
           </div>
           <div class="form-group">
             <label class="form-label">البريد الإلكتروني</label>
-            <input type="email" class="form-input" id="addCustomerEmail">
+            <input type="email" class="form-input" id="addCustomerEmail" data-label="البريد الإلكتروني">
           </div>
           <div class="form-group">
             <label class="form-label">ملاحظات/تعليق</label>
-            <textarea class="form-textarea" id="addCustomerComment" placeholder="أضف أي ملاحظات عن العميل..."></textarea>
+            <textarea class="form-textarea" id="addCustomerComment" data-label="ملاحظات"
+              placeholder="أضف أي ملاحظات عن العميل..."></textarea>
           </div>
           <input type="hidden" id="addCustomerType" value="customer">
           <div class="form-group">
             <label class="form-label">مصدر الطلب *</label>
-            <select class="form-select" id="addCustomerPrimarySourceOfSale" required>
+            <select class="form-select" id="addCustomerPrimarySourceOfSale" required data-label="مصدر الطلب">
               <option value="">اختر المصدر</option>
               <option value="Online">أونلاين</option>
               <option value="InStore">من المتجر</option>
@@ -2144,7 +2354,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">المصدر الفرعي</label>
-            <select class="form-select" id="addCustomerSecondarySourceOfSale">
+            <select class="form-select" id="addCustomerSecondarySourceOfSale" data-label="المصدر الفرعي">
               <option value="">اختر المصدر الفرعي</option>
               <option value="Referral">إحالة</option>
               <option value="Facebook">فيسبوك</option>
@@ -2154,6 +2364,8 @@
             </select>
           </div>
         </div>
+
+        <!-- Submit Buttons -->
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
           <button type="button" class="btn btn-success" onclick="submitAddCustomer()">
             <i class="fas fa-save"></i>
@@ -2167,6 +2379,7 @@
       </div>
     </div>
   </div>
+
 
   <script>
     // ===== GLOBAL DATA =====
@@ -3024,7 +3237,7 @@
       hideAllFormSections();
       document.getElementById('customerDetailsSection').classList.add('show');
       document.getElementById('orderDetailsSection').classList.add('show');
-      
+
       // Initialize with one empty item if none exist
       if (appState.newOrderForm.items.length === 0) {
         addOrderItem();
@@ -3039,13 +3252,15 @@
     function showNewAddressForm() {
       hideAllFormSections();
       appState.isAddingNewAddress = true;
+      appState.selectedAddress = null;
+      appState.newOrderForm.address = null;
       document.getElementById('newAddressSection').classList.add('show');
       initializeDistrictSearch();
     }
 
     function showOrderDetailsSection() {
       document.getElementById('orderDetailsSection').classList.add('show');
-      
+
       // Initialize with one empty item if none exist
       if (appState.newOrderForm.items.length === 0) {
         addOrderItem();
@@ -3100,28 +3315,28 @@
         );
       }
 
-      input.addEventListener('input', function() {
+      input.addEventListener('input', function () {
         const filtered = filterDistricts(input.value);
         renderDistrictResults(filtered, input.value.trim());
       });
-      input.addEventListener('focus', function() {
+      input.addEventListener('focus', function () {
         if (!isOpen) {
           renderDistrictResults(districts, input.value.trim());
         }
       });
-      input.addEventListener('click', function() {
+      input.addEventListener('click', function () {
         if (isOpen) {
           closeDropdown();
         } else {
           renderDistrictResults(districts, input.value.trim());
         }
       });
-      document.addEventListener('click', function(e) {
+      document.addEventListener('click', function (e) {
         if (!e.target.closest('.form-group')) {
           closeDropdown();
         }
       });
-      results.addEventListener('click', function(e) {
+      results.addEventListener('click', function (e) {
         const item = e.target.closest('.search-result[data-id]');
         if (item) {
           input.value = item.dataset.name + ' - ' + item.dataset.gov;
@@ -3185,6 +3400,9 @@
       } else {
         hideAllFormSections();
       }
+      appState.isAddingNewAddress = false;
+      appState.selectedAddress = null;
+      appState.newOrderForm.address = null;
     }
 
     function initializeLocationDropdowns() {
@@ -3256,6 +3474,21 @@
         document.getElementById('customerSearch').value = customer.name;
         document.getElementById('searchResults').classList.remove('show');
 
+        // Show customer details box
+        const detailsBox = document.getElementById('selectedCustomerDetails');
+        const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
+        
+        document.getElementById('selectedCustomerName').textContent = customer.name;
+        document.getElementById('selectedCustomerPhone').textContent = customer.phone;
+        document.getElementById('selectedCustomerAddress').textContent = primaryAddress ? 
+          `${primaryAddress.area}${primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : ''}` : 
+          'لا يوجد عنوان';
+        document.getElementById('selectedCustomerOrders').textContent = 
+          `${customer.totalOrders} طلبات - ${formatCurrency(customer.totalSpent)} إجمالي المشتريات`;
+        
+        detailsBox.style.display = 'block';
+        setTimeout(() => detailsBox.classList.add('show'), 10);
+
         if (customer.addresses.length > 0) {
           showAddressSection();
           renderAddresses(customer.addresses);
@@ -3263,6 +3496,20 @@
           showNewAddressForm();
         }
       }
+    }
+
+    function clearSelectedCustomer() {
+      appState.selectedCustomer = null;
+      appState.newOrderForm.customer = null;
+      appState.selectedAddress = null;
+      appState.newOrderForm.address = null;
+      
+      document.getElementById('customerSearch').value = '';
+      const detailsBox = document.getElementById('selectedCustomerDetails');
+      detailsBox.classList.remove('show');
+      detailsBox.style.display = 'none';
+      
+      hideAllFormSections();
     }
 
     function renderAddresses(addresses) {
@@ -3446,9 +3693,12 @@
 
       searchInput.addEventListener('input', debounce(handleCustomerSearch, 300));
       searchInput.addEventListener('focus', () => {
-        if (searchInput.value.trim()) {
-          handleCustomerSearch();
-        }
+        handleCustomerSearch();
+        searchResults.classList.add('show');
+      });
+      searchInput.addEventListener('click', () => {
+        handleCustomerSearch();
+        searchResults.classList.add('show');
       });
 
       document.addEventListener('click', (e) => {
@@ -3491,19 +3741,34 @@
 
     function showNewCustomerForm(searchTerm = '') {
       document.getElementById('searchResults').classList.remove('show');
-      
+      document.getElementById('customerSearch').value = '';
+
       // Clear existing customer data
       appState.selectedCustomer = null;
       appState.newOrderForm.customer = null;
       appState.selectedAddress = null;
       appState.newOrderForm.address = null;
 
-      showCustomerDetailsSection();
+      // Hide all sections once
+      hideAllFormSections();
+
+      // Show both customer and address forms, and order details
+      document.getElementById('customerDetailsSection').classList.add('show');
+      document.getElementById('newAddressSection').classList.add('show');
+      document.getElementById('orderDetailsSection').classList.add('show');
+
+      // Initialize district search for address form
+      initializeDistrictSearch();
 
       if (searchTerm) {
         document.getElementById('customerName').value = searchTerm;
         document.getElementById('customerSearch').value = searchTerm;
       }
+
+      // Reset customer details box
+      const detailsBox = document.getElementById('selectedCustomerDetails');
+      detailsBox.classList.remove('show');
+      detailsBox.style.display = 'none';
 
       showToast('success', 'يمكنك الآن إدخال بيانات العميل الجديد');
     }
@@ -3541,95 +3806,384 @@
       return text.replace(regex, '<mark style="background: #fef3c7; padding: 2px 4px; border-radius: 3px;">$1</mark>');
     }
 
-  function validateOrderForm() {
-      let isValid = true;
-      const errors = [];
+    // ===== HTML-DRIVEN VALIDATION SYSTEM =====
 
-      // Check customer selection or form completion
-      if (!appState.selectedCustomer) {
-        const requiredFields = ['customerName', 'customerPhone', 'primarySourceOfSale'];
-        for (const fieldId of requiredFields) {
-          const field = document.getElementById(fieldId);
-          if (!field) {
-            errors.push(`حقل مطلوب غير موجود: ${fieldId}`);
-            isValid = false;
-            continue;
-          }
-          if (!field.value || !field.value.trim()) {
-            field.classList.add('error');
-            setTimeout(() => field.classList.remove('error'), 3000);
-            errors.push(`يجب ملء الحقل المطلوب`);
-            isValid = false;
-          }
+    /**
+     * Get validation rules from HTML form elements
+     * @param {string} containerSelector - CSS selector for the form container
+     * @returns {Array} Array of field validation objects
+     */
+    function getFormValidationRules(containerSelector) {
+      const container = document.querySelector(containerSelector);
+      if (!container) return [];
+
+      const requiredFields = container.querySelectorAll('[required]');
+      return Array.from(requiredFields).map(field => ({
+        id: field.id,
+        label: field.dataset.label || field.placeholder || field.id,
+        type: field.type || 'text',
+        element: field
+      }));
+    }
+
+    /**
+     * Validate form fields based on HTML attributes
+     * @param {string} containerSelector - CSS selector for the form container
+     * @returns {Object} Validation result with isValid, errors, and missingFields
+     */
+    function validateHtmlForm(containerSelector) {
+      console.log('Validating form:', containerSelector);
+      
+      const validationRules = getFormValidationRules(containerSelector);
+      console.log('Found validation rules:', validationRules);
+      
+      const errors = [];
+      const missingFields = [];
+      let isValid = true;
+
+      for (const rule of validationRules) {
+        const field = rule.element;
+        
+        if (!field) {
+          console.warn('Field not found:', rule.id);
+          errors.push(`حقل "${rule.label}" غير موجود في النموذج`);
+          isValid = false;
+          continue;
+        }
+
+        let fieldValue = field.value;
+        let isEmpty = !fieldValue || !fieldValue.trim();
+
+        // Special handling for different field types
+        if (rule.type === 'select-one' && fieldValue === '') {
+          isEmpty = true;
+        }
+
+        // Special handling for hidden fields (like district ID)
+        if (field.type === 'hidden' && field.hasAttribute('required')) {
+          isEmpty = !fieldValue;
+        }
+
+        console.log(`Field ${rule.id}: value="${fieldValue}", isEmpty=${isEmpty}, type=${rule.type}`);
+
+        if (isEmpty) {
+          console.log('Field is empty, highlighting:', rule.id);
+          highlightErrorField(field);
+          missingFields.push(rule.label);
+          isValid = false;
         }
       }
 
-      // Check address selection
-      if (!appState.selectedAddress && !appState.isAddingNewAddress) {
-        errors.push('يجب اختيار عنوان للتوصيل');
+      if (missingFields.length > 0) {
+        errors.push(`الحقول المطلوبة التالية مفقودة: ${missingFields.join('، ')}`);
+      }
+
+      console.log('Validation result:', { isValid, errors, missingFields });
+      return { isValid, errors, missingFields };
+    }
+
+    /**
+     * Validate order items table
+     * @returns {Object} Validation result for order items
+     */
+    function validateOrderItems() {
+      const itemsTableBody = document.getElementById('itemsTableBody');
+      const missingItemFields = [];
+      let isValid = true;
+
+      if (!itemsTableBody || !appState.newOrderForm.items) {
+        return { isValid: false, errors: ['جدول المنتجات غير موجود'], missingFields: [] };
+      }
+
+      for (let i = 0; i < appState.newOrderForm.items.length; i++) {
+        const row = itemsTableBody.children[i];
+        if (!row) continue;
+
+        const rowNumber = i + 1;
+
+        // Validate product selection
+        const productInput = row.querySelector('.custom-dropdown-input');
+        const productSelect = row.querySelector('.product-select');
+        let productSelected = false;
+
+        if (productInput && productInput.getAttribute('data-id')) {
+          productSelected = true;
+        } else if (productSelect && productSelect.value) {
+          productSelected = true;
+        }
+
+        if (!productSelected) {
+          const fieldToHighlight = productInput || productSelect;
+          if (fieldToHighlight) {
+            highlightErrorField(fieldToHighlight);
+          }
+          missingItemFields.push(`المنتج في الصف ${rowNumber}`);
+          isValid = false;
+        }
+
+        // Validate quantity
+        const quantityInput = row.querySelector('.quantity-input');
+        if (!quantityInput || !quantityInput.value || parseFloat(quantityInput.value) <= 0) {
+          if (quantityInput) {
+            highlightErrorField(quantityInput);
+          }
+          missingItemFields.push(`الكمية في الصف ${rowNumber}`);
+          isValid = false;
+        }
+      }
+
+      const errors = missingItemFields.length > 0 ? [`يجب تحديد: ${missingItemFields.join('، ')}`] : [];
+      return { isValid, errors, missingFields: missingItemFields };
+    }
+
+    /**
+     * Highlight field with error styling
+     * @param {HTMLElement} field - The field element to highlight
+     */
+    function highlightErrorField(field) {
+      if (!field) {
+        console.warn('highlightErrorField: field is null or undefined');
+        return;
+      }
+      
+      console.log('Highlighting field:', field.id || field.name || 'unnamed field');
+      
+      // Remove any existing error styling first
+      field.classList.remove('error');
+      
+      // Add error class
+      field.classList.add('error');
+      
+      // Apply inline styles with !important to override CSS
+      field.style.setProperty('border-color', '#e2445c', 'important');
+      field.style.setProperty('box-shadow', '0 0 0 3px rgba(226, 68, 92, 0.1)', 'important');
+      field.style.setProperty('background-color', 'rgba(226, 68, 92, 0.05)', 'important');
+      
+      // Also add a visual shake animation
+      field.style.setProperty('animation', 'shake 0.3s ease-in-out', 'important');
+      
+      // Clear the error styling after 8 seconds (increased from 5)
+      setTimeout(() => {
+        field.classList.remove('error');
+        field.style.removeProperty('border-color');
+        field.style.removeProperty('box-shadow');
+        field.style.removeProperty('background-color');
+        field.style.removeProperty('animation');
+        console.log('Cleared error styling for field:', field.id || field.name || 'unnamed field');
+      }, 8000);
+    }
+
+    /**
+     * Main order form validation function
+     * @returns {boolean} True if form is valid, false otherwise
+     */
+    function validateOrderForm() {
+      let isValid = true;
+      const allErrors = [];
+
+      // Check customer selection or form completion
+      if (!appState.selectedCustomer) {
+        const customerValidation = validateHtmlForm('#customerDetailsSection');
+        if (!customerValidation.isValid) {
+          allErrors.push(...customerValidation.errors);
+          isValid = false;
+        }
+
+        // Check address fields for new customers
+        const addressValidation = validateHtmlForm('#newAddressSection');
+        if (!addressValidation.isValid && !appState.isAddingNewAddress) {
+          // Only add address errors if we're not in the process of adding a new address
+          allErrors.push('يجب إكمال بيانات العنوان أو اختيار عنوان موجود');
+          isValid = false;
+        }
+      }
+
+      // Check address selection for existing customers
+      if (appState.selectedCustomer && !appState.selectedAddress && !appState.isAddingNewAddress) {
+        allErrors.push('يجب اختيار عنوان للتوصيل من القائمة أو إضافة عنوان جديد');
         isValid = false;
       }
 
       // Check items
       if (!appState.newOrderForm.items || appState.newOrderForm.items.length === 0) {
-        errors.push('يجب إضافة منتج واحد على الأقل');
+        allErrors.push('يجب إضافة منتج واحد على الأقل للطلب');
         isValid = false;
-      }
-
-      // Validate individual items
-      let itemsValid = true;
-      const itemsTableBody = document.getElementById('itemsTableBody');
-      
-      if (itemsTableBody && appState.newOrderForm.items) {
-        for (let i = 0; i < appState.newOrderForm.items.length; i++) {
-          const row = itemsTableBody.children[i];
-          if (!row) continue;
-          
-          // Check for custom dropdown or regular select
-          const productInput = row.querySelector('.custom-dropdown-input');
-          const productSelect = row.querySelector('.product-select');
-          const quantityInput = row.querySelector('.quantity-input');
-
-          // Validate product selection
-          let productSelected = false;
-          if (productInput && productInput.getAttribute('data-id')) {
-            productSelected = true;
-          } else if (productSelect && productSelect.value) {
-            productSelected = true;
-          }
-
-          if (!productSelected) {
-            if (productInput) {
-              productInput.classList.add('error');
-              setTimeout(() => productInput.classList.remove('error'), 3000);
-            } else if (productSelect) {
-              productSelect.classList.add('error');
-              setTimeout(() => productSelect.classList.remove('error'), 3000);
-            }
-            itemsValid = false;
-          }
-
-          // Validate quantity
-          if (!quantityInput || !quantityInput.value || quantityInput.value <= 0) {
-            if (quantityInput) {
-              quantityInput.classList.add('error');
-              setTimeout(() => quantityInput.classList.remove('error'), 3000);
-            }
-            itemsValid = false;
-          }
+      } else {
+        // Validate individual items
+        const itemsValidation = validateOrderItems();
+        if (!itemsValidation.isValid) {
+          allErrors.push(...itemsValidation.errors);
+          isValid = false;
         }
       }
 
-      if (!itemsValid) {
-        errors.push('يجب تحديد المنتج والكمية لكل صف');
-        isValid = false;
-      }
-
       if (!isValid) {
-        showToast('error', 'خطأ في البيانات', errors.join(' • '));
+        // Scroll to top to show error message
+        const modalContent = document.querySelector('.modal-content');
+        if (modalContent) {
+          modalContent.scrollTop = 0;
+        }
+        showToast('error', 'يرجى تصحيح الأخطاء التالية:', allErrors.join('<br>• '));
       }
 
       return isValid;
+    }
+
+    /**
+     * Submit add customer form with validation
+     */
+    function submitAddCustomer() {
+      const validation = validateHtmlForm('#addCustomerModal .modal-content');
+      
+      if (!validation.isValid) {
+        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+        return;
+      }
+
+      const name = document.getElementById('addCustomerName').value.trim();
+      const phone = document.getElementById('addCustomerPhone').value.trim();
+      const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
+      const email = document.getElementById('addCustomerEmail').value.trim();
+      const comment = document.getElementById('addCustomerComment').value.trim();
+      const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
+      const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
+      const customerType = document.getElementById('addCustomerType').value;
+
+      const customerData = {
+        customer_name: name,
+        customer_type: customerType,
+        customer_comment: comment,
+        primary_source_of_sale: primarySource,
+        secondary_source_of_sale: secondarySource,
+        customer_phone: phone,
+        customer_whatsapp: whatsapp,
+        customer_email: email
+      };
+
+      API.addCustomer(customerData).then(newCustomer => {
+        customers.push(newCustomer);
+        showToast('success', 'تم إضافة العميل بنجاح');
+        closeAddCustomerModal();
+        loadCustomers();
+      }).catch(error => {
+        showToast('error', 'حدث خطأ أثناء إضافة العميل');
+      });
+    }
+
+    /**
+     * Submit add lead form with validation
+     */
+    function submitAddLead() {
+      const validation = validateHtmlForm('#addLeadModalDedicated .modal-content');
+      
+      if (!validation.isValid) {
+        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+        return;
+      }
+
+      const name = document.getElementById('addLeadName').value.trim();
+      const phone = document.getElementById('addLeadPhone').value.trim();
+      const email = document.getElementById('addLeadEmail').value.trim();
+      const comment = document.getElementById('addLeadComment').value.trim();
+      const primarySource = document.getElementById('addLeadPrimarySourceOfSale').value;
+      const secondarySource = document.getElementById('addLeadSecondarySourceOfSale').value;
+      const leadType = document.getElementById('addLeadType').value;
+
+      const leadData = {
+        lead_name: name,
+        lead_type: leadType,
+        lead_comment: comment,
+        lead_phone: phone,
+        lead_email: email,
+        primary_source_of_sale: primarySource,
+        secondary_source_of_sale: secondarySource
+      };
+
+      leads.push(leadData);
+      showToast('success', 'تم إضافة العميل المحتمل بنجاح');
+      closeAddLeadModalDedicated();
+      loadLeads();
+    }
+
+    /**
+     * Validate new address form
+     * @returns {boolean} True if address form is valid
+     */
+    function validateNewAddressForm() {
+      const validation = validateHtmlForm('#newAddressSection');
+      
+      if (!validation.isValid) {
+        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+        return false;
+      }
+      
+      return true;
+    }
+
+    // ===== UTILITY FUNCTIONS FOR VALIDATION =====
+
+    /**
+     * Check if a form section has any required fields
+     * @param {string} containerSelector - CSS selector for the form container
+     * @returns {boolean} True if container has required fields
+     */
+    function hasRequiredFields(containerSelector) {
+      const container = document.querySelector(containerSelector);
+      if (!container) return false;
+      
+      return container.querySelectorAll('[required]').length > 0;
+    }
+
+    /**
+     * Get all required field labels from a form section
+     * @param {string} containerSelector - CSS selector for the form container
+     * @returns {Array} Array of field labels
+     */
+    function getRequiredFieldLabels(containerSelector) {
+      const rules = getFormValidationRules(containerSelector);
+      return rules.map(rule => rule.label);
+    }
+
+    /**
+     * Clear all validation error states in a form
+     * @param {string} containerSelector - CSS selector for the form container
+     */
+    function clearValidationErrors(containerSelector) {
+      const container = document.querySelector(containerSelector);
+      if (!container) return;
+      
+      const errorFields = container.querySelectorAll('.error');
+      errorFields.forEach(field => {
+        field.classList.remove('error');
+        field.style.borderColor = '';
+        field.style.boxShadow = '';
+      });
+    }
+
+    /**
+     * Validate a single field
+     * @param {HTMLElement} field - The field element to validate
+     * @returns {boolean} True if field is valid
+     */
+    function validateSingleField(field) {
+      if (!field || !field.hasAttribute('required')) return true;
+      
+      let isEmpty = !field.value || !field.value.trim();
+      
+      if (field.type === 'select-one' && field.value === '') {
+        isEmpty = true;
+      }
+      
+      if (field.type === 'hidden' && field.hasAttribute('required')) {
+        isEmpty = !field.value;
+      }
+      
+      if (isEmpty) {
+        highlightErrorField(field);
+        return false;
+      }
+      
+      return true;
     }
 
     function submitOrder() {
@@ -3652,67 +4206,60 @@
 
       // If no existing customer selected, create new one
       if (!customer) {
-        const name = document.getElementById('customerName').value.trim();
-        const phone = document.getElementById('customerPhone').value.trim();
-        const whatsapp = document.getElementById('customerWhatsapp').value.trim();
-        const email = document.getElementById('customerEmail').value.trim();
-        const comment = document.getElementById('customerComment').value.trim();
-        const primarySource = document.getElementById('primarySourceOfSale').value;
-        const secondarySource = document.getElementById('secondarySourceOfSale').value;
-        const customerType = document.getElementById('customerType').value;
-
-        if (!name || !phone || !primarySource) {
-          showToast('error', 'يجب ملء جميع الحقول المطلوبة');
-          return;
-        }
-
-        const customerData = {
-          customer_name: name,
-          customer_type: customerType,
-          customer_comment: comment,
-          primary_source_of_sale: primarySource,
-          secondary_source_of_sale: secondarySource,
-          customer_phone: phone,
-          customer_whatsapp: whatsapp,
-          customer_email: email
-        };
-
-        API.addCustomer(customerData).then(newCustomer => {
-          customers.push(newCustomer);
-          return createOrderWithCustomer(newCustomer, validItems);
-        }).then(newOrder => {
-          handleOrderCreated(newOrder);
-        }).catch(error => {
-          console.error('Failed to create customer:', error);
-        });
-
+        showToast('error', 'يجب إضافة بيانات العميل أولاً');
         return;
       }
 
-      createOrderWithCustomer(customer, validItems).then(newOrder => {
-        handleOrderCreated(newOrder);
-      }).catch(error => {
-        console.error('Failed to create order:', error);
-      });
-    }
-
-    function createOrderWithCustomer(customer, items) {
-      const orderData = {
-        customer: customer,
-        address: appState.selectedAddress,
-        items: items,
+      // Create the compounded request
+      const compoundedRequest = {
+        customer: !customer.id.startsWith('TEMP-') ? null : {
+          customer_name: customer.name,
+          customer_type: customer.type,
+          customer_comment: customer.comment,
+          primary_source_of_sale: customer.primarySource,
+          secondary_source_of_sale: customer.secondarySource,
+          customer_phone: customer.phone,
+          customer_whatsapp: customer.whatsapp,
+          customer_email: customer.email
+        },
+        address: appState.selectedAddress && appState.selectedAddress.id.startsWith('ADDR-') ? {
+          address_label: appState.selectedAddress.address_label,
+          address_comment: appState.selectedAddress.address_comment,
+          house_number: appState.selectedAddress.house_number,
+          flat_number: appState.selectedAddress.flat_number,
+          floor_number: appState.selectedAddress.floor_number,
+          street_name: appState.selectedAddress.street_name,
+          address_marking: appState.selectedAddress.address_marking,
+          address_district: appState.selectedAddress.address_district,
+          address_governorate: appState.selectedAddress.address_governorate,
+          district_id: appState.selectedAddress.district_id,
+          area_id: appState.selectedAddress.area_id,
+          area: appState.selectedAddress.area
+        } : null,
+        items: validItems,
+        customer_id: !customer.id.startsWith('TEMP-') ? customer.id : null,
+        address_id: appState.selectedAddress && !appState.selectedAddress.id.startsWith('ADDR-') ? appState.selectedAddress.id : null,
         notes: document.getElementById('orderComments').value.trim(),
         source: document.getElementById('orderSource') ? document.getElementById('orderSource').value : '',
         secondarySource: document.getElementById('orderSecondarySource') ? document.getElementById('orderSecondarySource').value : ''
       };
 
-      return API.addOrder(orderData);
-    }
+      // Log the compounded request for verification
+      console.log('Submitting order with the following data:', JSON.stringify(compoundedRequest, null, 2));
 
-    function handleOrderCreated(newOrder) {
-      closeNewOrderModal();
-      loadOrders(); // Refresh orders list
-      showToast('success', 'تم إنشاء الطلب بنجاح', `رقم الطلب: ${newOrder.id}`);
+      // Send the compounded request
+      API.addCompoundedRequest(compoundedRequest).then(response => {
+        if (response.success) {
+          closeNewOrderModal();
+          loadOrders(); // Refresh orders list
+          showToast('success', 'تم إضافة الطلب بنجاح', 'سيتم معالجة الطلب في الخلفية');
+        } else {
+          showToast('error', 'حدث خطأ أثناء إضافة الطلب', response.message);
+        }
+      }).catch(error => {
+        console.error('Failed to create order:', error);
+        showToast('error', 'حدث خطأ أثناء إضافة الطلب');
+      });
     }
 
     // ===== INITIALIZATION =====
@@ -3944,7 +4491,7 @@
       secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Customer modal
       populateSourceDropdowns('primarySourceOfSale', 'secondarySourceOfSale');
       // Add customer modal
@@ -4004,132 +4551,71 @@
       }).join('');
     }
 
-    // 3. Add JS to handle the custom searchable dropdown
-    function initializeProductDropdown(row, rowIndex) {
-      const dropdown = row.querySelector('.custom-dropdown');
-      const box = dropdown.querySelector('.custom-dropdown-box');
-      const input = dropdown.querySelector('.custom-dropdown-input');
-      const chevron = dropdown.querySelector('.custom-dropdown-chevron');
-      const list = dropdown.querySelector('.custom-dropdown-list');
-
-      let isOpen = false;
-      let selectedIndex = -1;
-      let filteredProducts = products;
-
-      function renderList(term = '') {
-        filteredProducts = products.filter(p =>
-          p.name.toLowerCase().includes(term.toLowerCase())
-        );
-        if (filteredProducts.length === 0) {
-          list.innerHTML = '<div class="custom-dropdown-item">لا توجد نتائج</div>';
-        } else {
-          list.innerHTML = filteredProducts.map((product, idx) => {
-            let highlighted;
-            if (term && term.trim() !== '') {
-              highlighted = product.name.replace(
-                new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
-                '<mark>$1</mark>'
-              );
-            } else {
-              highlighted = product.name;
-            }
-            return `<div class="custom-dropdown-item${idx === selectedIndex ? ' selected' : ''}" data-id="${product.id}" data-price="${product.price}" data-idx="${idx}" style="direction: rtl; text-align: right;">${highlighted} <span style='color:#888;font-size:0.95em;'>${formatCurrency(product.price)}</span></div>`;
-          }).join('');
-        }
+    function submitNewCustomer() {
+      const validation = validateHtmlForm('#customerDetailsSection');
+      
+      if (!validation.isValid) {
+        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+        return;
       }
 
-      function openDropdown() {
-        isOpen = true;
-        box.classList.add('active');
-        list.classList.add('show');
-        chevron.classList.add('active');
-        input.removeAttribute('readonly');
-        renderList(input.value);
-      }
-      function closeDropdown() {
-        isOpen = false;
-        box.classList.remove('active');
-        list.classList.remove('show');
-        chevron.classList.remove('active');
-        selectedIndex = -1;
-        input.setAttribute('readonly', 'readonly');
-      }
+      const name = document.getElementById('customerName').value.trim();
+      const phone = document.getElementById('customerPhone').value.trim();
+      const whatsapp = document.getElementById('customerWhatsapp').value.trim();
+      const email = document.getElementById('customerEmail').value.trim();
+      const comment = document.getElementById('customerComment').value.trim();
+      const primarySource = document.getElementById('primarySourceOfSale').value;
+      const secondarySource = document.getElementById('secondarySourceOfSale').value;
+      const customerType = document.getElementById('customerType').value;
 
-      box.addEventListener('click', function(e) {
-        if (isOpen) {
-          closeDropdown();
-        } else {
-          openDropdown();
-          input.focus();
-          input.select();
-        }
-      });
-      input.addEventListener('focus', function() {
-        openDropdown();
-        input.select();
-      });
-      input.addEventListener('input', function() {
-        renderList(input.value);
-        selectedIndex = -1;
-        if (!isOpen) openDropdown();
-      });
-      input.addEventListener('keydown', function(e) {
-        if (!isOpen) return;
-        if (e.key === 'ArrowDown') {
-          selectedIndex = Math.min(selectedIndex + 1, filteredProducts.length - 1);
-          renderList(input.value);
-          e.preventDefault();
-        } else if (e.key === 'ArrowUp') {
-          selectedIndex = Math.max(selectedIndex - 1, 0);
-          renderList(input.value);
-          e.preventDefault();
-        } else if (e.key === 'Enter') {
-          if (selectedIndex >= 0 && filteredProducts[selectedIndex]) {
-            selectProduct(filteredProducts[selectedIndex]);
-            closeDropdown();
-          }
-          e.preventDefault();
-        } else if (e.key === 'Escape') {
-          closeDropdown();
-          e.preventDefault();
-        }
-      });
-      list.addEventListener('mousedown', function(e) {
-        const item = e.target.closest('.custom-dropdown-item[data-id]');
-        if (item) {
-          const product = products.find(p => p.id === item.dataset.id);
-          selectProduct(product);
-          closeDropdown();
-        }
-      });
-      // Use blur to close dropdown only when focus leaves input and dropdown
-      input.addEventListener('blur', function(e) {
-        setTimeout(closeDropdown, 150);
-      });
-      // Prevent closing when clicking inside the dropdown list
-      list.addEventListener('mousedown', function(e) {
-        e.preventDefault();
-      });
+      const customerData = {
+        customer_name: name,
+        customer_type: customerType,
+        customer_comment: comment,
+        primary_source_of_sale: primarySource,
+        secondary_source_of_sale: secondarySource,
+        customer_phone: phone,
+        customer_whatsapp: whatsapp,
+        customer_email: email
+      };
 
-      function selectProduct(product) {
-        input.value = product.name;
-        input.setAttribute('data-id', product.id);
-        input.setAttribute('data-price', product.price);
-        // Update the order item in appState
-        appState.newOrderForm.items[rowIndex].productId = product.id;
-        appState.newOrderForm.items[rowIndex].productName = product.name;
-        appState.newOrderForm.items[rowIndex].price = product.price;
-        // Update price display
-        const priceDisplay = row.querySelector('.price-display');
-        if (priceDisplay) priceDisplay.textContent = formatCurrency(product.price);
-        // Optionally, trigger updateOrderItem
-        updateOrderItem(rowIndex);
-        closeDropdown(); // Always close after selection
-      }
+      // Create a temporary customer object for the UI
+      const tempCustomer = {
+        id: `TEMP-${Date.now()}`,
+        name: name,
+        phone: phone,
+        whatsapp: whatsapp,
+        email: email,
+        comment: comment,
+        primarySource: primarySource,
+        secondarySource: secondarySource,
+        type: customerType,
+        addresses: [],
+        totalOrders: 0,
+        totalSpent: 0
+      };
 
-      // Initial render
-      renderList();
-      input.setAttribute('readonly', 'readonly');
+      // Update state
+      appState.selectedCustomer = tempCustomer;
+      appState.newOrderForm.customer = tempCustomer;
+
+      // Hide the form and show the customer card
+      document.getElementById('customerDetailsSection').classList.remove('show');
+      
+      // Update the customer details box
+      const detailsBox = document.getElementById('selectedCustomerDetails');
+      document.getElementById('selectedCustomerName').textContent = name;
+      document.getElementById('selectedCustomerPhone').textContent = phone;
+      document.getElementById('selectedCustomerAddress').textContent = 'لا يوجد عنوان';
+      document.getElementById('selectedCustomerOrders').textContent = '0 طلبات - 0 ريال إجمالي المشتريات';
+      
+      detailsBox.style.display = 'block';
+      setTimeout(() => detailsBox.classList.add('show'), 10);
+
+      // Show the address section for adding a new address
+      showNewAddressForm();
+
+      showToast('success', 'تم إضافة بيانات العميل بنجاح');
     }
   </script>
 </body>
