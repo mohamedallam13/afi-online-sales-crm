@@ -1372,6 +1372,14 @@
       transition: var(--transition);
       background: white;
       color: var(--gray-900);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      font-family: 'Cairo', sans-serif;
+      color: var(--gray-400);
+      font-size: 0.95rem;
     }
 
     .form-input:focus,
@@ -1422,6 +1430,7 @@
       border-radius: var(--border-radius);
       font-size: 1.1rem;
       transition: var(--transition);
+      font-family: 'Cairo', sans-serif;
     }
 
     .search-input:focus {
@@ -1748,6 +1757,98 @@
 
     .order-details-content {
       width: 100%;
+    }
+
+    /* ===== CUSTOM SEARCHABLE DROPDOWN ===== */
+    .custom-dropdown {
+      position: relative;
+      width: 100%;
+      font-family: inherit;
+      overflow: visible;
+    }
+    .custom-dropdown-box {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      background: white;
+      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+      cursor: pointer;
+      min-height: 40px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .custom-dropdown-box:focus-within, .custom-dropdown-box.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(97, 97, 255, 0.08);
+    }
+    .custom-dropdown-input {
+      border: none;
+      outline: none;
+      flex: 1;
+      font-size: 1rem;
+      background: transparent;
+      color: var(--gray-900);
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+    }
+    .custom-dropdown-chevron {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%) rotate(0deg);
+      color: #aaa;
+      font-size: 1.2em;
+      pointer-events: none;
+      transition: transform 0.2s;
+    }
+    .custom-dropdown-box.active .custom-dropdown-chevron {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .custom-dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      box-shadow: var(--shadow-lg);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 9999;
+      display: none;
+      direction: rtl;
+    }
+    .custom-dropdown-list.show {
+      display: block;
+    }
+    .custom-dropdown-item {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 1rem;
+      color: var(--gray-900);
+      display: block;
+      text-align: right;
+      direction: rtl;
+      font-family: 'Cairo', sans-serif;
+    }
+    .custom-dropdown-item.selected, .custom-dropdown-item:hover {
+      background: var(--gray-50);
+      color: var(--primary);
+    }
+    .custom-dropdown-item mark {
+      background: #fef3c7;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .items-table,
+    .items-table tbody,
+    .items-table tr {
+      overflow: visible !important;
     }
 
     .customer-details-box {
@@ -3097,6 +3198,13 @@
       resetNewOrderForm();
     }
 
+    // Add click event listener to close modal when clicking outside
+    document.getElementById('newOrderModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeNewOrderModal();
+      }
+    });
+
     function resetNewOrderForm() {
       const customerSearch = document.getElementById('customerSearch');
       const searchResults = document.getElementById('searchResults');
@@ -3492,9 +3600,13 @@
 
       row.innerHTML = `
         <td>
-          <select class="form-select product-select" onchange="updateOrderItem(${rowIndex})">
-            ${productOptions}
-          </select>
+          <div class="custom-dropdown" data-row-index="${rowIndex}">
+            <div class="custom-dropdown-box" tabindex="0">
+              <input type="text" class="custom-dropdown-input" placeholder="اختر المنتج..." />
+              <i class="fas fa-chevron-down custom-dropdown-chevron"></i>
+            </div>
+            <div class="custom-dropdown-list"></div>
+          </div>
         </td>
         <td>
           <input type="number" class="form-input quantity-input" min="1" placeholder="الكمية" onchange="updateOrderItem(${rowIndex})">
@@ -3535,6 +3647,9 @@
       };
 
       appState.newOrderForm.items.push(newItem);
+      
+      // Initialize the product dropdown for the new row
+      initializeProductDropdown(row, rowIndex);
     }
 
     function removeOrderItem(button) {
@@ -3552,29 +3667,30 @@
 
     function updateOrderItem(rowIndex) {
       const row = document.getElementById('itemsTableBody').children[rowIndex];
-      const productSelect = row.querySelector('.product-select');
+      const dropdownInput = row.querySelector('.custom-dropdown-input');
       const quantityInput = row.querySelector('.quantity-input');
       const unitSelect = row.querySelector('.unit-select');
       const commentInput = row.querySelector('.comment-input');
       const priceDisplay = row.querySelector('.price-display');
 
       if (appState.newOrderForm.items[rowIndex]) {
-        const selectedOption = productSelect.selectedOptions[0];
-        const product = products.find(p => p.id === productSelect.value);
-        const price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
+        const productId = dropdownInput.getAttribute('data-selected-id');
+        const product = products.find(p => p.id === productId);
+        const price = product ? product.price : 0;
+        const quantity = parseInt(quantityInput.value) || 0;
 
         appState.newOrderForm.items[rowIndex] = {
           id: appState.newOrderForm.items[rowIndex].id,
-          productId: productSelect.value,
+          productId: productId || '',
           productName: product ? product.name : '',
-          quantity: parseInt(quantityInput.value) || 0,
+          quantity: quantity,
           unit: unitSelect.value,
           comments: commentInput.value,
           price: price
         };
 
         // Update price display
-        priceDisplay.textContent = formatCurrency(price);
+        priceDisplay.textContent = formatCurrency(price * quantity);
       }
     }
 
@@ -3797,7 +3913,7 @@ function validateOrderItems() {
     const productSelect = row.querySelector('.product-select');
     let productSelected = false;
 
-    if (productInput && productInput.getAttribute('data-id')) {
+    if (productInput && productInput.getAttribute('data-selected-id')) {
       productSelected = true;
     } else if (productSelect && productSelect.value) {
       productSelected = true;
@@ -4475,6 +4591,14 @@ function validateSingleField(field) {
       document.getElementById('addCustomerModal').classList.remove('show');
       resetAddCustomerForm();
     }
+
+    // Add click event listener to close modal when clicking outside
+    document.getElementById('addCustomerModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAddCustomerModal();
+      }
+    });
+
     function resetAddCustomerForm() {
       ['addCustomerName', 'addCustomerPhone', 'addCustomerAddress', 'addCustomerDistrict', 'addCustomerArea'].forEach(id => {
         const el = document.getElementById(id);
@@ -4548,6 +4672,14 @@ function validateSingleField(field) {
       document.getElementById('addLeadModalDedicated').classList.remove('show');
       resetAddLeadForm();
     }
+
+    // Add click event listener to close modal when clicking outside
+    document.getElementById('addLeadModalDedicated').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAddLeadModalDedicated();
+      }
+    });
+
     function resetAddLeadForm() {
       ['addLeadName', 'addLeadPhone', 'addLeadEmail', 'addLeadDistrict', 'addLeadSource', 'addLeadStatus', 'addLeadNotes'].forEach(id => {
         const el = document.getElementById(id);
@@ -4768,6 +4900,105 @@ function validateSingleField(field) {
       showNewAddressForm();
 
       showToast('success', 'تم إضافة بيانات العميل بنجاح');
+    }
+
+    function initializeProductDropdown(row, rowIndex) {
+      const dropdown = row.querySelector('.custom-dropdown');
+      const input = dropdown.querySelector('.custom-dropdown-input');
+      const list = dropdown.querySelector('.custom-dropdown-list');
+      const box = dropdown.querySelector('.custom-dropdown-box');
+      const chevron = dropdown.querySelector('.custom-dropdown-chevron');
+      let isOpen = false;
+
+      function highlightMatch(text, term) {
+        if (!term) return text;
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+      }
+
+      function renderProductResults(filtered, term) {
+        if (!filtered.length) {
+          list.innerHTML = '<div class="custom-dropdown-item">لا توجد نتائج</div>';
+          list.classList.add('show');
+          isOpen = true;
+          chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+          return;
+        }
+        list.innerHTML = filtered.map(product =>
+          `<div class="custom-dropdown-item" data-id="${product.id}" data-price="${product.price}">
+            ${highlightMatch(product.name, term)}
+            <small style="color: var(--gray-500);">${product.category}</small>
+          </div>`
+        ).join('');
+        list.classList.add('show');
+        isOpen = true;
+        chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+      }
+
+      function closeDropdown() {
+        list.classList.remove('show');
+        isOpen = false;
+        chevron.style.transform = 'translateY(-50%)';
+      }
+
+      function filterProducts(term) {
+        term = term.trim().toLowerCase();
+        if (!term) return products;
+        return products.filter(p =>
+          p.name.toLowerCase().includes(term) ||
+          p.category.toLowerCase().includes(term)
+        );
+      }
+
+      function selectProduct(product) {
+        input.value = product.name;
+        input.setAttribute('data-selected-id', product.id);
+        input.setAttribute('data-selected-price', product.price);
+        // Auto-set quantity to 1 if empty
+        const row = document.getElementById('itemsTableBody').children[rowIndex];
+        const quantityInput = row.querySelector('.quantity-input');
+        if (quantityInput && (!quantityInput.value || parseInt(quantityInput.value) <= 0)) {
+          quantityInput.value = 1;
+        }
+        closeDropdown();
+        updateOrderItem(rowIndex);
+      }
+
+      input.addEventListener('input', function() {
+        const filtered = filterProducts(input.value);
+        renderProductResults(filtered, input.value.trim());
+      });
+
+      input.addEventListener('focus', function() {
+        if (!isOpen) {
+          renderProductResults(products, input.value.trim());
+        }
+      });
+
+      input.addEventListener('click', function() {
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          renderProductResults(products, input.value.trim());
+        }
+      });
+
+      list.addEventListener('click', function(e) {
+        const item = e.target.closest('.custom-dropdown-item');
+        if (item) {
+          const productId = item.dataset.id;
+          const product = products.find(p => p.id === productId);
+          if (product) {
+            selectProduct(product);
+          }
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-dropdown')) {
+          closeDropdown();
+        }
+      });
     }
   </script>
 </body>
