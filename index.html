@@ -2679,173 +2679,154 @@
     };
 
     // ===== API MODULE =====
+    // === Per-method test flags ===
+    const TEST_MODE_GET_ORDERS = true;
+    const TEST_MODE_ADD_ORDER = false;
+    const TEST_MODE_GET_PRODUCTS = true;
+    const TEST_MODE_GET_CUSTOMERS = true;
+    const TEST_MODE_ADD_CUSTOMER = false;
+    const TEST_MODE_GET_LEADS = true;
+    const TEST_MODE_ADD_COMPOUNDED_REQUEST_TO_BUFFER = false;
+    // ...add more as needed
+
     const API = {
       activeRequests: {},
 
       request: function (functionName, data = {}, options = {}) {
-        const {
-          showLoader = true,
-          loaderMessage = 'جاري المعالجة...',
-          hideToastOnSuccess = false,
-          successMessage = 'تم بنجاح',
-          errorMessage = 'حدث خطأ، الرجاء المحاولة مرة أخرى',
-          preventDuplicateSubmission = true,
-          requestId = functionName
-        } = options;
-
-        const trackingId = requestId;
-
-        if (preventDuplicateSubmission && this.activeRequests[trackingId]) {
-          console.warn(`Preventing duplicate submission for: ${trackingId}`);
-          return Promise.reject(new Error(`Request ${trackingId} already in progress`));
-        }
-
-        if (preventDuplicateSubmission) {
-          this.activeRequests[trackingId] = true;
-        }
-
-        return new Promise((resolve, reject) => {
-          if (showLoader) {
-            updateLoadingMessage(loaderMessage);
-            showGlobalLoader();
+        // Show loader if not explicitly disabled
+        if (options.showLoader !== false) {
+          showGlobalLoader();
+          if (options.loaderMessage) {
+            updateLoadingMessage(options.loaderMessage);
           }
+        }
 
-          // Simulate API delay
-          setTimeout(() => {
-            try {
-              const result = this.handleMockRequest(functionName, data);
-
-              if (showLoader) {
-                hideGlobalLoader();
-              }
-
-              if (!hideToastOnSuccess) {
-                showToast('success', successMessage);
-              }
-
-              if (preventDuplicateSubmission) {
-                delete this.activeRequests[trackingId];
-              }
-
-              resolve(result);
-            } catch (error) {
-              if (showLoader) {
-                hideGlobalLoader();
-              }
-
-              showToast('error', errorMessage);
-
-              if (preventDuplicateSubmission) {
-                delete this.activeRequests[trackingId];
-              }
-
-              reject(error);
+        // Only real backend logic here!
+        return new Promise((resolve, reject) => {
+          // Example for Google Apps Script:
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler((result) => {
+                // Hide loader if shown
+                if (options.showLoader !== false) {
+                  hideGlobalLoader();
+                }
+                // Show success toast if not disabled
+                if (!options.hideToastOnSuccess && options.successMessage) {
+                  showToast('success', options.successMessage);
+                }
+                resolve(result);
+              })
+              .withFailureHandler((error) => {
+                // Hide loader if shown
+                if (options.showLoader !== false) {
+                  hideGlobalLoader();
+                }
+                // Show error toast
+                showToast('error', 'حدث خطأ', error.message || 'حدث خطأ غير متوقع');
+                reject(error);
+              })[functionName](data);
+          } else {
+            // Placeholder for REST API or other backend
+            const error = new Error('Real backend not implemented.');
+            // Hide loader if shown
+            if (options.showLoader !== false) {
+              hideGlobalLoader();
             }
-          }, 800 + Math.random() * 500);
+            // Show error toast
+            showToast('error', 'حدث خطأ', error.message);
+            reject(error);
+          }
         });
       },
 
-      handleMockRequest: function (functionName, data) {
-        switch (functionName) {
-          case 'getOrders':
-            return orders;
-          case 'getCustomers':
-            return customers;
-          case 'getLeads':
-            return leads;
-          case 'getProducts':
-            return products;
-          case 'getLocations':
-            return districts;
-          case 'updateOrderStatus':
-            const order = orders.find(o => o.id === data.orderId);
-            if (order) {
-              order.status = data.status;
-              return order;
-            }
-            throw new Error('Order not found');
-          case 'addOrder':
-            const newOrder = {
-              id: `AFI-${String(orders.length + 1).padStart(3, '0')}`,
-              customerId: data.customer.id || `CUST-${Date.now()}`,
-              customerName: data.customer.name,
-              customerPhone: data.customer.phone,
-              date: new Date().toISOString().split('T')[0],
-              amount: data.items.reduce((total, item) => total + (item.price * item.quantity), 0),
-              status: 'pending',
-              items: data.items,
-              address: data.address ? `${data.address.area}` : data.customer.address,
-              comments: data.notes || ''
-            };
-            orders.unshift(newOrder);
-            return newOrder;
-          case 'addCustomer':
-            const newCustomer = {
-              id: `CUST-${Date.now()}`,
-              name: data.name,
-              phone: data.phone,
-              addresses: [{
-                id: `ADDR-${Date.now()}`,
-                street: data.address,
-                district: data.district,
-                area: data.area,
-                isPrimary: true,
-                label: 'المنزل'
-              }],
-              totalOrders: 0,
-              totalSpent: 0,
-              lastOrderDate: null
-            };
-            customers.push(newCustomer);
-            return newCustomer;
-          default:
-            throw new Error('Unknown function: ' + functionName);
-        }
+      getLocations: function () {
+        return new Promise(resolve => setTimeout(() => resolve(districts), 500));
       },
 
       getOrders: function () {
+        if (TEST_MODE_GET_ORDERS) {
+          return new Promise(resolve => setTimeout(() => resolve(orders), 500));
+        }
         return this.request('getOrders', {}, {
           loaderMessage: 'جاري تحميل الطلبات...',
           hideToastOnSuccess: true
         });
       },
 
-      getCustomers: function () {
-        return this.request('getCustomers', {}, {
-          loaderMessage: 'جاري تحميل العملاء...',
-          hideToastOnSuccess: true
-        });
-      },
-
-      getProducts: function () {
-        return this.request('getProducts', {}, {
-          loaderMessage: 'جاري تحميل المنتجات...',
-          hideToastOnSuccess: true
-        });
-      },
-
-      getLocations: function () {
-        return this.request('getLocations', {}, {
-          loaderMessage: 'جاري تحميل المواقع...',
-          hideToastOnSuccess: true
-        });
-      },
-
-      updateOrderStatus: function (orderId, status) {
-        return this.request('updateOrderStatus', { orderId, status }, {
-          loaderMessage: 'جاري تحديث حالة الطلب...',
-          successMessage: 'تم تحديث حالة الطلب بنجاح'
-        });
-      },
-
       addOrder: function (orderData) {
+        if (TEST_MODE_ADD_ORDER) {
+          // Simulate adding order to mock orders array
+          return new Promise(resolve => {
+            setTimeout(() => {
+              const newOrder = {
+                id: `AFI-${String(orders.length + 1).padStart(3, '0')}`,
+                customerId: orderData.customer.id || `CUST-${Date.now()}`,
+                customerName: orderData.customer.name,
+                customerPhone: orderData.customer.phone,
+                date: new Date().toISOString().split('T')[0],
+                amount: orderData.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+                status: 'pending',
+                items: orderData.items,
+                address: orderData.address ? `${orderData.address.area}` : orderData.customer.address,
+                comments: orderData.notes || ''
+              };
+              orders.unshift(newOrder);
+              resolve(newOrder);
+            }, 500);
+          });
+        }
         return this.request('addOrder', orderData, {
           loaderMessage: 'جاري إنشاء الطلب...',
           successMessage: 'تم إنشاء الطلب بنجاح'
         });
       },
 
+      getProducts: function () {
+        if (TEST_MODE_GET_PRODUCTS) {
+          return new Promise(resolve => setTimeout(() => resolve(products), 500));
+        }
+        return this.request('getProducts', {}, {
+          loaderMessage: 'جاري تحميل المنتجات...',
+          hideToastOnSuccess: true
+        });
+      },
+
+      getCustomers: function () {
+        if (TEST_MODE_GET_CUSTOMERS) {
+          return new Promise(resolve => setTimeout(() => resolve(customers), 500));
+        }
+        return this.request('getCustomers', {}, {
+          loaderMessage: 'جاري تحميل العملاء...',
+          hideToastOnSuccess: true
+        });
+      },
+
       addCustomer: function (customerData) {
+        if (TEST_MODE_ADD_CUSTOMER) {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              const newCustomer = {
+                id: `CUST-${Date.now()}`,
+                name: customerData.name,
+                phone: customerData.phone,
+                addresses: [{
+                  id: `ADDR-${Date.now()}`,
+                  street: customerData.address,
+                  district: customerData.district,
+                  area: customerData.area,
+                  isPrimary: true,
+                  label: 'المنزل'
+                }],
+                totalOrders: 0,
+                totalSpent: 0,
+                lastOrderDate: null
+              };
+              customers.push(newCustomer);
+              resolve(newCustomer);
+            }, 500);
+          });
+        }
         return this.request('addCustomer', customerData, {
           loaderMessage: 'جاري إضافة العميل...',
           successMessage: 'تم إضافة العميل بنجاح'
@@ -2853,11 +2834,31 @@
       },
 
       getLeads: function () {
+        if (TEST_MODE_GET_LEADS) {
+          return new Promise(resolve => setTimeout(() => resolve(leads), 500));
+        }
         return this.request('getLeads', {}, {
           loaderMessage: 'جاري تحميل العملاء المحتملين...',
           hideToastOnSuccess: true
         });
-      }
+      },
+
+      addCompoundedRequestToBuffer: function(orderData) {
+        if (TEST_MODE_ADD_COMPOUNDED_REQUEST_TO_BUFFER) {
+          return new Promise(resolve => setTimeout(() => resolve({ success: true, message: 'Buffered successfully (mock)' }), 500));
+        }
+        return this.request('addCompoundedRequestToBuffer', orderData, {
+          loaderMessage: 'جاري إنشاء الطلب...'
+        });
+      },
+
+      addCompoudedOrder: function(orderData) {
+        // Fire-and-forget: don't show loader, don't block UI
+        return this.request('addCompoudedOrder', orderData, {
+          showLoader: false,
+          hideToastOnSuccess: true
+        });
+      },
     };
 
     // ===== UTILITY FUNCTIONS =====
@@ -4478,8 +4479,12 @@ function validateSingleField(field) {
         return;
       }
 
+      // Generate a unique reference number for the order
+      const referenceNumber = 'REF-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+
       // Create the compounded request
       const compoundedRequest = {
+        reference: referenceNumber,
         customer: !customer.id.startsWith('TEMP-') ? null : {
           customer_name: customer.name,
           customer_type: customer.type,
@@ -4513,19 +4518,26 @@ function validateSingleField(field) {
       };
 
       // Log the compounded request for verification
-      console.log('Submitting order with the following data:', JSON.stringify(compoundedRequest, null, 2));
+      console.log('Submitting order to buffer with the following data:', JSON.stringify(compoundedRequest, null, 2));
 
-      // Send the compounded request
-      API.addCompoundedRequest(compoundedRequest).then(response => {
+      // Send the compounded request to the buffer
+      API.addCompoundedRequestToBuffer(compoundedRequest).then(response => {
+        response = JSON.parse(response);
         if (response.success) {
+          console.log('Response:', response);
+          // Fire-and-forget: send to DB, but don't block UI
+          API.addCompoudedOrder(compoundedRequest);
+
           closeNewOrderModal();
           loadOrders(); // Refresh orders list
           showToast('success', 'تم إضافة الطلب بنجاح', 'سيتم معالجة الطلب في الخلفية');
         } else {
+          console.log(1);
           showToast('error', 'حدث خطأ أثناء إضافة الطلب', response.message);
         }
       }).catch(error => {
-        console.error('Failed to create order:', error);
+        console.log(2);
+        console.error('Failed to buffer order:', error);
         showToast('error', 'حدث خطأ أثناء إضافة الطلب');
       });
     }
