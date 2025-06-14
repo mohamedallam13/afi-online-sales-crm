@@ -1750,96 +1750,6 @@
       width: 100%;
     }
 
-    /* ===== CUSTOM SEARCHABLE DROPDOWN ===== */
-    .custom-dropdown {
-      position: relative;
-      width: 100%;
-      font-family: inherit;
-      overflow: visible;
-    }
-    .custom-dropdown-box {
-      display: flex;
-      align-items: center;
-      border: 1px solid var(--gray-300);
-      border-radius: 6px;
-      background: white;
-      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-      cursor: pointer;
-      min-height: 40px;
-      position: relative;
-      transition: border-color 0.2s;
-    }
-    .custom-dropdown-box:focus-within, .custom-dropdown-box.active {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(97, 97, 255, 0.08);
-    }
-    .custom-dropdown-input {
-      border: none;
-      outline: none;
-      flex: 1;
-      font-size: 1rem;
-      background: transparent;
-      color: var(--gray-900);
-      padding: 0;
-    }
-    .custom-dropdown-chevron {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%) rotate(0deg);
-      color: #aaa;
-      font-size: 1.2em;
-      pointer-events: none;
-      transition: transform 0.2s;
-    }
-    .custom-dropdown-box.active .custom-dropdown-chevron {
-      transform: translateY(-50%) rotate(180deg);
-    }
-    .custom-dropdown-list {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border: 1px solid var(--gray-200);
-      border-top: none;
-      border-radius: 0 0 6px 6px;
-      box-shadow: var(--shadow-lg);
-      max-height: 220px;
-      overflow-y: auto;
-      z-index: 9999;
-      display: none;
-      direction: rtl;
-    }
-    .custom-dropdown-list.show {
-      display: block;
-    }
-    .custom-dropdown-item {
-      padding: 0.75rem 1.5rem;
-      cursor: pointer;
-      transition: background 0.15s;
-      font-size: 1rem;
-      color: var(--gray-900);
-      display: block;
-      text-align: right;
-      direction: rtl;
-    }
-    .custom-dropdown-item.selected, .custom-dropdown-item:hover {
-      background: var(--gray-50);
-      color: var(--primary);
-    }
-    .custom-dropdown-item mark {
-      background: #fef3c7;
-      padding: 2px 4px;
-      border-radius: 3px;
-    }
-
-    .items-table,
-    .items-table tbody,
-    .items-table tr {
-      overflow: visible !important;
-    }
-
     .customer-details-box {
       /* Remove transition */
     }
@@ -3561,19 +3471,11 @@
         appState.newOrderForm.address = address;
         showToast('success', 'تم اختيار العنوان', address.address_label);
 
-        showOrderDetailsSection();
+        setTimeout(() => {
+          showOrderDetailsSection();
+        }, 500);
       }
     }
-
-    // ===== UNITS ARRAY =====
-    const units = [
-      { id: 'piece', name: 'قطعة' },
-      { id: 'kilo', name: 'كيلو' },
-      { id: 'liter', name: 'لتر' },
-      { id: 'pack', name: 'عبوة' },
-      { id: 'bag', name: 'كيس' },
-      { id: 'bottle', name: 'زجاجة' }
-    ];
 
     function addOrderItem() {
       const tbody = document.getElementById('itemsTableBody');
@@ -3581,23 +3483,30 @@
 
       const row = document.createElement('tr');
 
-      // Custom searchable dropdown for products
+      const productOptions = '<option value="">اختر المنتج</option>' +
+        products.map(product => {
+          return `<option value="${product.id}" data-price="${product.price}">
+            ${product.name} - ${formatCurrency(product.price)}
+          </option>`;
+        }).join('');
+
       row.innerHTML = `
         <td>
-          <div class="custom-dropdown" data-row-index="${rowIndex}">
-            <div class="custom-dropdown-box" tabindex="0">
-              <input type="text" class="custom-dropdown-input" placeholder="اختر المنتج..." readonly />
-              <i class="fas fa-chevron-down custom-dropdown-chevron"></i>
-            </div>
-            <div class="custom-dropdown-list"></div>
-          </div>
+          <select class="form-select product-select" onchange="updateOrderItem(${rowIndex})">
+            ${productOptions}
+          </select>
         </td>
         <td>
           <input type="number" class="form-input quantity-input" min="1" placeholder="الكمية" onchange="updateOrderItem(${rowIndex})">
         </td>
         <td>
           <select class="form-select unit-select" onchange="updateOrderItem(${rowIndex})">
-            ${units.map(unit => `<option value="${unit.id}">${unit.name}</option>`).join('')}
+            <option value="قطعة">قطعة</option>
+            <option value="كيلو">كيلو</option>
+            <option value="لتر">لتر</option>
+            <option value="عبوة">عبوة</option>
+            <option value="كيس">كيس</option>
+            <option value="زجاجة">زجاجة</option>
           </select>
         </td>
         <td>
@@ -3620,15 +3529,12 @@
         productId: '',
         productName: '',
         quantity: 0,
-        unit: units[0].id,
+        unit: 'قطعة',
         comments: '',
         price: 0
       };
 
       appState.newOrderForm.items.push(newItem);
-
-      // Initialize the custom dropdown for this row
-      initializeProductDropdown(row, rowIndex);
     }
 
     function removeOrderItem(button) {
@@ -3646,42 +3552,27 @@
 
     function updateOrderItem(rowIndex) {
       const row = document.getElementById('itemsTableBody').children[rowIndex];
-      // Support custom product dropdown
-      const productInput = row.querySelector('.custom-dropdown-input');
-      let productId = '';
-      let productName = '';
-      let price = 0;
-
-      if (productInput) {
-        productId = productInput.getAttribute('data-id') || '';
-        productName = productInput.value || '';
-        price = parseFloat(productInput.getAttribute('data-price')) || 0;
-      } else {
-        // fallback for select (legacy)
-        const productSelect = row.querySelector('.product-select');
-        if (productSelect) {
-          const selectedOption = productSelect.selectedOptions[0];
-          productId = productSelect.value;
-          productName = selectedOption ? selectedOption.textContent : '';
-          price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
-        }
-      }
-
+      const productSelect = row.querySelector('.product-select');
       const quantityInput = row.querySelector('.quantity-input');
       const unitSelect = row.querySelector('.unit-select');
       const commentInput = row.querySelector('.comment-input');
       const priceDisplay = row.querySelector('.price-display');
 
       if (appState.newOrderForm.items[rowIndex]) {
+        const selectedOption = productSelect.selectedOptions[0];
+        const product = products.find(p => p.id === productSelect.value);
+        const price = selectedOption && selectedOption.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
+
         appState.newOrderForm.items[rowIndex] = {
           id: appState.newOrderForm.items[rowIndex].id,
-          productId: productId,
-          productName: productName,
+          productId: productSelect.value,
+          productName: product ? product.name : '',
           quantity: parseInt(quantityInput.value) || 0,
           unit: unitSelect.value,
           comments: commentInput.value,
           price: price
         };
+
         // Update price display
         priceDisplay.textContent = formatCurrency(price);
       }
@@ -3806,235 +3697,495 @@
       return text.replace(regex, '<mark style="background: #fef3c7; padding: 2px 4px; border-radius: 3px;">$1</mark>');
     }
 
-    // ===== HTML-DRIVEN VALIDATION SYSTEM =====
+   // ===== HTML-DRIVEN VALIDATION SYSTEM =====
 
-    /**
-     * Get validation rules from HTML form elements
-     * @param {string} containerSelector - CSS selector for the form container
-     * @returns {Array} Array of field validation objects
-     */
-    function getFormValidationRules(containerSelector) {
-      const container = document.querySelector(containerSelector);
-      if (!container) return [];
+/**
+ * Get validation rules from HTML form elements
+ * @param {string} containerSelector - CSS selector for the form container
+ * @returns {Array} Array of field validation objects
+ */
+function getFormValidationRules(containerSelector) {
+  const container = document.querySelector(containerSelector);
+  if (!container) return [];
 
-      const requiredFields = container.querySelectorAll('[required]');
-      return Array.from(requiredFields).map(field => ({
-        id: field.id,
-        label: field.dataset.label || field.placeholder || field.id,
-        type: field.type || 'text',
-        element: field
-      }));
+  const requiredFields = container.querySelectorAll('[required]');
+  return Array.from(requiredFields).map(field => ({
+    id: field.id,
+    label: field.dataset.label || field.placeholder || field.id,
+    type: field.type || 'text',
+    element: field
+  }));
+}
+
+/**
+ * Validate form fields based on HTML attributes
+ * @param {string} containerSelector - CSS selector for the form container
+ * @returns {Object} Validation result with isValid, errors, and missingFields
+ */
+function validateHtmlForm(containerSelector) {
+  console.log('Validating form:', containerSelector);
+  
+  const validationRules = getFormValidationRules(containerSelector);
+  console.log('Found validation rules:', validationRules);
+  
+  const errors = [];
+  const missingFields = [];
+  let isValid = true;
+
+  for (const rule of validationRules) {
+    const field = rule.element;
+    
+    if (!field) {
+      console.warn('Field not found:', rule.id);
+      errors.push(`حقل "${rule.label}" غير موجود في النموذج`);
+      isValid = false;
+      continue;
     }
 
-    /**
-     * Validate form fields based on HTML attributes
-     * @param {string} containerSelector - CSS selector for the form container
-     * @returns {Object} Validation result with isValid, errors, and missingFields
-     */
-    function validateHtmlForm(containerSelector) {
-      console.log('Validating form:', containerSelector);
-      
-      const validationRules = getFormValidationRules(containerSelector);
-      console.log('Found validation rules:', validationRules);
-      
-      const errors = [];
-      const missingFields = [];
-      let isValid = true;
+    let fieldValue = field.value;
+    let isEmpty = !fieldValue || !fieldValue.trim();
 
-      for (const rule of validationRules) {
-        const field = rule.element;
-        
-        if (!field) {
-          console.warn('Field not found:', rule.id);
-          errors.push(`حقل "${rule.label}" غير موجود في النموذج`);
-          isValid = false;
-          continue;
-        }
-
-        let fieldValue = field.value;
-        let isEmpty = !fieldValue || !fieldValue.trim();
-
-        // Special handling for different field types
-        if (rule.type === 'select-one' && fieldValue === '') {
-          isEmpty = true;
-        }
-
-        // Special handling for hidden fields (like district ID)
-        if (field.type === 'hidden' && field.hasAttribute('required')) {
-          isEmpty = !fieldValue;
-        }
-
-        console.log(`Field ${rule.id}: value="${fieldValue}", isEmpty=${isEmpty}, type=${rule.type}`);
-
-        if (isEmpty) {
-          console.log('Field is empty, highlighting:', rule.id);
-          highlightErrorField(field);
-          missingFields.push(rule.label);
-          isValid = false;
-        }
-      }
-
-      if (missingFields.length > 0) {
-        errors.push(`الحقول المطلوبة التالية مفقودة: ${missingFields.join('، ')}`);
-      }
-
-      console.log('Validation result:', { isValid, errors, missingFields });
-      return { isValid, errors, missingFields };
+    // Special handling for different field types
+    if (rule.type === 'select-one' && fieldValue === '') {
+      isEmpty = true;
     }
 
-    /**
-     * Validate order items table
-     * @returns {Object} Validation result for order items
-     */
-    function validateOrderItems() {
-      const itemsTableBody = document.getElementById('itemsTableBody');
-      const missingItemFields = [];
-      let isValid = true;
-
-      if (!itemsTableBody || !appState.newOrderForm.items) {
-        return { isValid: false, errors: ['جدول المنتجات غير موجود'], missingFields: [] };
-      }
-
-      for (let i = 0; i < appState.newOrderForm.items.length; i++) {
-        const row = itemsTableBody.children[i];
-        if (!row) continue;
-
-        const rowNumber = i + 1;
-
-        // Validate product selection
-        const productInput = row.querySelector('.custom-dropdown-input');
-        const productSelect = row.querySelector('.product-select');
-        let productSelected = false;
-
-        if (productInput && productInput.getAttribute('data-id')) {
-          productSelected = true;
-        } else if (productSelect && productSelect.value) {
-          productSelected = true;
-        }
-
-        if (!productSelected) {
-          const fieldToHighlight = productInput || productSelect;
-          if (fieldToHighlight) {
-            highlightErrorField(fieldToHighlight);
-          }
-          missingItemFields.push(`المنتج في الصف ${rowNumber}`);
-          isValid = false;
-        }
-
-        // Validate quantity
-        const quantityInput = row.querySelector('.quantity-input');
-        if (!quantityInput || !quantityInput.value || parseFloat(quantityInput.value) <= 0) {
-          if (quantityInput) {
-            highlightErrorField(quantityInput);
-          }
-          missingItemFields.push(`الكمية في الصف ${rowNumber}`);
-          isValid = false;
-        }
-      }
-
-      const errors = missingItemFields.length > 0 ? [`يجب تحديد: ${missingItemFields.join('، ')}`] : [];
-      return { isValid, errors, missingFields: missingItemFields };
+    // Special handling for hidden fields (like district ID)
+    if (field.type === 'hidden' && field.hasAttribute('required')) {
+      isEmpty = !fieldValue;
     }
 
-    /**
-     * Highlight field with error styling
-     * @param {HTMLElement} field - The field element to highlight
-     */
-    function highlightErrorField(field) {
-      if (!field) {
-        console.warn('highlightErrorField: field is null or undefined');
-        return;
-      }
-      
-      console.log('Highlighting field:', field.id || field.name || 'unnamed field');
-      
-      // Remove any existing error styling first
-      field.classList.remove('error');
-      
-      // Add error class
-      field.classList.add('error');
-      
-      // Apply inline styles with !important to override CSS
-      field.style.setProperty('border-color', '#e2445c', 'important');
-      field.style.setProperty('box-shadow', '0 0 0 3px rgba(226, 68, 92, 0.1)', 'important');
-      field.style.setProperty('background-color', 'rgba(226, 68, 92, 0.05)', 'important');
-      
-      // Also add a visual shake animation
-      field.style.setProperty('animation', 'shake 0.3s ease-in-out', 'important');
-      
-      // Clear the error styling after 8 seconds (increased from 5)
-      setTimeout(() => {
-        field.classList.remove('error');
-        field.style.removeProperty('border-color');
-        field.style.removeProperty('box-shadow');
-        field.style.removeProperty('background-color');
-        field.style.removeProperty('animation');
-        console.log('Cleared error styling for field:', field.id || field.name || 'unnamed field');
-      }, 8000);
+    console.log(`Field ${rule.id}: value="${fieldValue}", isEmpty=${isEmpty}, type=${rule.type}`);
+
+    if (isEmpty) {
+      console.log('Field is empty, highlighting:', rule.id);
+      highlightErrorField(field);
+      missingFields.push(rule.label);
+      isValid = false;
+    }
+  }
+
+  if (missingFields.length > 0) {
+    errors.push(`الحقول المطلوبة التالية مفقودة: ${missingFields.join('، ')}`);
+  }
+
+  console.log('Validation result:', { isValid, errors, missingFields });
+  return { isValid, errors, missingFields };
+}
+
+/**
+ * Validate order items table
+ * @returns {Object} Validation result for order items
+ */
+function validateOrderItems() {
+  const itemsTableBody = document.getElementById('itemsTableBody');
+  const missingItemFields = [];
+  let isValid = true;
+
+  if (!itemsTableBody || !appState.newOrderForm.items) {
+    return { isValid: false, errors: ['جدول المنتجات غير موجود'], missingFields: [] };
+  }
+
+  for (let i = 0; i < appState.newOrderForm.items.length; i++) {
+    const row = itemsTableBody.children[i];
+    if (!row) continue;
+
+    const rowNumber = i + 1;
+
+    // Validate product selection
+    const productInput = row.querySelector('.custom-dropdown-input');
+    const productSelect = row.querySelector('.product-select');
+    let productSelected = false;
+
+    if (productInput && productInput.getAttribute('data-id')) {
+      productSelected = true;
+    } else if (productSelect && productSelect.value) {
+      productSelected = true;
     }
 
-    /**
-     * Main order form validation function
-     * @returns {boolean} True if form is valid, false otherwise
-     */
-    function validateOrderForm() {
-      let isValid = true;
-      const allErrors = [];
-
-      // Check customer selection or form completion
-      if (!appState.selectedCustomer) {
-        const customerValidation = validateHtmlForm('#customerDetailsSection');
-        if (!customerValidation.isValid) {
-          allErrors.push(...customerValidation.errors);
-          isValid = false;
-        }
-
-        // Check address fields for new customers
-        const addressValidation = validateHtmlForm('#newAddressSection');
-        if (!addressValidation.isValid && !appState.isAddingNewAddress) {
-          // Only add address errors if we're not in the process of adding a new address
-          allErrors.push('يجب إكمال بيانات العنوان أو اختيار عنوان موجود');
-          isValid = false;
-        }
+    if (!productSelected) {
+      const fieldToHighlight = productInput || productSelect;
+      if (fieldToHighlight) {
+        highlightErrorField(fieldToHighlight);
       }
-
-      // Check address selection for existing customers
-      if (appState.selectedCustomer && !appState.selectedAddress && !appState.isAddingNewAddress) {
-        allErrors.push('يجب اختيار عنوان للتوصيل من القائمة أو إضافة عنوان جديد');
-        isValid = false;
-      }
-
-      // Check items
-      if (!appState.newOrderForm.items || appState.newOrderForm.items.length === 0) {
-        allErrors.push('يجب إضافة منتج واحد على الأقل للطلب');
-        isValid = false;
-      } else {
-        // Validate individual items
-        const itemsValidation = validateOrderItems();
-        if (!itemsValidation.isValid) {
-          allErrors.push(...itemsValidation.errors);
-          isValid = false;
-        }
-      }
-
-      if (!isValid) {
-        // Scroll to top to show error message
-        const modalContent = document.querySelector('.modal-content');
-        if (modalContent) {
-          modalContent.scrollTop = 0;
-        }
-        showToast('error', 'يرجى تصحيح الأخطاء التالية:', allErrors.join('<br>• '));
-      }
-
-      return isValid;
+      missingItemFields.push(`المنتج في الصف ${rowNumber}`);
+      isValid = false;
     }
+
+    // Validate quantity
+    const quantityInput = row.querySelector('.quantity-input');
+    if (!quantityInput || !quantityInput.value || parseFloat(quantityInput.value) <= 0) {
+      if (quantityInput) {
+        highlightErrorField(quantityInput);
+      }
+      missingItemFields.push(`الكمية في الصف ${rowNumber}`);
+      isValid = false;
+    }
+  }
+
+  const errors = missingItemFields.length > 0 ? [`يجب تحديد: ${missingItemFields.join('، ')}`] : [];
+  return { isValid, errors, missingFields: missingItemFields };
+}
+
+/**
+ * Highlight field with error styling
+ * @param {HTMLElement} field - The field element to highlight
+ */
+function highlightErrorField(field) {
+  if (!field) {
+    console.warn('highlightErrorField: field is null or undefined');
+    return;
+  }
+  
+  console.log('Highlighting field:', field.id || field.name || 'unnamed field');
+  
+  // Remove any existing error styling first
+  field.classList.remove('error');
+  
+  // Add error class
+  field.classList.add('error');
+  
+  // Apply inline styles with !important to override CSS
+  field.style.setProperty('border-color', '#e2445c', 'important');
+  field.style.setProperty('box-shadow', '0 0 0 3px rgba(226, 68, 92, 0.1)', 'important');
+  field.style.setProperty('background-color', 'rgba(226, 68, 92, 0.05)', 'important');
+  
+  // Also add a visual shake animation
+  field.style.setProperty('animation', 'shake 0.3s ease-in-out', 'important');
+  
+  // Clear the error styling after 8 seconds (increased from 5)
+  setTimeout(() => {
+    field.classList.remove('error');
+    field.style.removeProperty('border-color');
+    field.style.removeProperty('box-shadow');
+    field.style.removeProperty('background-color');
+    field.style.removeProperty('animation');
+    console.log('Cleared error styling for field:', field.id || field.name || 'unnamed field');
+  }, 8000);
+}
+
+/**
+ * Main order form validation function
+ * @returns {boolean} True if form is valid, false otherwise
+ */
+function validateOrderForm() {
+  let isValid = true;
+  const allErrors = [];
+
+  // Check customer selection or form completion
+  if (!appState.selectedCustomer) {
+    const customerValidation = validateHtmlForm('#customerDetailsSection');
+    if (!customerValidation.isValid) {
+      allErrors.push(...customerValidation.errors);
+      isValid = false;
+    }
+
+    // Check address fields for new customers
+    const addressValidation = validateHtmlForm('#newAddressSection');
+    if (!addressValidation.isValid && !appState.isAddingNewAddress) {
+      // Only add address errors if we're not in the process of adding a new address
+      allErrors.push('يجب إكمال بيانات العنوان أو اختيار عنوان موجود');
+      isValid = false;
+    }
+  }
+
+  // Check address selection for existing customers
+  if (appState.selectedCustomer && !appState.selectedAddress && !appState.isAddingNewAddress) {
+    allErrors.push('يجب اختيار عنوان للتوصيل من القائمة أو إضافة عنوان جديد');
+    isValid = false;
+  }
+
+  // Check items
+  if (!appState.newOrderForm.items || appState.newOrderForm.items.length === 0) {
+    allErrors.push('يجب إضافة منتج واحد على الأقل للطلب');
+    isValid = false;
+  } else {
+    // Validate individual items
+    const itemsValidation = validateOrderItems();
+    if (!itemsValidation.isValid) {
+      allErrors.push(...itemsValidation.errors);
+      isValid = false;
+    }
+  }
+
+  if (!isValid) {
+    // Scroll to top to show error message
+    const modalContent = document.querySelector('.modal-content');
+    if (modalContent) {
+      modalContent.scrollTop = 0;
+    }
+    showToast('error', 'يرجى تصحيح الأخطاء التالية:', allErrors.join('<br>• '));
+  }
+
+  return isValid;
+}
+
+/**
+ * Submit add customer form with validation
+ */
+function submitAddCustomer() {
+  const validation = validateHtmlForm('#addCustomerModal .modal-content');
+  
+  if (!validation.isValid) {
+    showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+    return;
+  }
+
+  const name = document.getElementById('addCustomerName').value.trim();
+  const phone = document.getElementById('addCustomerPhone').value.trim();
+  const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
+  const email = document.getElementById('addCustomerEmail').value.trim();
+  const comment = document.getElementById('addCustomerComment').value.trim();
+  const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
+  const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
+  const customerType = document.getElementById('addCustomerType').value;
+
+  const customerData = {
+    customer_name: name,
+    customer_type: customerType,
+    customer_comment: comment,
+    primary_source_of_sale: primarySource,
+    secondary_source_of_sale: secondarySource,
+    customer_phone: phone,
+    customer_whatsapp: whatsapp,
+    customer_email: email
+  };
+
+  API.addCustomer(customerData).then(newCustomer => {
+    customers.push(newCustomer);
+    showToast('success', 'تم إضافة العميل بنجاح');
+    closeAddCustomerModal();
+    loadCustomers();
+  }).catch(error => {
+    showToast('error', 'حدث خطأ أثناء إضافة العميل');
+  });
+}
+
+/**
+ * Submit add lead form with validation
+ */
+function submitAddLead() {
+  const validation = validateHtmlForm('#addLeadModalDedicated .modal-content');
+  
+  if (!validation.isValid) {
+    showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+    return;
+  }
+
+  const name = document.getElementById('addLeadName').value.trim();
+  const phone = document.getElementById('addLeadPhone').value.trim();
+  const email = document.getElementById('addLeadEmail').value.trim();
+  const comment = document.getElementById('addLeadComment').value.trim();
+  const primarySource = document.getElementById('addLeadPrimarySourceOfSale').value;
+  const secondarySource = document.getElementById('addLeadSecondarySourceOfSale').value;
+  const leadType = document.getElementById('addLeadType').value;
+
+  const leadData = {
+    lead_name: name,
+    lead_type: leadType,
+    lead_comment: comment,
+    lead_phone: phone,
+    lead_email: email,
+    primary_source_of_sale: primarySource,
+    secondary_source_of_sale: secondarySource
+  };
+
+  leads.push(leadData);
+  showToast('success', 'تم إضافة العميل المحتمل بنجاح');
+  closeAddLeadModalDedicated();
+  loadLeads();
+}
+
+/**
+ * Validate new address form
+ * @returns {boolean} True if address form is valid
+ */
+function validateNewAddressForm() {
+  const validation = validateHtmlForm('#newAddressSection');
+  
+  if (!validation.isValid) {
+    showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+    return false;
+  }
+  
+  return true;
+}
+
+// ===== UTILITY FUNCTIONS FOR VALIDATION =====
+
+/**
+ * Check if a form section has any required fields
+ * @param {string} containerSelector - CSS selector for the form container
+ * @returns {boolean} True if container has required fields
+ */
+function hasRequiredFields(containerSelector) {
+  const container = document.querySelector(containerSelector);
+  if (!container) return false;
+  
+  return container.querySelectorAll('[required]').length > 0;
+}
+
+/**
+ * Get all required field labels from a form section
+ * @param {string} containerSelector - CSS selector for the form container
+ * @returns {Array} Array of field labels
+ */
+function getRequiredFieldLabels(containerSelector) {
+  const rules = getFormValidationRules(containerSelector);
+  return rules.map(rule => rule.label);
+}
+
+/**
+ * Clear all validation error states in a form
+ * @param {string} containerSelector - CSS selector for the form container
+ */
+function clearValidationErrors(containerSelector) {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+  
+  const errorFields = container.querySelectorAll('.error');
+  errorFields.forEach(field => {
+    field.classList.remove('error');
+    field.style.borderColor = '';
+    field.style.boxShadow = '';
+  });
+}
+
+/**
+ * Validate a single field
+ * @param {HTMLElement} field - The field element to validate
+ * @returns {boolean} True if field is valid
+ */
+function validateSingleField(field) {
+  if (!field || !field.hasAttribute('required')) return true;
+  
+  let isEmpty = !field.value || !field.value.trim();
+  
+  if (field.type === 'select-one' && field.value === '') {
+    isEmpty = true;
+  }
+  
+  if (field.type === 'hidden' && field.hasAttribute('required')) {
+    isEmpty = !field.value;
+  }
+  
+  if (isEmpty) {
+    highlightErrorField(field);
+    return false;
+  }
+  
+  return true;
+}
+
+// // ===== DEBUGGING AND TESTING FUNCTIONS =====
+
+// /**
+//  * Test validation highlighting on a specific field
+//  * @param {string} fieldId - ID of the field to test
+//  */
+// function testFieldHighlighting(fieldId) {
+//   const field = document.getElementById(fieldId);
+//   if (!field) {
+//     console.error('Field not found:', fieldId);
+//     return;
+//   }
+  
+//   console.log('Testing field highlighting for:', fieldId);
+//   highlightErrorField(field);
+// }
+
+// /**
+//  * Test validation on a form without submitting
+//  * @param {string} containerSelector - CSS selector for the form container
+//  */
+// function testFormValidation(containerSelector) {
+//   console.log('Testing form validation for:', containerSelector);
+//   const result = validateHtmlForm(containerSelector);
+//   console.log('Test result:', result);
+//   return result;
+// }
+
+// /**
+//  * Highlight all required fields in a form (for testing)
+//  * @param {string} containerSelector - CSS selector for the form container
+//  */
+// function highlightAllRequiredFields(containerSelector) {
+//   const rules = getFormValidationRules(containerSelector);
+//   console.log('Highlighting all required fields in:', containerSelector);
+  
+//   rules.forEach(rule => {
+//     console.log('Highlighting field:', rule.id);
+//     highlightErrorField(rule.element);
+//   });
+// }
+
+// /**
+//  * Enhanced submit function with better error handling
+//  */
+// function submitAddCustomerWithDebug() {
+//   console.log('=== STARTING ADD CUSTOMER VALIDATION ===');
+  
+//   // First, let's see what fields we're looking for
+//   const rules = getFormValidationRules('#addCustomerModal .modal-content');
+//   console.log('Required fields found:', rules.map(r => ({id: r.id, label: r.label, exists: !!r.element})));
+  
+//   // Now validate
+//   const validation = validateHtmlForm('#addCustomerModal .modal-content');
+  
+//   if (!validation.isValid) {
+//     console.log('Validation failed, showing errors');
+//     showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
+    
+//     // Also manually highlight fields that failed
+//     rules.forEach(rule => {
+//       if (rule.element && (!rule.element.value || !rule.element.value.trim())) {
+//         console.log('Manually highlighting empty field:', rule.id);
+//         highlightErrorField(rule.element);
+//       }
+//     });
+    
+//     return;
+//   }
+
+//   console.log('Validation passed, proceeding with submission');
+  
+//   // Original submission logic
+//   const name = document.getElementById('addCustomerName').value.trim();
+//   const phone = document.getElementById('addCustomerPhone').value.trim();
+//   const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
+//   const email = document.getElementById('addCustomerEmail').value.trim();
+//   const comment = document.getElementById('addCustomerComment').value.trim();
+//   const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
+//   const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
+//   const customerType = document.getElementById('addCustomerType').value;
+
+//   const customerData = {
+//     customer_name: name,
+//     customer_type: customerType,
+//     customer_comment: comment,
+//     primary_source_of_sale: primarySource,
+//     secondary_source_of_sale: secondarySource,
+//     customer_phone: phone,
+//     customer_whatsapp: whatsapp,
+//     customer_email: email
+//   };
+
+//   API.addCustomer(customerData).then(newCustomer => {
+//     customers.push(newCustomer);
+//     showToast('success', 'تم إضافة العميل بنجاح');
+//     closeAddCustomerModal();
+//     loadCustomers();
+//   }).catch(error => {
+//     showToast('error', 'حدث خطأ أثناء إضافة العميل');
+//   });
+// }
 
     /**
      * Submit add customer form with validation
      */
     function submitAddCustomer() {
       const validation = validateHtmlForm('#addCustomerModal .modal-content');
-      
+
       if (!validation.isValid) {
         showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
         return;
@@ -4075,7 +4226,7 @@
      */
     function submitAddLead() {
       const validation = validateHtmlForm('#addLeadModalDedicated .modal-content');
-      
+
       if (!validation.isValid) {
         showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
         return;
@@ -4111,12 +4262,12 @@
      */
     function validateNewAddressForm() {
       const validation = validateHtmlForm('#newAddressSection');
-      
+
       if (!validation.isValid) {
         showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
         return false;
       }
-      
+
       return true;
     }
 
@@ -4130,7 +4281,7 @@
     function hasRequiredFields(containerSelector) {
       const container = document.querySelector(containerSelector);
       if (!container) return false;
-      
+
       return container.querySelectorAll('[required]').length > 0;
     }
 
@@ -4151,7 +4302,7 @@
     function clearValidationErrors(containerSelector) {
       const container = document.querySelector(containerSelector);
       if (!container) return;
-      
+
       const errorFields = container.querySelectorAll('.error');
       errorFields.forEach(field => {
         field.classList.remove('error');
@@ -4167,24 +4318,25 @@
      */
     function validateSingleField(field) {
       if (!field || !field.hasAttribute('required')) return true;
-      
+
       let isEmpty = !field.value || !field.value.trim();
-      
+
       if (field.type === 'select-one' && field.value === '') {
         isEmpty = true;
       }
-      
+
       if (field.type === 'hidden' && field.hasAttribute('required')) {
         isEmpty = !field.value;
       }
-      
+
       if (isEmpty) {
         highlightErrorField(field);
         return false;
       }
-      
+
       return true;
     }
+
 
     function submitOrder() {
       // Validate form
@@ -4297,7 +4449,7 @@
     // ===== EVENT LISTENERS =====
     document.addEventListener('DOMContentLoaded', initializeApp);
 
-    // ===== Global functions for onclick handlers (moved to very end for guaranteed global exposure) =====
+    // Global functions for onclick handlers
     window.openNewOrderModal = openNewOrderModal;
     window.closeNewOrderModal = closeNewOrderModal;
     window.selectCustomer = selectCustomer;
