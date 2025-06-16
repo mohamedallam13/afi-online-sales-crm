@@ -54,74 +54,137 @@
                 });
             }
 
-            // Attach timestamp and reference
+            // Attach timestamp, reference, and status
             request.timestamp = timestamp;
             request.reference = reference;
+            request.status = 'pending';
+            request.error = null;
             pendingRequests.push(request);
             writeToJSON(cormCompoundedRequestsBuffer, pendingRequests);
 
-            // Fire and forget background processing
-            processCompoundedRequestInBackground(request);
-
             return JSON.stringify({
                 success: true,
-                message: `Request ${reference} added to buffer successfully`
+                message: `Request ${reference} added to buffer successfully`,
+                reference: reference
             });
         } catch (error) {
+            console.error('Error adding compounded request to buffer:', error);
             return JSON.stringify({
                 success: false,
-                message: `Error adding compounded request to buffer: ${error.message}`
+                message: `Error adding compounded request to buffer: ${error.message}`,
+                stack: error.stack
             });
         }
+    }
+
+    function OrderRequest(order) {
+        this.customer_order_serial = order.order_serial || '';
+        this.customer_original_serial = order.customer_original_serial || '';
+        this.version_number = order.version_number || '1';
+        this.change_type = order.change_type || 'New Order';
+        this.status = order.status || 'Pending';
+        this.sales_person_id = order.sales_person_id || '600000000000001';
+        this.payment_type = order.payment_type || 'cash';
+        this.customer_id = order.customer_id || order.customerId || '';
+        this.address_id = order.address_id || order.addressId || '';
+        this.customer_order_comment = order.notes || order.customer_order_comment || '';
+        this.customer_order_date = order.customer_order_date || timestampCreate(new Date(), "M/d/YYYY HH:mm:ss");
+        this.customer_order_deadline = order.customer_order_deadline || '';
+        this.changed_at = order.changed_at || timestampCreate(new Date(), "M/d/YYYY HH:mm:ss");
+        this.change_reason = order.change_reason || 'Initial entry';
+        this.order_url = order.order_url || '';
+        this.order_invoice_number = order.order_invoice_number || '';
+        this.order_invoice_value = order.order_invoice_value || 0;
+        this.primary_source_of_sale = order.source || order.primary_source_of_sale || '';
+        this.secondary_source_of_sale = order.secondarySource || order.secondary_source_of_sale || '';
+        this.items = (order.items || []).map(item => ({
+            productData: item.productData || {
+                product_id: item.productId || '',
+                product_name_ar: item.productName || ''
+            },
+            quantity: item.quantity,
+            unit: item.unit || {
+                unit_id: item.unit_id || '',
+                unit_name_ar: item.unit_name_ar || item.unit || '',
+                unit_name: item.unit_name || ''
+            },
+            item_comment: item.comments || item.item_comment || ''
+        }));
+    }
+
+    function AddressRequest(address) {
+        this.address_label = address.address_label || '';
+        this.address_type = address.address_type || '';
+        this.address_comment = address.address_comment || '';
+        this.house_number = address.house_number || '';
+        this.flat_number = address.flat_number || '';
+        this.floor_number = address.floor_number || '';
+        this.street_name = address.street_name || '';
+        this.address_marking = address.address_marking || '';
+        this.address_district = address.address_district || '';
+        this.address_governorate = address.address_governorate || '';
+        this.area_id = address.area_id || '';
+    }
+
+    function CustomerRequest(customer) {
+        this.customer_name = customer.customer_name || '';
+        this.customer_type = customer.customer_type || '';
+        this.customer_comment = customer.customer_comment || '';
+        this.primary_source_of_sale = customer.primary_source_of_sale || '';
+        this.secondary_source_of_sale = customer.secondary_source_of_sale || '';
+        this.customer_phone = customer.customer_phone || '';
+        this.customer_whatsapp = customer.customer_whatsapp || '';
+        this.customer_email = customer.customer_email || '';
     }
 
     function addCompoudedOrder(request) {
-        console.log('Processing compounded request:', request);
-        
+        const orderRequest = new OrderRequest(request);
+        console.log('Processing compounded request:', orderRequest);
         // Create new customer if provided
-        let customerId = request.customer_id;
+        let customerId = orderRequest.customer_id;
         if (request.customer) {
-            customerId = createNewCustomer(request.customer);
+            const customerRequest = new CustomerRequest(request.customer);
+            customerId = createNewCustomer(customerRequest);
         }
-
         // Create new address if provided
-        let addressId = request.address_id;
+        let addressId = orderRequest.address_id;
         if (request.address) {
-            addressId = createNewAddress(request.address);
+            const addressRequest = new AddressRequest(request.address);
+            addressId = createNewAddress(addressRequest);
         }
-
-        // Create the order with all information
-        const orderData = {
-            customer_id: customerId,
-            address_id: addressId,
-            items: request.items,
-            notes: request.notes,
-            source: request.source,
-            secondary_source: request.secondarySource
-        };
-
-        const orderId = createNewOrder(orderData);
-        return orderId;
+        // Set the customer and address IDs in the orderRequest
+        orderRequest.customer_id = customerId;
+        orderRequest.address_id = addressId;
+        // Pass orderRequest directly to createNewOrder
+        const { pdfUrl, customerOrderId } = createNewOrder(orderRequest);
+        // Remove from buffer if successful
+        if (customerOrderId && request.reference) {
+            removeCompoundedRequestFromBuffer(request.reference);
+            increaseOrderCounter();
+        }
+        // return { pdfUrl, customerOrderId };
+        return { pdfUrl, customerOrderId };
     }
 
     function createNewCustomer(customer) {
-        const customerId = AFIDBSheetsController.runRequest("createNewCustomer", customer)
-        return customerId
+        const customerRequest = new CustomerRequest(customer);
+        const customerId = AFIDBSheetsController.runRequest("createNewCustomer", customerRequest);
+        return customerId;
     }
 
     function createNewAddress(address) {
-        const addressId = AFIDBSheetsController.runRequest("createNewAddress", address)
-        return addressId
+        const addressRequest = new AddressRequest(address);
+        const addressId = AFIDBSheetsController.runRequest("createNewAddress", addressRequest);
+        return addressId;
     }
 
     function createNewOrder(formData) {
         const { pdfUrl, blob } = generateOrderPDF(formData)
         const customerOrderId = saveOrderToDBSheet(formData)
         // sendEmail(blob, formData)
-        increaseOrderCounter()
         console.log(formData)
         SpreadsheetApp.flush()
-        return pdfUrl
+        return { pdfUrl, customerOrderId }
     }
 
     function addNewLead(formData) {
@@ -136,7 +199,7 @@
 
     function saveOrderToDBSheet(formData) {
         augmentNewParameters(formData)
-        return AFIDBSheetsController.runRequest("createNewCustomerOrder", order)
+        return AFIDBSheetsController.runRequest("createNewCustomerOrder", formData)
     }
 
     function augmentNewParameters(formData) {
@@ -157,12 +220,20 @@
         writeToJSON(counters, countersFile)
     }
 
-    // Placeholder for background processing
-    function processCompoundedRequestInBackground(request) {
-        // This should be implemented to process the request and add to DB asynchronously
-        // For now, just log
-        console.log('Processing compounded request in background:', request);
-        // Example: setTimeout(() => addCompoudedOrder(request), 0);
+    function removeCompoundedRequestFromBuffer(reference) {
+        const masterFile = readFromJSON(MASTER_INDEX_ID);
+        const { cormCompoundedRequestsBuffer } = masterFile;
+        let pendingRequests = readFromJSON(cormCompoundedRequestsBuffer);
+        pendingRequests = pendingRequests.filter(req =>
+            (req.reference || (req.order && req.order.reference)) !== reference
+        );
+        writeToJSON(cormCompoundedRequestsBuffer, pendingRequests);
+        return true;
+    }
+
+    function generateOrderPDF(formData) {
+        // const pdfUrl = AFIDBSheetsController.runRequest("generateOrderPDF", formData)
+        return { pdfUrl: 'https://www.google.com', blob: 'blob' }
     }
 
     return {
