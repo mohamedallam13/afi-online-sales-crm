@@ -1861,6 +1861,64 @@
     }
 
     /* Remove the slideDown animation since it's no longer needed */
+
+    /* Empty State Styles */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      border-radius: var(--border-radius-lg);
+      margin: 2rem auto;
+      max-width: 500px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      opacity: 0.8;
+    }
+
+    .empty-state h3 {
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+    }
+
+    .empty-state p {
+      color: var(--gray-500);
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .empty-state .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .empty-state .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Center empty state in grid and table containers */
+    .customers-grid > .empty-state,
+    .leads-grid > .empty-state {
+      grid-column: 1 / -1;
+      justify-self: center;
+    }
+    .orders-table-container .empty-state {
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
 </head>
 
@@ -3003,10 +3061,50 @@
 
     function renderOrders() {
       const tbody = document.getElementById('ordersTableBody');
-      let filteredOrders = orders;
+      if (!tbody) {
+        console.error('Orders table body element not found');
+        return;
+      }
 
+      if (!orders || orders.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>لا توجد طلبات</h3>
+                <p>لم يتم إضافة أي طلبات حتى الآن. يمكنك إضافة طلب جديد من خلال الضغط على زر "طلب جديد"</p>
+                <button class="btn btn-primary" onclick="openNewOrderModal()">
+                  <i class="fas fa-plus"></i>
+                  إضافة طلب جديد
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        return;
+      }
+
+      let filteredOrders = orders;
       if (appState.orderFilter !== 'all') {
         filteredOrders = orders.filter(order => order.status === appState.orderFilter);
+      }
+
+      if (filteredOrders.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="fas fa-filter"></i>
+                <h3>لا توجد طلبات في هذه الفئة</h3>
+                <p>لم يتم العثور على أي طلبات تطابق الفلتر المحدد. جرب تغيير الفلتر أو إضافة طلب جديد</p>
+                <button class="btn btn-primary" onclick="openNewOrderModal()">
+                  <i class="fas fa-plus"></i>
+                  إضافة طلب جديد
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        return;
       }
 
       tbody.innerHTML = filteredOrders.map(order => {
@@ -3146,16 +3244,33 @@
 
     // ===== CUSTOMERS MANAGEMENT =====
     function loadCustomers() {
-      API.getCustomers().then(customers => {
-        customers = customers;
+      API.getCustomers().then(customersData => {
+        customers = Array.isArray(customersData) ? customersData : [];
         renderCustomers();
       }).catch(error => {
         console.error('Failed to load customers:', error);
+        customers = [];
+        renderCustomers();
       });
     }
 
     function renderCustomers() {
       const grid = document.getElementById('customersGrid');
+      if (!grid) return;
+
+      if (customers.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h3>لا يوجد عملاء</h3>
+            <p>لم يتم إضافة أي عملاء حتى الآن. يمكنك إضافة عميل جديد من خلال الضغط على زر "إضافة عميل"</p>
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">
+              <i class="fas fa-user-plus"></i>
+              إضافة عميل جديد
+            </button>
+          </div>`;
+        return;
+      }
 
       grid.innerHTML = customers.map(customer => {
         const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
@@ -4825,6 +4940,21 @@ function validateSingleField(field) {
 
     function renderLeads() {
       const grid = document.getElementById('leadsGrid');
+      if (!grid) return;
+
+      if (!leads || leads.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-user-plus"></i>
+            <h3>لا يوجد عملاء محتملين</h3>
+            <p>لم يتم إضافة أي عملاء محتملين حتى الآن. يمكنك إضافة عميل محتمل جديد من خلال الضغط على زر "إضافة عميل محتمل"</p>
+            <button class="btn btn-success" onclick="openAddLeadModal()">
+              <i class="fas fa-plus"></i>
+              إضافة عميل محتمل جديد
+            </button>
+          </div>`;
+        return;
+      }
 
       grid.innerHTML = leads.map(lead => {
         return `
