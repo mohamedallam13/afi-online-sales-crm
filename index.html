@@ -2158,25 +2158,12 @@
             </div>
             <input type="hidden" id="customerType" value="customer">
             <div class="form-group">
-              <label class="form-label">مصدر الطلب *</label>
-              <select class="form-select" id="primarySourceOfSale" required data-label="مصدر الطلب">
-                <option value="">اختر المصدر</option>
-                <option value="Online">أونلاين</option>
-                <option value="InStore">من المتجر</option>
-                <option value="Phone">هاتف</option>
-                <option value="Other">أخرى</option>
-              </select>
+              <label class="form-label">مصدر العميل *</label>
+              <select class="form-select" id="primarySourceOfSale" required data-label="مصدر الطلب"></select>
             </div>
             <div class="form-group">
-              <label class="form-label">مصدر ثانوي</label>
-              <select class="form-select" id="secondarySourceOfSale" data-label="مصدر ثانوي">
-                <option value="">اختر المصدر</option>
-                <option value="Facebook">فيسبوك</option>
-                <option value="Instagram">انستجرام</option>
-                <option value="Google">جوجل</option>
-                <option value="Referral">إحالة</option>
-                <option value="Other">أخرى</option>
-              </select>
+              <label class="form-label">المصدر الفرعي</label>
+              <select class="form-select" id="secondarySourceOfSale" data-label="المصدر الفرعي"></select>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
               <button type="button" class="btn btn-primary" onclick="submitNewCustomer()">
@@ -2272,6 +2259,17 @@
             <i class="fas fa-shopping-cart"></i>
             تفاصيل الطلب
           </h3>
+          <!-- Source Dropdowns -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">مصدر الطلب *</label>
+              <select class="form-select" id="orderSource" required data-label="مصدر الطلب"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">المصدر الفرعي</label>
+              <select class="form-select" id="orderSecondarySource" data-label="المصدر الفرعي"></select>
+            </div>
+          </div>
 
           <!-- Order Comments -->
           <div class="form-group mb-2">
@@ -2350,25 +2348,12 @@
           </div>
           <input type="hidden" id="addLeadType" value="customer">
           <div class="form-group">
-            <label class="form-label">مصدر الطلب *</label>
-            <select class="form-select" id="addLeadPrimarySourceOfSale" required data-label="مصدر الطلب">
-              <option value="">اختر المصدر</option>
-              <option value="Online">أونلاين</option>
-              <option value="InStore">من المتجر</option>
-              <option value="Phone">هاتف</option>
-              <option value="Other">أخرى</option>
-            </select>
+            <label class="form-label">مصدر العميل *</label>
+            <select class="form-select" id="addLeadPrimarySourceOfSale" required data-label="مصدر الطلب"></select>
           </div>
           <div class="form-group">
             <label class="form-label">المصدر الفرعي</label>
-            <select class="form-select" id="addLeadSecondarySourceOfSale" data-label="المصدر الفرعي">
-              <option value="">اختر المصدر الفرعي</option>
-              <option value="Referral">إحالة</option>
-              <option value="Facebook">فيسبوك</option>
-              <option value="Instagram">إنستغرام</option>
-              <option value="Google">جوجل</option>
-              <option value="Other">أخرى</option>
-            </select>
+            <select class="form-select" id="addLeadSecondarySourceOfSale" data-label="المصدر الفرعي"></select>
           </div>
         </div>
       </div>
@@ -2412,25 +2397,12 @@
           </div>
           <input type="hidden" id="addCustomerType" value="customer">
           <div class="form-group">
-            <label class="form-label">مصدر الطلب *</label>
-            <select class="form-select" id="addCustomerPrimarySourceOfSale" required data-label="مصدر الطلب">
-              <option value="">اختر المصدر</option>
-              <option value="Online">أونلاين</option>
-              <option value="InStore">من المتجر</option>
-              <option value="Phone">هاتف</option>
-              <option value="Other">أخرى</option>
-            </select>
+            <label class="form-label">مصدر العميل *</label>
+            <select class="form-select" id="addCustomerPrimarySourceOfSale" required data-label="مصدر الطلب"></select>
           </div>
           <div class="form-group">
             <label class="form-label">المصدر الفرعي</label>
-            <select class="form-select" id="addCustomerSecondarySourceOfSale" data-label="المصدر الفرعي">
-              <option value="">اختر المصدر الفرعي</option>
-              <option value="Referral">إحالة</option>
-              <option value="Facebook">فيسبوك</option>
-              <option value="Instagram">إنستغرام</option>
-              <option value="Google">جوجل</option>
-              <option value="Other">أخرى</option>
-            </select>
+            <select class="form-select" id="addCustomerSecondarySourceOfSale" data-label="المصدر الفرعي"></select>
           </div>
         </div>
 
@@ -3328,6 +3300,8 @@
       if (customerSearch) customerSearch.value = '';
       if (searchResults) searchResults.classList.remove('show');
 
+      clearSelectedCustomer()
+
       // Hide all form sections
       hideAllFormSections();
 
@@ -3639,9 +3613,21 @@
       appState.newOrderForm.address = null;
       
       document.getElementById('customerSearch').value = '';
+      // Hide and reset the customer details box
       const detailsBox = document.getElementById('selectedCustomerDetails');
-      detailsBox.classList.remove('show');
-      detailsBox.style.display = 'none';
+      if (detailsBox) {
+        detailsBox.classList.remove('show');
+        detailsBox.style.display = 'none';
+        // Optionally clear its contents
+        const name = document.getElementById('selectedCustomerName');
+        const phone = document.getElementById('selectedCustomerPhone');
+        const address = document.getElementById('selectedCustomerAddress');
+        const orders = document.getElementById('selectedCustomerOrders');
+        if (name) name.textContent = '';
+        if (phone) phone.textContent = '';
+        if (address) address.textContent = '';
+        if (orders) orders.textContent = '';
+      }
       
       hideAllFormSections();
     }
@@ -4855,7 +4841,7 @@ function validateSingleField(field) {
     window.submitAddLead = submitAddLead;
 
     // ===== GLOBAL SOURCES MAP =====
-    let sourcesMap = {
+    const sourcesMap = {
       Online: [
         { value: 'Referral', label: 'إحالة' },
         { value: 'Facebook', label: 'فيسبوك' },
@@ -4877,7 +4863,7 @@ function validateSingleField(field) {
         { value: 'Other', label: 'أخرى' }
       ]
     };
-    let primarySources = [
+    const primarySources = [
       { value: 'Online', label: 'أونلاين' },
       { value: 'InStore', label: 'من المتجر' },
       { value: 'Phone', label: 'هاتف' },
@@ -4903,25 +4889,11 @@ function validateSingleField(field) {
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      // Customer modal
       populateSourceDropdowns('primarySourceOfSale', 'secondarySourceOfSale');
-      // Add customer modal
       populateSourceDropdowns('addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale');
-      // Add lead modal
+      populateSourceDropdowns('orderSource', 'orderSecondarySource');
       populateSourceDropdowns('addLeadPrimarySourceOfSale', 'addLeadSecondarySourceOfSale');
-
-      // Initialize navigation
-      initializeNavigation();
-      initializeOrderFilters();
-
-      // Load initial data based on active section
-      if (appState.currentSection === 'orders') {
-        loadOrders();
-      } else if (appState.currentSection === 'customers') {
-        loadCustomers();
-      } else if (appState.currentSection === 'leads') {
-        loadLeads();
-      }
+      // ... existing code ...
     });
 
     function loadLeads() {
