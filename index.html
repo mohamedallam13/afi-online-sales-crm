@@ -2160,6 +2160,15 @@
               <input type="tel" class="form-input" id="customerPhone" required data-label="رقم الهاتف">
             </div>
             <div class="form-group">
+              <label class="form-label">نوع *</label>
+              <select class="form-select" id="customerGender" required data-label="نوع">
+                <option value="">اختر النوع</option>
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
+                <option value="other">آخر</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label class="form-label">واتساب</label>
               <input type="tel" class="form-input" id="customerWhatsapp" data-label="واتساب">
             </div>
@@ -2354,6 +2363,15 @@
             <input type="tel" class="form-input" id="addLeadPhone" required data-label="رقم الهاتف">
           </div>
           <div class="form-group">
+            <label class="form-label">نوع *</label>
+            <select class="form-select" id="addLeadGender" required data-label="نوع">
+              <option value="">اختر النوع</option>
+              <option value="male">ذكر</option>
+              <option value="female">أنثى</option>
+              <option value="other">آخر</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label class="form-label">البريد الإلكتروني</label>
             <input type="email" class="form-input" id="addLeadEmail" data-label="البريد الإلكتروني">
           </div>
@@ -2397,6 +2415,15 @@
           <div class="form-group">
             <label class="form-label">رقم الهاتف *</label>
             <input type="tel" class="form-input" id="addCustomerPhone" required data-label="رقم الهاتف">
+          </div>
+          <div class="form-group">
+            <label class="form-label">نوع *</label>
+            <select class="form-select" id="addCustomerGender" required data-label="نوع">
+              <option value="">اختر النوع</option>
+              <option value="male">ذكر</option>
+              <option value="female">أنثى</option>
+              <option value="other">آخر</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">واتساب</label>
@@ -2550,6 +2577,7 @@
         id: 'CUST-001',
         name: 'أحمد محمد علي',
         phone: '01234567890',
+        gender: 'male',
         addresses: [
           {
             id: 'ADDR_001',
@@ -2594,6 +2622,7 @@
         id: 'CUST-002',
         name: 'فاطمة أحمد محمود',
         phone: '01111111111',
+        gender: 'female',
         addresses: [
           {
             id: 'ADDR_003',
@@ -2621,6 +2650,7 @@
         id: 'CUST-003',
         name: 'محمد حسن إبراهيم',
         phone: '01222222222',
+        gender: 'male',
         addresses: [
           {
             id: 'ADDR_004',
@@ -2648,6 +2678,7 @@
         id: 'CUST-004',
         name: 'سارة عبدالله أحمد',
         phone: '01333333333',
+        gender: 'female',
         addresses: [
           {
             id: 'ADDR_005',
@@ -2680,6 +2711,7 @@
         lead_comment: 'مهتم بالمنتجات العضوية، طلب كتالوج',
         lead_phone: '01544444444',
         lead_email: 'khalid@email.com',
+        lead_gender: 'male',
         primary_source_of_sale: 'Online',
         secondary_source_of_sale: 'Facebook'
       },
@@ -2689,6 +2721,7 @@
         lead_comment: 'تم إرسال عرض سعر لطلبية شهرية',
         lead_phone: '01655555555',
         lead_email: 'reem.m@email.com',
+        lead_gender: 'female',
         primary_source_of_sale: 'Online',
         secondary_source_of_sale: 'Google'
       },
@@ -2698,6 +2731,7 @@
         lead_comment: 'إحالة من أحمد محمد علي',
         lead_phone: '01766666666',
         lead_email: '',
+        lead_gender: 'male',
         primary_source_of_sale: 'Referral',
         secondary_source_of_sale: ''
       },
@@ -2707,6 +2741,7 @@
         lead_comment: 'غير مهتمة حالياً، للمتابعة بعد 3 أشهر',
         lead_phone: '01877777777',
         lead_email: 'nora.h@email.com',
+        lead_gender: 'female',
         primary_source_of_sale: 'Online',
         secondary_source_of_sale: 'Instagram'
       }
@@ -2894,6 +2929,25 @@
         return this.request('getLeads', {}, {
           loaderMessage: 'جاري تحميل العملاء المحتملين...',
           hideToastOnSuccess: true
+        });
+      },
+
+      addLead: function (leadData) {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const newLead = {
+              lead_name: leadData.lead_name,
+              lead_type: leadData.lead_type,
+              lead_comment: leadData.lead_comment,
+              lead_phone: leadData.lead_phone,
+              lead_email: leadData.lead_email,
+              lead_gender: leadData.lead_gender,
+              primary_source_of_sale: leadData.primary_source_of_sale,
+              secondary_source_of_sale: leadData.secondary_source_of_sale
+            };
+            leads.push(newLead);
+            resolve(newLead);
+          }, 500);
         });
       },
 
@@ -3269,6 +3323,17 @@
       });
     }
 
+    function loadLeads() {
+      API.getLeads().then(leadsData => {
+        leads = Array.isArray(leadsData) ? leadsData : [];
+        renderLeads();
+      }).catch(error => {
+        console.error('Failed to load leads:', error);
+        leads = [];
+        renderLeads();
+      });
+    }
+
     function renderCustomers() {
       const grid = document.getElementById('customersGrid');
       if (!grid) return;
@@ -3289,12 +3354,29 @@
 
       grid.innerHTML = customers.map(customer => {
         const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
+        let genderIcon, genderText, genderColor;
+        
+        if (customer.gender === 'male') {
+          genderIcon = 'fas fa-mars';
+          genderText = 'ذكر';
+          genderColor = '#3b82f6';
+        } else if (customer.gender === 'female') {
+          genderIcon = 'fas fa-venus';
+          genderText = 'أنثى';
+          genderColor = '#ec4899';
+        } else {
+          genderIcon = 'fas fa-user';
+          genderText = 'آخر';
+          genderColor = '#6b7280';
+        }
+        
         return `
           <div class="customer-card">
             <div class="customer-header">
               <div class="customer-info">
                 <h3>${customer.name}</h3>
                 <p><i class="fas fa-phone"></i> ${customer.phone}</p>
+                <p><i class="${genderIcon}" style="color: ${genderColor};"></i> ${genderText}</p>
                 <p><i class="fas fa-map-marker-alt"></i> ${primaryAddress.area}${primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : ''}</p>
               </div>
             </div>
@@ -3322,6 +3404,12 @@
     function openNewOrderModal() {
       document.getElementById('newOrderModal').classList.add('show');
       resetNewOrderForm();
+      
+      // Initialize source dropdowns for order form
+      initializeSourceDropdowns();
+      
+      // Initialize customer source dropdowns in the order form
+      populateSourceDropdowns('primarySourceOfSale', 'secondarySourceOfSale');
     }
 
     function closeNewOrderModal() {
@@ -3589,20 +3677,38 @@
       if (!sourceSelect || !secondarySourceSelect) return;
 
       const sourceMappings = {
-        'website': [
-          { value: 'facebook', text: 'فيسبوك' },
-          { value: 'instagram', text: 'إنستغرام' },
-          { value: 'google', text: 'جوجل' },
-          { value: 'direct', text: 'مباشر' },
-          { value: 'linktree', text: 'لينك تري' },
-          { value: 'other', text: 'أخرى' }
+        'Online': [
+          { value: 'Referral', text: 'إحالة' },
+          { value: 'Facebook', text: 'فيسبوك' },
+          { value: 'Instagram', text: 'إنستغرام' },
+          { value: 'Google', text: 'جوجل' },
+          { value: 'Other', text: 'أخرى' }
         ],
-        'social': [
-          { value: 'facebook', text: 'فيسبوك' },
-          { value: 'instagram', text: 'إنستغرام' },
-          { value: 'google', text: 'جوجل' }
+        'InStore': [
+          { value: 'WalkIn', text: 'زيارة مباشرة' },
+          { value: 'Referral', text: 'إحالة' },
+          { value: 'Other', text: 'أخرى' }
+        ],
+        'Phone': [
+          { value: 'Referral', text: 'إحالة' },
+          { value: 'Ad', text: 'إعلان' },
+          { value: 'Other', text: 'أخرى' }
+        ],
+        'Other': [
+          { value: 'Other', text: 'أخرى' }
         ]
       };
+
+      const primarySources = [
+        { value: 'Online', text: 'أونلاين' },
+        { value: 'InStore', text: 'من المتجر' },
+        { value: 'Phone', text: 'هاتف' },
+        { value: 'Other', text: 'أخرى' }
+      ];
+
+      // Populate primary source dropdown
+      sourceSelect.innerHTML = '<option value="">اختر المصدر</option>' +
+        primarySources.map(src => `<option value="${src.value}">${src.text}</option>`).join('');
 
       sourceSelect.addEventListener('change', function () {
         const selectedSource = sourceSelect.value;
@@ -3911,6 +4017,10 @@
 
       // Initialize district search for address form
       initializeDistrictSearch();
+      
+      // Initialize source dropdowns
+      initializeSourceDropdowns();
+      populateSourceDropdowns('primarySourceOfSale', 'secondarySourceOfSale');
 
       if (searchTerm) {
         document.getElementById('customerName').value = searchTerm;
@@ -4194,12 +4304,18 @@ function submitAddCustomer() {
 
   const name = document.getElementById('addCustomerName').value.trim();
   const phone = document.getElementById('addCustomerPhone').value.trim();
+  const gender = document.getElementById('addCustomerGender').value;
   const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
   const email = document.getElementById('addCustomerEmail').value.trim();
   const comment = document.getElementById('addCustomerComment').value.trim();
   const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
   const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
   const customerType = document.getElementById('addCustomerType').value;
+
+  if (!name || !phone || !primarySource || !gender) {
+    showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+    return;
+  }
 
   const customerData = {
     customer_name: name,
@@ -4209,7 +4325,8 @@ function submitAddCustomer() {
     secondary_source_of_sale: secondarySource,
     customer_phone: phone,
     customer_whatsapp: whatsapp,
-    customer_email: email
+    customer_email: email,
+    customer_gender: gender
   };
 
   API.addCustomer(customerData).then(newCustomer => {
@@ -4222,284 +4339,119 @@ function submitAddCustomer() {
   });
 }
 
-/**
- * Submit add lead form with validation
- */
-function submitAddLead() {
-  const validation = validateHtmlForm('#addLeadModalDedicated .modal-content');
-  
-  if (!validation.isValid) {
-    showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
-    return;
+function initializeProductDropdown(row, rowIndex) {
+  const dropdown = row.querySelector('.custom-dropdown');
+  const input = dropdown.querySelector('.custom-dropdown-input');
+  const list = dropdown.querySelector('.custom-dropdown-list');
+  const box = dropdown.querySelector('.custom-dropdown-box');
+  const chevron = dropdown.querySelector('.custom-dropdown-chevron');
+  let isOpen = false;
+
+  function highlightMatch(text, term) {
+    if (!term) return text;
+    const regex = new RegExp(`(${term})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
   }
 
-  const name = document.getElementById('addLeadName').value.trim();
-  const phone = document.getElementById('addLeadPhone').value.trim();
-  const email = document.getElementById('addLeadEmail').value.trim();
-  const comment = document.getElementById('addLeadComment').value.trim();
-  const primarySource = document.getElementById('addLeadPrimarySourceOfSale').value;
-  const secondarySource = document.getElementById('addLeadSecondarySourceOfSale').value;
-  const leadType = document.getElementById('addLeadType').value;
-
-  const leadData = {
-    lead_name: name,
-    lead_type: leadType,
-    lead_comment: comment,
-    lead_phone: phone,
-    lead_email: email,
-    primary_source_of_sale: primarySource,
-    secondary_source_of_sale: secondarySource
-  };
-
-  leads.push(leadData);
-  showToast('success', 'تم إضافة العميل المحتمل بنجاح');
-  closeAddLeadModalDedicated();
-  loadLeads();
-}
-
-/**
- * Validate new address form
- * @returns {boolean} True if address form is valid
- */
-function validateNewAddressForm() {
-  const validation = validateHtmlForm('#newAddressSection');
-  
-  if (!validation.isValid) {
-    showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
-    return false;
+  function renderProductResults(filtered, term) {
+    if (!filtered.length) {
+      list.innerHTML = '<div class="custom-dropdown-item">لا توجد نتائج</div>';
+      list.classList.add('show');
+      isOpen = true;
+      chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+      return;
+    }
+    list.innerHTML = filtered.map(product =>
+      `<div class="custom-dropdown-item" data-id="${product.id}" data-price="${product.price}">
+        ${highlightMatch(product.name, term)}
+        <small style="color: var(--gray-500);">${product.category}</small>
+      </div>`
+    ).join('');
+    list.classList.add('show');
+    isOpen = true;
+    chevron.style.transform = 'translateY(-50%) rotate(180deg)';
   }
-  
-  return true;
-}
 
-// ===== UTILITY FUNCTIONS FOR VALIDATION =====
+  function closeDropdown() {
+    list.classList.remove('show');
+    isOpen = false;
+    chevron.style.transform = 'translateY(-50%)';
+  }
 
-/**
- * Check if a form section has any required fields
- * @param {string} containerSelector - CSS selector for the form container
- * @returns {boolean} True if container has required fields
- */
-function hasRequiredFields(containerSelector) {
-  const container = document.querySelector(containerSelector);
-  if (!container) return false;
-  
-  return container.querySelectorAll('[required]').length > 0;
-}
+  function filterProducts(term) {
+    term = term.trim().toLowerCase();
+    if (!term) return products;
+    return products.filter(p =>
+      p.name.toLowerCase().includes(term) ||
+      p.category.toLowerCase().includes(term)
+    );
+  }
 
-/**
- * Get all required field labels from a form section
- * @param {string} containerSelector - CSS selector for the form container
- * @returns {Array} Array of field labels
- */
-function getRequiredFieldLabels(containerSelector) {
-  const rules = getFormValidationRules(containerSelector);
-  return rules.map(rule => rule.label);
-}
+  function selectProduct(product) {
+    input.value = product.name;
+    input.setAttribute('data-selected-id', product.id);
+    input.setAttribute('data-selected-price', product.price);
+    // Auto-set quantity to 1 if empty
+    const row = document.getElementById('itemsTableBody').children[rowIndex];
+    const quantityInput = row.querySelector('.quantity-input');
+    if (quantityInput && (!quantityInput.value || parseInt(quantityInput.value) <= 0)) {
+      quantityInput.value = 1;
+    }
+    closeDropdown();
+    updateOrderItem(rowIndex);
+  }
 
-/**
- * Clear all validation error states in a form
- * @param {string} containerSelector - CSS selector for the form container
- */
-function clearValidationErrors(containerSelector) {
-  const container = document.querySelector(containerSelector);
-  if (!container) return;
-  
-  const errorFields = container.querySelectorAll('.error');
-  errorFields.forEach(field => {
-    field.classList.remove('error');
-    field.style.borderColor = '';
-    field.style.boxShadow = '';
+  input.addEventListener('input', function() {
+    const filtered = filterProducts(input.value);
+    renderProductResults(filtered, input.value.trim());
+  });
+
+  input.addEventListener('focus', function() {
+    if (!isOpen) {
+      renderProductResults(products, input.value.trim());
+    }
+  });
+
+  input.addEventListener('click', function() {
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      renderProductResults(products, input.value.trim());
+    }
+  });
+
+  list.addEventListener('click', function(e) {
+    const item = e.target.closest('.custom-dropdown-item');
+    if (item) {
+      const productId = item.dataset.id;
+      const product = products.find(p => p.id === productId);
+      if (product) {
+        selectProduct(product);
+      }
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.custom-dropdown')) {
+      closeDropdown();
+    }
   });
 }
 
-/**
- * Validate a single field
- * @param {HTMLElement} field - The field element to validate
- * @returns {boolean} True if field is valid
- */
-function validateSingleField(field) {
-  if (!field || !field.hasAttribute('required')) return true;
-  
-  let isEmpty = !field.value || !field.value.trim();
-  
-  if (field.type === 'select-one' && field.value === '') {
-    isEmpty = true;
-  }
-  
-  if (field.type === 'hidden' && field.hasAttribute('required')) {
-    isEmpty = !field.value;
-  }
-  
-  if (isEmpty) {
-    highlightErrorField(field);
-    return false;
-  }
-  
-  return true;
-}
-
-// // ===== DEBUGGING AND TESTING FUNCTIONS =====
-
-// /**
-//  * Test validation highlighting on a specific field
-//  * @param {string} fieldId - ID of the field to test
-//  */
-// function testFieldHighlighting(fieldId) {
-//   const field = document.getElementById(fieldId);
-//   if (!field) {
-//     console.error('Field not found:', fieldId);
-//     return;
-//   }
-  
-//   console.log('Testing field highlighting for:', fieldId);
-//   highlightErrorField(field);
-// }
-
-// /**
-//  * Test validation on a form without submitting
-//  * @param {string} containerSelector - CSS selector for the form container
-//  */
-// function testFormValidation(containerSelector) {
-//   console.log('Testing form validation for:', containerSelector);
-//   const result = validateHtmlForm(containerSelector);
-//   console.log('Test result:', result);
-//   return result;
-// }
-
-// /**
-//  * Highlight all required fields in a form (for testing)
-//  * @param {string} containerSelector - CSS selector for the form container
-//  */
-// function highlightAllRequiredFields(containerSelector) {
-//   const rules = getFormValidationRules(containerSelector);
-//   console.log('Highlighting all required fields in:', containerSelector);
-  
-//   rules.forEach(rule => {
-//     console.log('Highlighting field:', rule.id);
-//     highlightErrorField(rule.element);
-//   });
-// }
-
-// /**
-//  * Enhanced submit function with better error handling
-//  */
-// function submitAddCustomerWithDebug() {
-//   console.log('=== STARTING ADD CUSTOMER VALIDATION ===');
-  
-//   // First, let's see what fields we're looking for
-//   const rules = getFormValidationRules('#addCustomerModal .modal-content');
-//   console.log('Required fields found:', rules.map(r => ({id: r.id, label: r.label, exists: !!r.element})));
-  
-//   // Now validate
-//   const validation = validateHtmlForm('#addCustomerModal .modal-content');
-  
-//   if (!validation.isValid) {
-//     console.log('Validation failed, showing errors');
-//     showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
-    
-//     // Also manually highlight fields that failed
-//     rules.forEach(rule => {
-//       if (rule.element && (!rule.element.value || !rule.element.value.trim())) {
-//         console.log('Manually highlighting empty field:', rule.id);
-//         highlightErrorField(rule.element);
-//       }
-//     });
-    
-//     return;
-//   }
-
-//   console.log('Validation passed, proceeding with submission');
-  
-//   // Original submission logic
-//   const name = document.getElementById('addCustomerName').value.trim();
-//   const phone = document.getElementById('addCustomerPhone').value.trim();
-//   const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
-//   const email = document.getElementById('addCustomerEmail').value.trim();
-//   const comment = document.getElementById('addCustomerComment').value.trim();
-//   const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
-//   const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
-//   const customerType = document.getElementById('addCustomerType').value;
-
-//   const customerData = {
-//     customer_name: name,
-//     customer_type: customerType,
-//     customer_comment: comment,
-//     primary_source_of_sale: primarySource,
-//     secondary_source_of_sale: secondarySource,
-//     customer_phone: phone,
-//     customer_whatsapp: whatsapp,
-//     customer_email: email
-//   };
-
-//   API.addCustomer(customerData).then(newCustomer => {
-//     customers.push(newCustomer);
-//     showToast('success', 'تم إضافة العميل بنجاح');
-//     closeAddCustomerModal();
-//     loadCustomers();
-//   }).catch(error => {
-//     showToast('error', 'حدث خطأ أثناء إضافة العميل');
-//   });
-// }
-
-    /**
-     * Submit add customer form with validation
-     */
-    function submitAddCustomer() {
-      const validation = validateHtmlForm('#addCustomerModal .modal-content');
-
-      if (!validation.isValid) {
-        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
-        return;
-      }
-
-      const name = document.getElementById('addCustomerName').value.trim();
-      const phone = document.getElementById('addCustomerPhone').value.trim();
-      const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
-      const email = document.getElementById('addCustomerEmail').value.trim();
-      const comment = document.getElementById('addCustomerComment').value.trim();
-      const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
-      const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
-      const customerType = document.getElementById('addCustomerType').value;
-
-      const customerData = {
-        customer_name: name,
-        customer_type: customerType,
-        customer_comment: comment,
-        primary_source_of_sale: primarySource,
-        secondary_source_of_sale: secondarySource,
-        customer_phone: phone,
-        customer_whatsapp: whatsapp,
-        customer_email: email
-      };
-
-      API.addCustomer(customerData).then(newCustomer => {
-        customers.push(newCustomer);
-        showToast('success', 'تم إضافة العميل بنجاح');
-        closeAddCustomerModal();
-        loadCustomers();
-      }).catch(error => {
-        showToast('error', 'حدث خطأ أثناء إضافة العميل');
-      });
-    }
-
-    /**
-     * Submit add lead form with validation
-     */
     function submitAddLead() {
-      const validation = validateHtmlForm('#addLeadModalDedicated .modal-content');
-
-      if (!validation.isValid) {
-        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
-        return;
-      }
-
       const name = document.getElementById('addLeadName').value.trim();
       const phone = document.getElementById('addLeadPhone').value.trim();
+      const gender = document.getElementById('addLeadGender').value;
       const email = document.getElementById('addLeadEmail').value.trim();
       const comment = document.getElementById('addLeadComment').value.trim();
       const primarySource = document.getElementById('addLeadPrimarySourceOfSale').value;
       const secondarySource = document.getElementById('addLeadSecondarySourceOfSale').value;
       const leadType = document.getElementById('addLeadType').value;
+
+      if (!name || !phone || !primarySource || !gender) {
+        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+        return;
+      }
 
       const leadData = {
         lead_name: name,
@@ -4507,206 +4459,157 @@ function validateSingleField(field) {
         lead_comment: comment,
         lead_phone: phone,
         lead_email: email,
+        lead_gender: gender,
         primary_source_of_sale: primarySource,
         secondary_source_of_sale: secondarySource
       };
 
-      leads.push(leadData);
-      showToast('success', 'تم إضافة العميل المحتمل بنجاح');
-      closeAddLeadModalDedicated();
-      loadLeads();
-    }
-
-    /**
-     * Validate new address form
-     * @returns {boolean} True if address form is valid
-     */
-    function validateNewAddressForm() {
-      const validation = validateHtmlForm('#newAddressSection');
-
-      if (!validation.isValid) {
-        showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
-        return false;
-      }
-
-      return true;
-    }
-
-    // ===== UTILITY FUNCTIONS FOR VALIDATION =====
-
-    /**
-     * Check if a form section has any required fields
-     * @param {string} containerSelector - CSS selector for the form container
-     * @returns {boolean} True if container has required fields
-     */
-    function hasRequiredFields(containerSelector) {
-      const container = document.querySelector(containerSelector);
-      if (!container) return false;
-
-      return container.querySelectorAll('[required]').length > 0;
-    }
-
-    /**
-     * Get all required field labels from a form section
-     * @param {string} containerSelector - CSS selector for the form container
-     * @returns {Array} Array of field labels
-     */
-    function getRequiredFieldLabels(containerSelector) {
-      const rules = getFormValidationRules(containerSelector);
-      return rules.map(rule => rule.label);
-    }
-
-    /**
-     * Clear all validation error states in a form
-     * @param {string} containerSelector - CSS selector for the form container
-     */
-    function clearValidationErrors(containerSelector) {
-      const container = document.querySelector(containerSelector);
-      if (!container) return;
-
-      const errorFields = container.querySelectorAll('.error');
-      errorFields.forEach(field => {
-        field.classList.remove('error');
-        field.style.borderColor = '';
-        field.style.boxShadow = '';
-      });
-    }
-
-    /**
-     * Validate a single field
-     * @param {HTMLElement} field - The field element to validate
-     * @returns {boolean} True if field is valid
-     */
-    function validateSingleField(field) {
-      if (!field || !field.hasAttribute('required')) return true;
-
-      let isEmpty = !field.value || !field.value.trim();
-
-      if (field.type === 'select-one' && field.value === '') {
-        isEmpty = true;
-      }
-
-      if (field.type === 'hidden' && field.hasAttribute('required')) {
-        isEmpty = !field.value;
-      }
-
-      if (isEmpty) {
-        highlightErrorField(field);
-        return false;
-      }
-
-      return true;
-    }
-
-
-    function submitOrder() {
-      // Validate form
-      if (!validateOrderForm()) {
-        return;
-      }
-
-      // Update all items from form
-      for (let i = 0; i < appState.newOrderForm.items.length; i++) {
-        updateOrderItem(i);
-      }
-
-      // Filter out empty items
-      const validItems = appState.newOrderForm.items.filter(item =>
-        item.productId && item.quantity > 0
-      );
-
-      let customer = appState.selectedCustomer;
-
-      // If no existing customer selected, create new one
-      if (!customer) {
-        showToast('error', 'يجب إضافة بيانات العميل أولاً');
-        return;
-      }
-
-      // Generate a unique reference number for the order
-      const referenceNumber = 'REF-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
-
-      // Create the compounded request
-      const compoundedRequest = {
-        reference: referenceNumber,
-        customer: !customer.id.startsWith('TEMP-') ? null : {
-          customer_name: customer.name,
-          customer_type: customer.type,
-          customer_comment: customer.comment,
-          primary_source_of_sale: customer.primarySource,
-          secondary_source_of_sale: customer.secondarySource,
-          customer_phone: customer.phone,
-          customer_whatsapp: customer.whatsapp,
-          customer_email: customer.email
-        },
-        address: appState.selectedAddress && appState.selectedAddress.id.startsWith('ADDR-') ? {
-          address_label: appState.selectedAddress.address_label,
-          address_comment: appState.selectedAddress.address_comment,
-          house_number: appState.selectedAddress.house_number,
-          flat_number: appState.selectedAddress.flat_number,
-          floor_number: appState.selectedAddress.floor_number,
-          street_name: appState.selectedAddress.street_name,
-          address_marking: appState.selectedAddress.address_marking,
-          address_district: appState.selectedAddress.address_district,
-          address_governorate: appState.selectedAddress.address_governorate,
-          district_id: appState.selectedAddress.district_id,
-          area_id: appState.selectedAddress.area_id,
-          area: appState.selectedAddress.area
-        } : null,
-        items: validItems,
-        customer_id: !customer.id.startsWith('TEMP-') ? customer.id : null,
-        address_id: appState.selectedAddress && !appState.selectedAddress.id.startsWith('ADDR-') ? appState.selectedAddress.id : null,
-        notes: document.getElementById('orderComments').value.trim(),
-        source: document.getElementById('orderSource') ? document.getElementById('orderSource').value : '',
-        secondarySource: document.getElementById('orderSecondarySource') ? document.getElementById('orderSecondarySource').value : ''
-      };
-
-      // Log the compounded request for verification
-      console.log('Submitting order to buffer with the following data:', JSON.stringify(compoundedRequest, null, 2));
-
-      // Send the compounded request to the buffer
-      API.addCompoundedRequestToBuffer(compoundedRequest).then(response => {
-        response = JSON.parse(response);
-        if (response.success) {
-          console.log('Response:', response);
-          // Fire-and-forget: send to DB, but don't block UI
-          API.addCompoudedOrder(compoundedRequest);
-
-          closeNewOrderModal();
-          loadOrders(); // Refresh orders list
-          showToast('success', 'تم إضافة الطلب بنجاح', 'سيتم معالجة الطلب في الخلفية');
-        } else {
-          console.log(1);
-          showToast('error', 'حدث خطأ أثناء إضافة الطلب', response.message);
-        }
+      API.addLead(leadData).then(newLead => {
+        leads.push(newLead);
+        showToast('success', 'تم إضافة العميل المحتمل بنجاح');
+        closeAddLeadModalDedicated();
+        loadLeads();
       }).catch(error => {
-        console.log(2);
-        console.error('Failed to buffer order:', error);
-        showToast('error', 'حدث خطأ أثناء إضافة الطلب');
+        showToast('error', 'حدث خطأ أثناء إضافة العميل المحتمل');
       });
     }
 
-    // ===== INITIALIZATION =====
+    function renderLeads() {
+      const grid = document.getElementById('leadsGrid');
+      if (!grid) return;
+
+      if (!leads || leads.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-user-plus"></i>
+            <h3>لا يوجد عملاء محتملين</h3>
+            <p>لم يتم إضافة أي عملاء محتملين حتى الآن. يمكنك إضافة عميل محتمل جديد من خلال الضغط على زر "إضافة عميل محتمل"</p>
+            <button class="btn btn-success" onclick="openAddLeadModal()">
+              <i class="fas fa-plus"></i>
+              إضافة عميل محتمل جديد
+            </button>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = leads.map(lead => {
+        let genderIcon, genderText, genderColor;
+        
+        if (lead.lead_gender === 'male') {
+          genderIcon = 'fas fa-mars';
+          genderText = 'ذكر';
+          genderColor = '#3b82f6';
+        } else if (lead.lead_gender === 'female') {
+          genderIcon = 'fas fa-venus';
+          genderText = 'أنثى';
+          genderColor = '#ec4899';
+        } else {
+          genderIcon = 'fas fa-user';
+          genderText = 'آخر';
+          genderColor = '#6b7280';
+        }
+        
+        return `
+          <div class="customer-card">
+            <div class="customer-header">
+              <div class="customer-info">
+                <h3>${lead.lead_name}</h3>
+                <p><i class="fas fa-phone"></i> ${lead.lead_phone}</p>
+                <p><i class="${genderIcon}" style="color: ${genderColor};"></i> ${genderText}</p>
+                ${lead.lead_email ? `<p><i class="fas fa-envelope"></i> ${lead.lead_email}</p>` : ''}
+                <p><i class="fas fa-tag"></i> ${lead.primary_source_of_sale}${lead.secondary_source_of_sale ? ' - ' + lead.secondary_source_of_sale : ''}</p>
+              </div>
+            </div>
+            ${lead.lead_comment ? `
+              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200); color: var(--gray-600);">
+                <i class="fas fa-comment"></i> ${lead.lead_comment}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ===== ADD CUSTOMER MODAL LOGIC =====
+    function openAddCustomerModal() {
+      document.getElementById('addCustomerModal').classList.add('show');
+      resetAddCustomerForm();
+      populateSourceDropdowns('addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale');
+    }
+
+    function closeAddCustomerModal() {
+      document.getElementById('addCustomerModal').classList.remove('show');
+      resetAddCustomerForm();
+    }
+
+    function resetAddCustomerForm() {
+      ['addCustomerName', 'addCustomerPhone', 'addCustomerGender', 'addCustomerWhatsapp', 'addCustomerEmail', 'addCustomerComment', 'addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale', 'addCustomerType'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+
+    // Add click event listener to close modal when clicking outside
+    document.addEventListener('DOMContentLoaded', function() {
+      const addCustomerModal = document.getElementById('addCustomerModal');
+      if (addCustomerModal) {
+        addCustomerModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeAddCustomerModal();
+          }
+        });
+      }
+    });
+
+    // ===== ADD LEAD MODAL LOGIC =====
+    function openAddLeadModal() {
+      document.getElementById('addLeadModalDedicated').classList.add('show');
+      resetAddLeadForm();
+      populateSourceDropdowns('addLeadPrimarySourceOfSale', 'addLeadSecondarySourceOfSale');
+    }
+
+    function closeAddLeadModalDedicated() {
+      document.getElementById('addLeadModalDedicated').classList.remove('show');
+      resetAddLeadForm();
+    }
+
+    function resetAddLeadForm() {
+      ['addLeadName', 'addLeadPhone', 'addLeadGender', 'addLeadEmail', 'addLeadComment', 'addLeadPrimarySourceOfSale', 'addLeadSecondarySourceOfSale', 'addLeadType'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+
+    // Add click event listener to close lead modal when clicking outside
+    document.addEventListener('DOMContentLoaded', function() {
+      const addLeadModal = document.getElementById('addLeadModalDedicated');
+      if (addLeadModal) {
+        addLeadModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeAddLeadModalDedicated();
+          }
+        });
+      }
+    });
+
+    // ===== MAIN INITIALIZATION =====
     function initializeApp() {
       updateLoadingMessage('جاري تحميل البيانات...');
-
+      
       // Initialize components
       initializeNavigation();
       initializeOrderFilters();
-      initializeCustomerSearch();
-      initializeLocationDropdowns();
-      initializeSourceDropdowns();
-
+      
       // Load initial data
       Promise.all([
         API.getOrders(),
         API.getProducts(),
         API.getLocations()
-      ]).then(([orders, products, locations]) => {
-        orders = orders;
-        products = products;
-        locations = locations;
-
+      ]).then(([ordersData, productsData, locationsData]) => {
+        orders = ordersData;
+        products = productsData;
+        locations = locationsData;
+        
         updateOrderCounts();
         renderOrders();
         hideGlobalLoader();
@@ -4718,172 +4621,10 @@ function validateSingleField(field) {
       });
     }
 
-    // ===== EVENT LISTENERS =====
+    // Initialize app when DOM is loaded
     document.addEventListener('DOMContentLoaded', initializeApp);
 
-    // Global functions for onclick handlers
-    window.openNewOrderModal = openNewOrderModal;
-    window.closeNewOrderModal = closeNewOrderModal;
-    window.selectCustomer = selectCustomer;
-    window.showNewCustomerForm = showNewCustomerForm;
-    window.showNewAddressForm = showNewAddressForm;
-    window.saveNewAddress = saveNewAddress;
-    window.cancelNewAddress = cancelNewAddress;
-    window.selectAddress = selectAddress;
-    window.addOrderItem = addOrderItem;
-    window.removeOrderItem = removeOrderItem;
-    window.updateOrderItem = updateOrderItem;
-    window.submitOrder = submitOrder;
-    window.changeOrderStatus = changeOrderStatus;
-    window.toggleOrderDetails = toggleOrderDetails;
-
-    // ===== ADD CUSTOMER MODAL LOGIC =====
-    function openAddCustomerModal() {
-      document.getElementById('addCustomerModal').classList.add('show');
-      resetAddCustomerForm();
-      initializeAddCustomerLocationDropdowns();
-    }
-    function closeAddCustomerModal() {
-      document.getElementById('addCustomerModal').classList.remove('show');
-      resetAddCustomerForm();
-    }
-
-    // Add click event listener to close modal when clicking outside
-    document.getElementById('addCustomerModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeAddCustomerModal();
-      }
-    });
-
-    function resetAddCustomerForm() {
-      ['addCustomerName', 'addCustomerPhone', 'addCustomerAddress', 'addCustomerDistrict', 'addCustomerArea'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-    }
-    function initializeAddCustomerLocationDropdowns() {
-      const districtSelect = document.getElementById('addCustomerDistrict');
-      const areaSelect = document.getElementById('addCustomerArea');
-      if (!districtSelect || !areaSelect) return;
-      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
-        districts.map(district =>
-          `<option value="${district.id}">${district.name}</option>`
-        ).join('');
-      districtSelect.addEventListener('change', function () {
-        const selectedDistrict = districtSelect.value;
-        areaSelect.innerHTML = '<option value="">اختر الحي</option>';
-        if (selectedDistrict && locations.areas[selectedDistrict]) {
-          areaSelect.innerHTML += locations.areas[selectedDistrict].map(area =>
-            `<option value="${area.id}">${area.name}</option>`
-          ).join('');
-        }
-      });
-    }
-    function submitAddCustomer() {
-      const name = document.getElementById('addCustomerName').value.trim();
-      const phone = document.getElementById('addCustomerPhone').value.trim();
-      const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
-      const email = document.getElementById('addCustomerEmail').value.trim();
-      const comment = document.getElementById('addCustomerComment').value.trim();
-      const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
-      const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
-      const customerType = document.getElementById('addCustomerType').value;
-
-      if (!name || !phone || !primarySource) {
-        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
-        return;
-      }
-
-      const customerData = {
-        customer_name: name,
-        customer_type: customerType,
-        customer_comment: comment,
-        primary_source_of_sale: primarySource,
-        secondary_source_of_sale: secondarySource,
-        customer_phone: phone,
-        customer_whatsapp: whatsapp,
-        customer_email: email
-      };
-
-      API.addCustomer(customerData).then(newCustomer => {
-        customers.push(newCustomer);
-        showToast('success', 'تم إضافة العميل بنجاح');
-        closeAddCustomerModal();
-        loadCustomers();
-      }).catch(error => {
-        showToast('error', 'حدث خطأ أثناء إضافة العميل');
-      });
-    }
-    window.openAddCustomerModal = openAddCustomerModal;
-    window.closeAddCustomerModal = closeAddCustomerModal;
-    window.submitAddCustomer = submitAddCustomer;
-
-    // ===== ADD LEAD MODAL LOGIC =====
-    function openAddLeadModal() {
-      document.getElementById('addLeadModalDedicated').classList.add('show');
-      resetAddLeadForm();
-      initializeAddLeadDistrictDropdown();
-    }
-    function closeAddLeadModalDedicated() {
-      document.getElementById('addLeadModalDedicated').classList.remove('show');
-      resetAddLeadForm();
-    }
-
-    // Add click event listener to close modal when clicking outside
-    document.getElementById('addLeadModalDedicated').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeAddLeadModalDedicated();
-      }
-    });
-
-    function resetAddLeadForm() {
-      ['addLeadName', 'addLeadPhone', 'addLeadEmail', 'addLeadDistrict', 'addLeadSource', 'addLeadStatus', 'addLeadNotes'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-    }
-    function initializeAddLeadDistrictDropdown() {
-      const districtSelect = document.getElementById('addLeadDistrict');
-      if (!districtSelect) return;
-      districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
-        districts.map(district =>
-          `<option value="${district.id}">${district.name}</option>`
-        ).join('');
-    }
-    function submitAddLead() {
-      const name = document.getElementById('addLeadName').value.trim();
-      const phone = document.getElementById('addLeadPhone').value.trim();
-      const email = document.getElementById('addLeadEmail').value.trim();
-      const comment = document.getElementById('addLeadComment').value.trim();
-      const primarySource = document.getElementById('addLeadPrimarySourceOfSale').value;
-      const secondarySource = document.getElementById('addLeadSecondarySourceOfSale').value;
-      const leadType = document.getElementById('addLeadType').value;
-
-      if (!name || !phone || !primarySource) {
-        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
-        return;
-      }
-
-      const leadData = {
-        lead_name: name,
-        lead_type: leadType,
-        lead_comment: comment,
-        lead_phone: phone,
-        lead_email: email,
-        primary_source_of_sale: primarySource,
-        secondary_source_of_sale: secondarySource
-      };
-
-      leads.push(leadData);
-      showToast('success', 'تم إضافة العميل المحتمل بنجاح');
-      closeAddLeadModalDedicated();
-      loadLeads();
-    }
-    window.openAddLeadModal = openAddLeadModal;
-    window.closeAddLeadModalDedicated = closeAddLeadModalDedicated;
-    window.submitAddLead = submitAddLead;
-
-    // ===== GLOBAL SOURCES MAP =====
+    // ===== SOURCE DROPDOWNS =====
     const sourcesMap = {
       Online: [
         { value: 'Referral', label: 'إحالة' },
@@ -4906,6 +4647,7 @@ function validateSingleField(field) {
         { value: 'Other', label: 'أخرى' }
       ]
     };
+
     const primarySources = [
       { value: 'Online', label: 'أونلاين' },
       { value: 'InStore', label: 'من المتجر' },
@@ -4917,9 +4659,11 @@ function validateSingleField(field) {
       const primarySelect = document.getElementById(primaryId);
       const secondarySelect = document.getElementById(secondaryId);
       if (!primarySelect || !secondarySelect) return;
+      
       // Populate primary
       primarySelect.innerHTML = '<option value="">اختر المصدر</option>' +
         primarySources.map(src => `<option value="${src.value}">${src.label}</option>`).join('');
+      
       // Populate secondary on primary change
       primarySelect.addEventListener('change', function () {
         const selected = primarySelect.value;
@@ -4927,72 +4671,91 @@ function validateSingleField(field) {
         secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>' +
           options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
       });
+      
       // Initial clear
       secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>';
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      populateSourceDropdowns('primarySourceOfSale', 'secondarySourceOfSale');
-      populateSourceDropdowns('addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale');
-      populateSourceDropdowns('orderSource', 'orderSecondarySource');
-      populateSourceDropdowns('addLeadPrimarySourceOfSale', 'addLeadSecondarySourceOfSale');
-      // ... existing code ...
-    });
-
-    function loadLeads() {
-      if (API.getLeads) {
-        API.getLeads().then(apiLeads => {
-          leads = apiLeads;
-          renderLeads();
-        }).catch(error => {
-          console.error('Failed to load leads from API, falling back to hardcoded leads:', error);
-          renderLeads(); // fallback to hardcoded leads
-        });
-      } else {
-        renderLeads(); // fallback if API.getLeads is not defined
-      }
-    }
-
-    function renderLeads() {
-      const grid = document.getElementById('leadsGrid');
-      if (!grid) return;
-
-      if (!leads || leads.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-user-plus"></i>
-            <h3>لا يوجد عملاء محتملين</h3>
-            <p>لم يتم إضافة أي عملاء محتملين حتى الآن. يمكنك إضافة عميل محتمل جديد من خلال الضغط على زر "إضافة عميل محتمل"</p>
-            <button class="btn btn-success" onclick="openAddLeadModal()">
-              <i class="fas fa-plus"></i>
-              إضافة عميل محتمل جديد
-            </button>
-          </div>`;
+    // Global function assignments
+    window.openAddCustomerModal = openAddCustomerModal;
+    window.closeAddCustomerModal = closeAddCustomerModal;
+    window.submitAddCustomer = submitAddCustomer;
+    window.openAddLeadModal = openAddLeadModal;
+    window.closeAddLeadModalDedicated = closeAddLeadModalDedicated;
+    window.submitAddLead = submitAddLead;
+    window.openNewOrderModal = openNewOrderModal;
+    window.closeNewOrderModal = closeNewOrderModal;
+    window.submitOrder = submitOrder;
+    window.submitNewCustomer = submitNewCustomer;
+    window.showNewCustomerForm = showNewCustomerForm;
+    window.clearSelectedCustomer = clearSelectedCustomer;
+    window.showNewAddressForm = showNewAddressForm;
+    window.saveNewAddress = saveNewAddress;
+    window.cancelNewAddress = cancelNewAddress;
+    window.addOrderItem = addOrderItem;
+    window.removeOrderItem = removeOrderItem;
+    window.updateOrderItem = updateOrderItem;
+    window.changeOrderStatus = changeOrderStatus;
+    
+    // ===== ORDER SUBMISSION =====
+    function submitOrder() {
+      // Validate the order form
+      if (!validateOrderForm()) {
         return;
       }
 
-      grid.innerHTML = leads.map(lead => {
-        return `
-          <div class="customer-card">
-            <div class="customer-header">
-              <div class="customer-info">
-                <h3>${lead.lead_name}</h3>
-                <p><i class="fas fa-phone"></i> ${lead.lead_phone}</p>
-                ${lead.lead_email ? `<p><i class="fas fa-envelope"></i> ${lead.lead_email}</p>` : ''}
-                <p><i class="fas fa-tag"></i> ${lead.primary_source_of_sale}${lead.secondary_source_of_sale ? ' - ' + lead.secondary_source_of_sale : ''}</p>
-              </div>
-            </div>
-            ${lead.lead_comment ? `
-              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200); color: var(--gray-600);">
-                <i class="fas fa-comment"></i> ${lead.lead_comment}
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
+      // Collect order data
+      const orderData = {
+        customer: appState.selectedCustomer || {
+          name: document.getElementById('customerName').value.trim(),
+          phone: document.getElementById('customerPhone').value.trim(),
+          gender: document.getElementById('customerGender').value,
+          whatsapp: document.getElementById('customerWhatsapp').value.trim(),
+          email: document.getElementById('customerEmail').value.trim(),
+          comment: document.getElementById('customerComment').value.trim(),
+          primarySource: document.getElementById('primarySourceOfSale').value,
+          secondarySource: document.getElementById('secondarySourceOfSale').value,
+          type: document.getElementById('customerType').value
+        },
+        address: appState.selectedAddress || {
+          street_name: document.getElementById('newStreetName').value.trim(),
+          address_district: document.getElementById('newAddressDistrict').value,
+          address_governorate: document.getElementById('newAddressGovernorate').value,
+          house_number: document.getElementById('newHouseNumber').value.trim(),
+          flat_number: document.getElementById('newFlatNumber').value.trim(),
+          floor_number: document.getElementById('newFloorNumber').value.trim(),
+          address_marking: document.getElementById('newAddressMarking').value.trim(),
+          address_comment: document.getElementById('newAddressComment').value.trim(),
+          area: document.getElementById('newAddressDistrict').value
+        },
+        items: appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0),
+        notes: document.getElementById('orderComments').value.trim(),
+        source: document.getElementById('orderSource').value,
+        secondarySource: document.getElementById('orderSecondarySource').value
+      };
+
+      // Validate that we have at least one item
+      if (!orderData.items || orderData.items.length === 0) {
+        showToast('error', 'يجب إضافة منتج واحد على الأقل للطلب');
+        return;
+      }
+
+      // Submit the order
+      API.addOrder(orderData).then(newOrder => {
+        orders.unshift(newOrder);
+        updateOrderCounts();
+        renderOrders();
+        closeNewOrderModal();
+        showToast('success', 'تم إنشاء الطلب بنجاح', `رقم الطلب: ${newOrder.id}`);
+      }).catch(error => {
+        console.error('Failed to submit order:', error);
+        showToast('error', 'حدث خطأ أثناء إنشاء الطلب');
+      });
     }
 
+    // ===== NEW CUSTOMER SUBMISSION =====
     function submitNewCustomer() {
+      // Validate the customer form
       const validation = validateHtmlForm('#customerDetailsSection');
       
       if (!validation.isValid) {
@@ -5002,6 +4765,7 @@ function validateSingleField(field) {
 
       const name = document.getElementById('customerName').value.trim();
       const phone = document.getElementById('customerPhone').value.trim();
+      const gender = document.getElementById('customerGender').value;
       const whatsapp = document.getElementById('customerWhatsapp').value.trim();
       const email = document.getElementById('customerEmail').value.trim();
       const comment = document.getElementById('customerComment').value.trim();
@@ -5009,22 +4773,17 @@ function validateSingleField(field) {
       const secondarySource = document.getElementById('secondarySourceOfSale').value;
       const customerType = document.getElementById('customerType').value;
 
-      const customerData = {
-        customer_name: name,
-        customer_type: customerType,
-        customer_comment: comment,
-        primary_source_of_sale: primarySource,
-        secondary_source_of_sale: secondarySource,
-        customer_phone: phone,
-        customer_whatsapp: whatsapp,
-        customer_email: email
-      };
+      if (!name || !phone || !primarySource || !gender) {
+        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
+        return;
+      }
 
-      // Create a temporary customer object for the UI
-      const tempCustomer = {
-        id: `TEMP-${Date.now()}`,
+      // Create new customer object
+      const newCustomer = {
+        id: `CUST-${Date.now()}`,
         name: name,
         phone: phone,
+        gender: gender,
         whatsapp: whatsapp,
         email: email,
         comment: comment,
@@ -5033,129 +4792,22 @@ function validateSingleField(field) {
         type: customerType,
         addresses: [],
         totalOrders: 0,
-        totalSpent: 0
+        totalSpent: 0,
+        lastOrderDate: null
       };
 
-      // Update state
-      appState.selectedCustomer = tempCustomer;
-      appState.newOrderForm.customer = tempCustomer;
-
-      // Hide the form and show the customer card
-      document.getElementById('customerDetailsSection').classList.remove('show');
+      // Add to customers array
+      customers.push(newCustomer);
       
-      // Update the customer details box
-      const detailsBox = document.getElementById('selectedCustomerDetails');
-      document.getElementById('selectedCustomerName').textContent = name;
-      document.getElementById('selectedCustomerPhone').textContent = phone;
-      document.getElementById('selectedCustomerAddress').textContent = 'لا يوجد عنوان';
-      document.getElementById('selectedCustomerOrders').textContent = '0 طلبات - 0 ريال إجمالي المشتريات';
+      // Set as selected customer
+      appState.selectedCustomer = newCustomer;
+      appState.newOrderForm.customer = newCustomer;
+
+      // Show success message
+      showToast('success', 'تم إضافة العميل بنجاح');
       
-      detailsBox.style.display = 'block';
-      setTimeout(() => detailsBox.classList.add('show'), 10);
-
-      // Show the address section for adding a new address
-      showNewAddressForm();
-
-      showToast('success', 'تم إضافة بيانات العميل بنجاح');
-    }
-
-    function initializeProductDropdown(row, rowIndex) {
-      const dropdown = row.querySelector('.custom-dropdown');
-      const input = dropdown.querySelector('.custom-dropdown-input');
-      const list = dropdown.querySelector('.custom-dropdown-list');
-      const box = dropdown.querySelector('.custom-dropdown-box');
-      const chevron = dropdown.querySelector('.custom-dropdown-chevron');
-      let isOpen = false;
-
-      function highlightMatch(text, term) {
-        if (!term) return text;
-        const regex = new RegExp(`(${term})`, 'gi');
-        return text.replace(regex, '<mark>$1</mark>');
-      }
-
-      function renderProductResults(filtered, term) {
-        if (!filtered.length) {
-          list.innerHTML = '<div class="custom-dropdown-item">لا توجد نتائج</div>';
-          list.classList.add('show');
-          isOpen = true;
-          chevron.style.transform = 'translateY(-50%) rotate(180deg)';
-          return;
-        }
-        list.innerHTML = filtered.map(product =>
-          `<div class="custom-dropdown-item" data-id="${product.id}" data-price="${product.price}">
-            ${highlightMatch(product.name, term)}
-            <small style="color: var(--gray-500);">${product.category}</small>
-          </div>`
-        ).join('');
-        list.classList.add('show');
-        isOpen = true;
-        chevron.style.transform = 'translateY(-50%) rotate(180deg)';
-      }
-
-      function closeDropdown() {
-        list.classList.remove('show');
-        isOpen = false;
-        chevron.style.transform = 'translateY(-50%)';
-      }
-
-      function filterProducts(term) {
-        term = term.trim().toLowerCase();
-        if (!term) return products;
-        return products.filter(p =>
-          p.name.toLowerCase().includes(term) ||
-          p.category.toLowerCase().includes(term)
-        );
-      }
-
-      function selectProduct(product) {
-        input.value = product.name;
-        input.setAttribute('data-selected-id', product.id);
-        input.setAttribute('data-selected-price', product.price);
-        // Auto-set quantity to 1 if empty
-        const row = document.getElementById('itemsTableBody').children[rowIndex];
-        const quantityInput = row.querySelector('.quantity-input');
-        if (quantityInput && (!quantityInput.value || parseInt(quantityInput.value) <= 0)) {
-          quantityInput.value = 1;
-        }
-        closeDropdown();
-        updateOrderItem(rowIndex);
-      }
-
-      input.addEventListener('input', function() {
-        const filtered = filterProducts(input.value);
-        renderProductResults(filtered, input.value.trim());
-      });
-
-      input.addEventListener('focus', function() {
-        if (!isOpen) {
-          renderProductResults(products, input.value.trim());
-        }
-      });
-
-      input.addEventListener('click', function() {
-        if (isOpen) {
-          closeDropdown();
-        } else {
-          renderProductResults(products, input.value.trim());
-        }
-      });
-
-      list.addEventListener('click', function(e) {
-        const item = e.target.closest('.custom-dropdown-item');
-        if (item) {
-          const productId = item.dataset.id;
-          const product = products.find(p => p.id === productId);
-          if (product) {
-            selectProduct(product);
-          }
-        }
-      });
-
-      document.addEventListener('click', function(e) {
-        if (!e.target.closest('.custom-dropdown')) {
-          closeDropdown();
-        }
-      });
+      // Show address section to continue with order
+      showAddressSection();
     }
   </script>
 </body>
