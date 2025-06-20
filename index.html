@@ -1057,7 +1057,7 @@
     }
 
     .summary-item {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      background: var(--glass-bg);
       padding: 1.5rem;
       border-radius: var(--border-radius-lg);
       text-align: center;
@@ -1077,12 +1077,28 @@
       color: var(--gray-500);
       margin-bottom: 0.5rem;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .summary-label i {
+      font-size: 1rem;
     }
 
     .summary-value {
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--gray-700);
+    }
+
+    .summary-value.address-details {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      text-align: center;
+      max-width: 100%;
+      word-wrap: break-word;
     }
 
     .expand-icon {
@@ -2460,6 +2476,8 @@
           { productId: 'PROD_002', productName: 'أرز بسمتي - كيس 2 كيلو', quantity: 2, unit: 'كيس', price: 35.00, comments: 'يفضل النوع الفاخر' },
           { productId: 'PROD_005', productName: 'زيت دوار الشمس - لتر', quantity: 1, unit: 'لتر', price: 25.00, comments: '' }
         ],
+        area: 'المعادي الجديدة',
+        address_details: 'شارع النيل، منزل 15، شقة 3، دور 2<br>المعادي - القاهرة',
         address: 'المعادي الجديدة',
         comments: 'يرجى التوصيل قبل المغرب'
       },
@@ -2475,6 +2493,8 @@
           { productId: 'PROD_003', productName: 'معكرونة بنة - 500 جرام', quantity: 3, unit: 'عبوة', price: 12.50, comments: 'نوع جيد' },
           { productId: 'PROD_007', productName: 'سكر أبيض - كيس كيلو', quantity: 2, unit: 'كيس', price: 20.00, comments: '' }
         ],
+        area: 'هليوبوليس',
+        address_details: 'شارع الجمهورية، منزل 8، شقة 5، دور 5<br>مصر الجديدة - القاهرة',
         address: 'هليوبوليس',
         comments: ''
       },
@@ -2490,6 +2510,8 @@
           { productId: 'PROD_008', productName: 'دقيق فاخر - كيس 2 كيلو', quantity: 1, unit: 'كيس', price: 18.00, comments: '' },
           { productId: 'PROD_009', productName: 'شاي أحمد - 100 كيس', quantity: 2, unit: 'عبوة', price: 30.00, comments: 'تاريخ حديث' }
         ],
+        area: 'الدقي',
+        address_details: 'شارع أحمد عرابي، منزل 22<br>المهندسين - الجيزة',
         address: 'الدقي',
         comments: 'طلب عاجل'
       },
@@ -2504,6 +2526,8 @@
         items: [
           { productId: 'PROD_006', productName: 'زيت زيتون - 500 مل', quantity: 1, unit: 'زجاجة', price: 85.00, comments: 'أصلي 100%' }
         ],
+        area: 'المعادي الجديدة',
+        address_details: 'شارع النيل، منزل 15، شقة 3، دور 2<br>المعادي - القاهرة',
         address: 'المعادي الجديدة',
         comments: ''
       },
@@ -2519,6 +2543,8 @@
           { productId: 'PROD_001', productName: 'أرز أبيض - كيس 5 كيلو', quantity: 2, unit: 'كيس', price: 45.00, comments: '' },
           { productId: 'PROD_004', productName: 'معكرونة حلزونية - 500 جرام', quantity: 3, unit: 'عبوة', price: 15.00, comments: 'للأطفال' }
         ],
+        area: 'الحي الأول',
+        address_details: 'شارع العروبة، منزل 10، شقة 2، دور 2<br>مدينة نصر - القاهرة',
         address: 'مدينة نصر',
         comments: 'توصيل سريع'
       }
@@ -2798,6 +2824,10 @@
                 amount: orderData.items.reduce((total, item) => total + (item.price * item.quantity), 0),
                 status: 'pending',
                 items: orderData.items,
+                area: orderData.address ? orderData.address.area : (orderData.customer.area || 'غير محدد'),
+                address_details: orderData.address ? 
+                  `${orderData.address.street_name}، منزل ${orderData.address.house_number}${orderData.address.flat_number ? '، شقة ' + orderData.address.flat_number : ''}${orderData.address.floor_number ? '، دور ' + orderData.address.floor_number : ''}<br>${orderData.address.address_district} - ${orderData.address.address_governorate}` :
+                  (orderData.customer.address || 'غير محدد'),
                 address: orderData.address ? `${orderData.address.area}` : orderData.customer.address,
                 comments: orderData.notes || ''
               };
@@ -3117,8 +3147,18 @@
                     <div class="summary-value">${totalQuantity}</div>
                   </div>
                   <div class="summary-item">
-                    <div class="summary-label">العنوان</div>
-                    <div class="summary-value">${order.address}</div>
+                    <div class="summary-label">
+                      <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                      المنطقة
+                    </div>
+                    <div class="summary-value">${order.area || 'غير محدد'}</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-label">
+                      <i class="fas fa-home" style="color: var(--success);"></i>
+                      تفاصيل العنوان
+                    </div>
+                    <div class="summary-value address-details">${order.address_details || order.address || 'غير محدد'}</div>
                   </div>
                   <div class="summary-item">
                     <div class="summary-label">تاريخ الطلب</div>
