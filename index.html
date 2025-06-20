@@ -3139,11 +3139,17 @@
               <div class="order-details-content">
                 <div class="order-summary">
                   <div class="summary-item">
-                    <div class="summary-label">إجمالي المنتجات</div>
+                    <div class="summary-label">
+                      <i class="fas fa-box" style="color: var(--info);"></i>
+                      إجمالي المنتجات
+                    </div>
                     <div class="summary-value">${totalItems}</div>
                   </div>
                   <div class="summary-item">
-                    <div class="summary-label">إجمالي الكمية</div>
+                    <div class="summary-label">
+                      <i class="fas fa-layer-group" style="color: var(--warning);"></i>
+                      إجمالي الكمية
+                    </div>
                     <div class="summary-value">${totalQuantity}</div>
                   </div>
                   <div class="summary-item">
@@ -3161,7 +3167,10 @@
                     <div class="summary-value address-details">${order.address_details || order.address || 'غير محدد'}</div>
                   </div>
                   <div class="summary-item">
-                    <div class="summary-label">تاريخ الطلب</div>
+                    <div class="summary-label">
+                      <i class="fas fa-calendar-alt" style="color: var(--purple);"></i>
+                      تاريخ الطلب
+                    </div>
                     <div class="summary-value">${formatDate(order.date)}</div>
                   </div>
                 </div>
