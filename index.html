@@ -2449,6 +2449,74 @@
           </div>
         </div>
 
+        <!-- Address Section -->
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--gray-200);">
+          <h3 style="margin-bottom: 1.5rem; color: var(--gray-700);">
+            <i class="fas fa-map-marker-alt"></i>
+            عنوان العميل
+          </h3>
+          <div class="form-grid">
+            <!-- Address Label -->
+            <div class="form-group">
+              <label class="form-label">تسمية العنوان</label>
+              <select class="form-select" id="addCustomerAddressLabel">
+                <option value="Home" data-icon="fa-home">🏠 المنزل</option>
+                <option value="Work" data-icon="fa-building">🏢 العمل</option>
+                <option value="Family" data-icon="fa-users">👪 العائلة</option>
+                <option value="Friend" data-icon="fa-handshake">🤝 صديق</option>
+                <option value="Warehouse" data-icon="fa-warehouse">🏬 مستودع</option>
+                <option value="Chalet" data-icon="fa-umbrella-beach">🏖️ شاليه</option>
+                <option value="Farm" data-icon="fa-tractor">🌾 مزرعة</option>
+                <option value="Shop" data-icon="fa-store">🛒 متجر</option>
+                <option value="Other" data-icon="fa-map-marker-alt">📍 أخرى</option>
+              </select>
+            </div>
+            <!-- Building Number -->
+            <div class="form-group">
+              <label class="form-label">رقم المنزل</label>
+              <input type="text" class="form-input" id="addCustomerHouseNumber">
+            </div>
+            <!-- Flat Number -->
+            <div class="form-group">
+              <label class="form-label">رقم الشقة</label>
+              <input type="text" class="form-input" id="addCustomerFlatNumber">
+            </div>
+            <!-- Floor Number -->
+            <div class="form-group">
+              <label class="form-label">رقم الدور</label>
+              <input type="text" class="form-input" id="addCustomerFloorNumber">
+            </div>
+            <!-- Street Name -->
+            <div class="form-group">
+              <label class="form-label">اسم الشارع *</label>
+              <input type="text" class="form-input" id="addCustomerStreetName" required data-label="اسم الشارع">
+            </div>
+            <!-- District (searchable) -->
+            <div class="form-group" style="position:relative;">
+              <label class="form-label">المنطقة *</label>
+              <input type="text" class="form-input" id="addCustomerDistrictSearch" placeholder="ابحث عن المنطقة..."
+                autocomplete="off" required data-label="المنطقة" style="padding-left: 2.5rem; padding-right: 1rem;">
+              <i class="fas fa-chevron-down" id="addCustomerDistrictChevron"
+                style="position:absolute; left:1.25rem; top:50%; transform:translateY(-50%); color:#aaa; font-size:1.2em; pointer-events:none; line-height:1;"></i>
+              <div class="search-results" id="addCustomerDistrictSearchResults"></div>
+              <input type="hidden" id="addCustomerAddressDistrict">
+              <input type="hidden" id="addCustomerAddressGovernorate">
+              <input type="hidden" id="addCustomerDistrictId" required data-label="المنطقة">
+            </div>
+            <!-- Landmark -->
+            <div class="form-group">
+              <label class="form-label">علامة مميزة</label>
+              <input type="text" class="form-input" id="addCustomerAddressMarking">
+            </div>
+            <!-- Comment -->
+            <div class="form-group">
+              <label class="form-label">ملاحظات/تعليق</label>
+              <textarea class="form-textarea" id="addCustomerAddressComment"
+                placeholder="أضف أي ملاحظات عن العنوان..."></textarea>
+            </div>
+          </div>
+        </div>
+
         <!-- Submit Buttons -->
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
           <button type="button" class="btn btn-success" onclick="submitAddCustomer()">
@@ -2895,24 +2963,35 @@
         if (TEST_MODE_ADD_CUSTOMER) {
           return new Promise(resolve => {
             setTimeout(() => {
-              const newCustomer = {
-                id: `CUST-${Date.now()}`,
-                name: customerData.name,
-                phone: customerData.phone,
+              const newId = `CUST-${Date.now()}`;
+              const newAddressId = `ADDR-${Date.now()}`;
+              const newCustomerForMockDB = {
+                id: newId,
+                name: customerData.customer.name,
+                phone: customerData.customer.phone,
+                gender: customerData.customer.gender,
                 addresses: [{
-                  id: `ADDR-${Date.now()}`,
-                  street: customerData.address,
-                  district: customerData.district,
-                  area: customerData.area,
-                  isPrimary: true,
-                  label: 'المنزل'
+                  id: newAddressId,
+                  address_label: customerData.address.address_label || 'Home',
+                  address_type: customerData.address.address_label || 'Home',
+                  address_comment: customerData.address.address_comment || '',
+                  house_number: customerData.address.house_number || '',
+                  flat_number: customerData.address.flat_number || '',
+                  floor_number: customerData.address.floor_number || '',
+                  street_name: customerData.address.street_name,
+                  address_marking: customerData.address.address_marking || '',
+                  address_district: customerData.address.address_district,
+                  address_governorate: customerData.address.address_governorate,
+                  district_id: customerData.address.district_id,
+                  area: customerData.address.address_district,
+                  isPrimary: true
                 }],
                 totalOrders: 0,
                 totalSpent: 0,
                 lastOrderDate: null
               };
-              customers.push(newCustomer);
-              resolve(newCustomer);
+              customers.push(newCustomerForMockDB);
+              resolve({ customer_id: newId, address_id: newAddressId });
             }, 500);
           });
         }
@@ -3353,7 +3432,9 @@
       }
 
       grid.innerHTML = customers.map(customer => {
-        const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
+        const primaryAddress = customer.addresses && customer.addresses.length > 0
+          ? customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0]
+          : null;
         let genderIcon, genderText, genderColor;
         
         if (customer.gender === 'male') {
@@ -3377,7 +3458,7 @@
                 <h3>${customer.name}</h3>
                 <p><i class="fas fa-phone"></i> ${customer.phone}</p>
                 <p><i class="${genderIcon}" style="color: ${genderColor};"></i> ${genderText}</p>
-                <p><i class="fas fa-map-marker-alt"></i> ${primaryAddress.area}${primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : ''}</p>
+                <p><i class="fas fa-map-marker-alt"></i> ${primaryAddress ? (primaryAddress.area + (primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : '')) : 'لا يوجد عنوان'}</p>
               </div>
             </div>
             <div class="customer-stats">
@@ -3407,6 +3488,8 @@
       
       // Initialize customer search
       initializeCustomerSearch();
+      // Initialize address grid listener
+      initializeAddressGrid();
       
       // Initialize source dropdowns for order form
       initializeSourceDropdowns();
@@ -3630,7 +3713,16 @@
         appState.selectedCustomer.addresses.push(newAddress);
         showAddressSection();
         renderAddresses(appState.selectedCustomer.addresses);
-        selectAddress(newAddress);
+        
+        // Find the newly rendered card and select it
+        const newAddressCard = document.querySelector(`.address-card[data-address-id="${newAddress.id}"]`);
+        if (newAddressCard) {
+          selectAddress(newAddress.id, newAddressCard);
+        } else {
+          // Fallback for safety
+          selectAddress(newAddress);
+        }
+
         showToast('success', 'تم إضافة العنوان بنجاح');
       }
     }
@@ -3726,7 +3818,9 @@
     }
 
     function selectCustomer(customerId) {
-      const customer = customers.find(c => c.id === customerId);
+      // Coerce both IDs to strings for a reliable comparison
+      const customer = customers.find(c => String(c.id) === String(customerId));
+
       if (customer) {
         appState.selectedCustomer = customer;
         appState.newOrderForm.customer = customer;
@@ -3737,15 +3831,15 @@
         // Show customer details box
         const detailsBox = document.getElementById('selectedCustomerDetails');
         const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
-        
+
         document.getElementById('selectedCustomerName').textContent = customer.name;
         document.getElementById('selectedCustomerPhone').textContent = customer.phone;
-        document.getElementById('selectedCustomerAddress').textContent = primaryAddress ? 
-          `${primaryAddress.area}${primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : ''}` : 
+        document.getElementById('selectedCustomerAddress').textContent = primaryAddress ?
+          `${primaryAddress.area}${primaryAddress.address_governorate ? ', ' + primaryAddress.address_governorate : ''}` :
           'لا يوجد عنوان';
-        document.getElementById('selectedCustomerOrders').textContent = 
+        document.getElementById('selectedCustomerOrders').textContent =
           `${customer.totalOrders} طلبات - ${formatCurrency(customer.totalSpent)} إجمالي المشتريات`;
-        
+
         detailsBox.style.display = 'block';
         setTimeout(() => detailsBox.classList.add('show'), 10);
 
@@ -3755,6 +3849,8 @@
         } else {
           showNewAddressForm();
         }
+      } else {
+        console.error(`selectCustomer: Could not find customer with ID ${customerId} in the local 'customers' array.`);
       }
     }
 
@@ -3801,7 +3897,7 @@
           case 'Other': icon = 'map-marker-alt'; break;
         }
         return `
-          <div class="address-card" onclick="selectAddress('${address.id}')">
+          <div class="address-card" data-address-id="${address.id}">
             <div class="address-label">
               <i class="fas fa-${icon}"></i>
               ${address.address_label}
@@ -3816,16 +3912,19 @@
       }).join('');
     }
 
-    function selectAddress(addressId) {
+    function selectAddress(addressId, clickedElement = null) {
       let address;
 
       if (typeof addressId === 'string') {
-        address = appState.selectedCustomer.addresses.find(a => a.id === addressId);
+        // Coerce both IDs to strings for a reliable comparison
+        address = appState.selectedCustomer.addresses.find(a => String(a.id) === String(addressId));
         // Update UI
-        document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
-        event.target.closest('.address-card').classList.add('selected');
+        if (clickedElement) {
+          document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
+          clickedElement.classList.add('selected');
+        }
       } else {
-        address = addressId; // Direct address object
+        address = addressId; // Direct address object for programmatic selection
       }
 
       if (address) {
@@ -3836,6 +3935,8 @@
         setTimeout(() => {
           showOrderDetailsSection();
         }, 500);
+      } else {
+        console.error(`selectAddress: Could not find address with ID ${addressId}`);
       }
     }
 
@@ -3962,6 +4063,22 @@
         searchResults.classList.add('show');
       });
 
+      // Event delegation for search results
+      searchResults.addEventListener('click', (e) => {
+        const resultElement = e.target.closest('.search-result');
+        if (!resultElement) return;
+
+        if (resultElement.classList.contains('new-customer-option')) {
+          const searchTerm = resultElement.dataset.searchTerm || '';
+          showNewCustomerForm(searchTerm);
+        } else {
+          const customerId = resultElement.dataset.customerId;
+          if (customerId) {
+            selectCustomer(customerId);
+          }
+        }
+      });
+
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.customer-search')) {
           searchResults.classList.remove('show');
@@ -3989,7 +4106,7 @@
         searchResults.classList.add('show');
       } else {
         searchResults.innerHTML = `
-          <div class="search-result new-customer-option" onclick="showNewCustomerForm('${term}')">
+          <div class="search-result new-customer-option" data-search-term="${term}">
             <div>
               <h4><i class="fas fa-plus"></i> عميل جديد: "${term}"</h4>
               <p>إضافة عميل جديد بهذا الاسم</p>
@@ -4042,19 +4159,21 @@
       const searchResults = document.getElementById('searchResults');
 
       let html = customers.map(customer => {
-        const primaryAddress = customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0];
+        const primaryAddress = customer.addresses && customer.addresses.length > 0
+          ? customer.addresses.find(addr => addr.isPrimary) || customer.addresses[0]
+          : null;
         return `
-          <div class="search-result" onclick="selectCustomer('${customer.id}')">
+          <div class="search-result" data-customer-id="${customer.id}">
             <div>
               <h4>${highlightMatch(customer.name, searchTerm)}</h4>
-              <p>${highlightMatch(customer.phone, searchTerm)} - ${primaryAddress.area}</p>
+              <p>${highlightMatch(customer.phone, searchTerm)} - ${primaryAddress ? primaryAddress.area : 'لا يوجد عنوان'}</p>
             </div>
           </div>
         `;
       }).join('');
 
       html += `
-        <div class="search-result new-customer-option" onclick="showNewCustomerForm('${searchTerm}')">
+        <div class="search-result new-customer-option" data-search-term="${searchTerm}">
           <div>
             <h4><i class="fas fa-plus"></i> عميل جديد: "${searchTerm}"</h4>
             <p>إضافة عميل جديد بهذا الاسم</p>
@@ -4299,46 +4418,113 @@ function validateOrderForm() {
  */
 function submitAddCustomer() {
   const validation = validateHtmlForm('#addCustomerModal .modal-content');
-  
   if (!validation.isValid) {
     showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
     return;
   }
-
-  const name = document.getElementById('addCustomerName').value.trim();
-  const phone = document.getElementById('addCustomerPhone').value.trim();
-  const gender = document.getElementById('addCustomerGender').value;
-  const whatsapp = document.getElementById('addCustomerWhatsapp').value.trim();
-  const email = document.getElementById('addCustomerEmail').value.trim();
-  const comment = document.getElementById('addCustomerComment').value.trim();
-  const primarySource = document.getElementById('addCustomerPrimarySourceOfSale').value;
-  const secondarySource = document.getElementById('addCustomerSecondarySourceOfSale').value;
-  const customerType = document.getElementById('addCustomerType').value;
-
-  if (!name || !phone || !primarySource || !gender) {
-    showToast('error', 'يجب ملء جميع الحقول المطلوبة');
-    return;
-  }
-
+  
+  // Collect customer data
   const customerData = {
-    customer_name: name,
-    customer_type: customerType,
-    customer_comment: comment,
-    primary_source_of_sale: primarySource,
-    secondary_source_of_sale: secondarySource,
-    customer_phone: phone,
-    customer_whatsapp: whatsapp,
-    customer_email: email,
-    customer_gender: gender
+    customer: {
+      name: document.getElementById('addCustomerName').value.trim(),
+      phone: document.getElementById('addCustomerPhone').value.trim(),
+      gender: document.getElementById('addCustomerGender').value,
+      whatsapp: document.getElementById('addCustomerWhatsapp').value.trim(),
+      email: document.getElementById('addCustomerEmail').value.trim(),
+      comment: document.getElementById('addCustomerComment').value.trim(),
+      primary_source_of_sale: document.getElementById('addCustomerPrimarySourceOfSale').value,
+      secondary_source_of_sale: document.getElementById('addCustomerSecondarySourceOfSale').value,
+      type: document.getElementById('addCustomerType').value
+    },
+    address: {
+      address_label: document.getElementById('addCustomerAddressLabel').value,
+      address_comment: document.getElementById('addCustomerAddressComment').value.trim(),
+      house_number: document.getElementById('addCustomerHouseNumber').value.trim(),
+      flat_number: document.getElementById('addCustomerFlatNumber').value.trim(),
+      floor_number: document.getElementById('addCustomerFloorNumber').value.trim(),
+      street_name: document.getElementById('addCustomerStreetName').value.trim(),
+      address_marking: document.getElementById('addCustomerAddressMarking').value.trim(),
+      address_district: document.getElementById('addCustomerAddressDistrict').value,
+      address_governorate: document.getElementById('addCustomerAddressGovernorate').value,
+      district_id: document.getElementById('addCustomerDistrictId').value,
+      isPrimary: true
+    }
   };
 
-  API.addCustomer(customerData).then(newCustomer => {
-    customers.push(newCustomer);
+  API.addCustomer(customerData).then(response => {
+    console.log('=== API RESPONSE ===');
+    console.log('Raw response:', response);
+    
+    // Handle both string and object responses
+    let parsedResponse;
+    if (typeof response === 'string') {
+      try {
+        parsedResponse = JSON.parse(response);
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', e);
+        showToast('error', 'حدث خطأ في استجابة الخادم.');
+        return;
+      }
+    } else {
+      parsedResponse = response;
+    }
+    
+    console.log('Parsed response:', parsedResponse);
+    
+    const newCustomerId = parsedResponse.customer_id || parsedResponse.id;
+    const newAddressId = parsedResponse.address_id || `ADDR-${Date.now()}`;
+    
+    if (!newCustomerId) {
+        console.error("Backend did not return a customer ID.", parsedResponse);
+        showToast('error', 'حدث خطأ في استجابة الخادم.');
+        return;
+    }
+
+    // Create complete customer object for frontend
+    const newCustomerForFrontend = {
+      id: newCustomerId,
+      name: customerData.customer.name,
+      phone: customerData.customer.phone,
+      gender: customerData.customer.gender,
+      addresses: [{
+        id: newAddressId,
+        address_label: customerData.address.address_label || 'Home',
+        address_type: customerData.address.address_label || 'Home',
+        address_comment: customerData.address.address_comment || '',
+        house_number: customerData.address.house_number || '',
+        flat_number: customerData.address.flat_number || '',
+        floor_number: customerData.address.floor_number || '',
+        street_name: customerData.address.street_name,
+        address_marking: customerData.address.address_marking || '',
+        address_district: customerData.address.address_district,
+        address_governorate: customerData.address.address_governorate,
+        district_id: customerData.address.district_id,
+        area: customerData.address.address_district,
+        isPrimary: true
+      }],
+      totalOrders: 0,
+      totalSpent: 0,
+      lastOrderDate: null
+    };
+
+    customers.push(newCustomerForFrontend);
     showToast('success', 'تم إضافة العميل بنجاح');
     closeAddCustomerModal();
-    loadCustomers();
+    renderCustomers();
+    
+    // If the new order modal is open, automatically populate the search with the new customer
+    const newOrderModal = document.getElementById('newOrderModal');
+    if (newOrderModal && newOrderModal.classList.contains('show')) {
+      const customerSearch = document.getElementById('customerSearch');
+      if (customerSearch) {
+        customerSearch.value = newCustomerForFrontend.name;
+        // Trigger a search to show the new customer in results
+        handleCustomerSearch();
+      }
+    }
   }).catch(error => {
     showToast('error', 'حدث خطأ أثناء إضافة العميل');
+    console.error('Failed to add customer:', error);
   });
 }
 
@@ -4538,6 +4724,7 @@ function initializeProductDropdown(row, rowIndex) {
       document.getElementById('addCustomerModal').classList.add('show');
       resetAddCustomerForm();
       populateSourceDropdowns('addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale');
+      initializeAddCustomerDistrictSearch();
     }
 
     function closeAddCustomerModal() {
@@ -4546,9 +4733,90 @@ function initializeProductDropdown(row, rowIndex) {
     }
 
     function resetAddCustomerForm() {
-      ['addCustomerName', 'addCustomerPhone', 'addCustomerGender', 'addCustomerWhatsapp', 'addCustomerEmail', 'addCustomerComment', 'addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale', 'addCustomerType'].forEach(id => {
+      ['addCustomerName', 'addCustomerPhone', 'addCustomerGender', 'addCustomerWhatsapp', 'addCustomerEmail', 'addCustomerComment', 'addCustomerPrimarySourceOfSale', 'addCustomerSecondarySourceOfSale', 'addCustomerType', 'addCustomerAddressLabel', 'addCustomerHouseNumber', 'addCustomerFlatNumber', 'addCustomerFloorNumber', 'addCustomerStreetName', 'addCustomerDistrictSearch', 'addCustomerAddressDistrict', 'addCustomerAddressGovernorate', 'addCustomerDistrictId', 'addCustomerAddressMarking', 'addCustomerAddressComment'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
+      });
+    }
+
+    function initializeAddCustomerDistrictSearch() {
+      const input = document.getElementById('addCustomerDistrictSearch');
+      const results = document.getElementById('addCustomerDistrictSearchResults');
+      const chevron = document.getElementById('addCustomerDistrictChevron');
+      const hiddenDistrict = document.getElementById('addCustomerAddressDistrict');
+      const hiddenGovernorate = document.getElementById('addCustomerAddressGovernorate');
+      const hiddenDistrictId = document.getElementById('addCustomerDistrictId');
+      let isOpen = false;
+
+      function highlightMatch(text, term) {
+        if (!term) return text;
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.replace(regex, '<mark style="background: #fef3c7; padding: 2px 4px; border-radius: 3px;">$1</mark>');
+      }
+
+      function renderDistrictResults(filtered, term) {
+        if (!filtered.length) {
+          results.innerHTML = '<div class="search-result">لا توجد نتائج</div>';
+          results.classList.add('show');
+          isOpen = true;
+          chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+          return;
+        }
+        results.innerHTML = filtered.map(d =>
+          `<div class="search-result" data-id="${d.district_id}" data-name="${d.district_name}" data-gov="${d.governorate_name}">
+            ${highlightMatch(d.district_name, term)} - ${highlightMatch(d.governorate_name, term)}
+          </div>`
+        ).join('');
+        results.classList.add('show');
+        isOpen = true;
+        chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+      }
+
+      function closeDropdown() {
+        results.classList.remove('show');
+        isOpen = false;
+        chevron.style.transform = 'translateY(-50%)';
+      }
+
+      function filterDistricts(term) {
+        term = term.trim().toLowerCase();
+        if (!term) return districts;
+        return districts.filter(d =>
+          d.district_name.toLowerCase().includes(term) ||
+          d.governorate_name.toLowerCase().includes(term)
+        );
+      }
+
+      input.addEventListener('input', function () {
+        const filtered = filterDistricts(input.value);
+        renderDistrictResults(filtered, input.value.trim());
+      });
+      input.addEventListener('focus', function () {
+        if (!isOpen) {
+          renderDistrictResults(districts, input.value.trim());
+        }
+      });
+      input.addEventListener('click', function () {
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          renderDistrictResults(districts, input.value.trim());
+        }
+      });
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.form-group')) {
+          closeDropdown();
+        }
+      });
+      results.addEventListener('click', function (e) {
+        const item = e.target.closest('.search-result[data-id]');
+        if (item) {
+          input.value = item.dataset.name + ' - ' + item.dataset.gov;
+          hiddenDistrict.value = item.dataset.name;
+          hiddenGovernorate.value = item.dataset.gov;
+          hiddenDistrictId.value = item.dataset.id;
+          closeDropdown();
+        }
       });
     }
 
@@ -4700,6 +4968,7 @@ function initializeProductDropdown(row, rowIndex) {
     window.updateOrderItem = updateOrderItem;
     window.changeOrderStatus = changeOrderStatus;
     window.initializeCustomerSearch = initializeCustomerSearch;
+    window.selectCustomer = selectCustomer;
     
     // ===== ORDER SUBMISSION =====
     function submitOrder() {
@@ -4826,59 +5095,91 @@ function initializeProductDropdown(row, rowIndex) {
 
     // ===== NEW CUSTOMER SUBMISSION =====
     function submitNewCustomer() {
-      // Validate the customer form
-      const validation = validateHtmlForm('#customerDetailsSection');
-      
+      const validation = validateHtmlForm('#addCustomerModal .modal-content');
       if (!validation.isValid) {
         showToast('error', 'يرجى تصحيح الأخطاء التالية:', validation.errors.join('<br>• '));
         return;
       }
-
-      const name = document.getElementById('customerName').value.trim();
-      const phone = document.getElementById('customerPhone').value.trim();
-      const gender = document.getElementById('customerGender').value;
-      const whatsapp = document.getElementById('customerWhatsapp').value.trim();
-      const email = document.getElementById('customerEmail').value.trim();
-      const comment = document.getElementById('customerComment').value.trim();
-      const primarySource = document.getElementById('primarySourceOfSale').value;
-      const secondarySource = document.getElementById('secondarySourceOfSale').value;
-      const customerType = document.getElementById('customerType').value;
-
-      if (!name || !phone || !primarySource || !gender) {
-        showToast('error', 'يجب ملء جميع الحقول المطلوبة');
-        return;
-      }
-
-      // Create new customer object
-      const newCustomer = {
-        id: `CUST-${Date.now()}`,
-        name: name,
-        phone: phone,
-        gender: gender,
-        whatsapp: whatsapp,
-        email: email,
-        comment: comment,
-        primarySource: primarySource,
-        secondarySource: secondarySource,
-        type: customerType,
-        addresses: [],
-        totalOrders: 0,
-        totalSpent: 0,
-        lastOrderDate: null
+      const customerData = {
+        customer: {
+          name: document.getElementById('addCustomerName').value.trim(),
+          phone: document.getElementById('addCustomerPhone').value.trim(),
+          gender: document.getElementById('addCustomerGender').value,
+          whatsapp: document.getElementById('addCustomerWhatsapp').value.trim(),
+          email: document.getElementById('addCustomerEmail').value.trim(),
+          comment: document.getElementById('addCustomerComment').value.trim(),
+          primary_source_of_sale: document.getElementById('addCustomerPrimarySourceOfSale').value,
+          secondary_source_of_sale: document.getElementById('addCustomerSecondarySourceOfSale').value,
+          type: document.getElementById('addCustomerType').value
+        },
+        address: {
+          address_label: document.getElementById('addAddressLabel') ? document.getElementById('newAddressLabel').value : 'Home',
+          address_comment: document.getElementById('newAddressComment') ? document.getElementById('newAddressComment').value.trim() : '',
+          house_number: document.getElementById('newHouseNumber') ? document.getElementById('newHouseNumber').value.trim() : '',
+          flat_number: document.getElementById('newFlatNumber') ? document.getElementById('newFlatNumber').value.trim() : '',
+          floor_number: document.getElementById('newFloorNumber') ? document.getElementById('newFloorNumber').value.trim() : '',
+          street_name: document.getElementById('newStreetName') ? document.getElementById('newStreetName').value.trim() : '',
+          address_marking: document.getElementById('newAddressMarking') ? document.getElementById('newAddressMarking').value.trim() : '',
+          address_district: document.getElementById('newAddressDistrict') ? document.getElementById('newAddressDistrict').value : '',
+          address_governorate: document.getElementById('newAddressGovernorate') ? document.getElementById('newAddressGovernorate').value : '',
+          district_id: document.getElementById('newDistrictId') ? document.getElementById('newDistrictId').value : '',
+          isPrimary: true
+        }
       };
+      API.addCustomer(customerData).then(response => {
+        response = JSON.parse(response);
+        const newCustomerId = response.customer_id;
+        const newAddressId = response.address_id;
+        if (!newCustomerId) {
+            showToast('error', 'حدث خطأ في استجابة الخادم.');
+            return;
+        }
+        const newCustomerForFrontend = {
+          id: newCustomerId,
+          name: customerData.customer.name,
+          phone: customerData.customer.phone,
+          gender: customerData.customer.gender,
+          addresses: [{
+            id: newAddressId,
+            address_label: customerData.address.address_label || 'Home',
+            address_type: customerData.address.address_label || 'Home',
+            address_comment: customerData.address.address_comment || '',
+            house_number: customerData.address.house_number || '',
+            flat_number: customerData.address.flat_number || '',
+            floor_number: customerData.address.floor_number || '',
+            street_name: customerData.address.street_name,
+            address_marking: customerData.address.address_marking || '',
+            address_district: customerData.address.address_district,
+            address_governorate: customerData.address.address_governorate,
+            district_id: customerData.address.district_id,
+            area: customerData.address.address_district,
+            isPrimary: true
+          }],
+          totalOrders: 0,
+          totalSpent: 0,
+          lastOrderDate: null
+        };
+        customers.push(newCustomerForFrontend);
+        showToast('success', 'تم إضافة العميل بنجاح');
+        closeAddCustomerModal();
+        renderCustomers();
+      }).catch(error => {
+        showToast('error', 'حدث خطأ أثناء إضافة العميل');
+      });
+    }
 
-      // Add to customers array
-      customers.push(newCustomer);
-      
-      // Set as selected customer
-      appState.selectedCustomer = newCustomer;
-      appState.newOrderForm.customer = newCustomer;
+    // ===== ADDRESS GRID EVENT LISTENER =====
+    function initializeAddressGrid() {
+      const addressGrid = document.getElementById('addressGrid');
+      if (!addressGrid) return;
 
-      // Show success message
-      showToast('success', 'تم إضافة العميل بنجاح');
-      
-      // Show address section to continue with order
-      showAddressSection();
+      addressGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.address-card');
+        if (card && card.dataset.addressId) {
+          const addressId = card.dataset.addressId;
+          selectAddress(addressId, card);
+        }
+      });
     }
   </script>
 </body>

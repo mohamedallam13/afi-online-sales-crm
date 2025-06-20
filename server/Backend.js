@@ -124,17 +124,19 @@
         this.address_district = address.address_district || '';
         this.address_governorate = address.address_governorate || '';
         this.area_id = address.area_id || '';
+        this.isPrimary = address.isPrimary || '';
     }
 
     function CustomerRequest(customer) {
-        this.customer_name = customer.customer_name || '';
-        this.customer_type = customer.customer_type || '';
-        this.customer_comment = customer.customer_comment || '';
+        this.customer_name = customer.name || '';
+        this.customer_gender = customer.gender || '';
+        this.customer_type = customer.type || '';
+        this.customer_comment = customer.comment || '';
         this.primary_source_of_sale = customer.primary_source_of_sale || '';
         this.secondary_source_of_sale = customer.secondary_source_of_sale || '';
-        this.customer_phone = customer.customer_phone || '';
-        this.customer_whatsapp = customer.customer_whatsapp || '';
-        this.customer_email = customer.customer_email || '';
+        this.customer_phone = customer.phone || '';
+        this.customer_whatsapp = customer.whatsapp || '';
+        this.customer_email = customer.email || '';
     }
 
     function addCompoudedOrder(request) {
@@ -142,13 +144,13 @@
         console.log('Processing compounded request:', orderRequest);
         // Create new customer if provided
         let customerId = orderRequest.customer_id;
-        if (request.customer) {
+        if (!request.customer_id) {
             const customerRequest = new CustomerRequest(request.customer);
             customerId = createNewCustomer(customerRequest);
         }
         // Create new address if provided
         let addressId = orderRequest.address_id;
-        if (request.address) {
+        if (!request.address_id) {
             const addressRequest = new AddressRequest(request.address);
             addressId = createNewAddress(addressRequest);
         }
@@ -166,15 +168,34 @@
         return { pdfUrl, customerOrderId };
     }
 
+    function addCustomer(customerData) {
+        console.log(customerData)
+        const { customer, address } = customerData
+        const customerId = createNewCustomer(customer)
+        if(address) {
+            const addressId = createNewAddress(address)
+            customer.address_id = addressId
+            return JSON.stringify({address_id: addressId, customer_id: customerId});
+        }
+        return JSON.stringify({customer_id: customerId});
+    }
+    
     function createNewCustomer(customer) {
         const customerRequest = new CustomerRequest(customer);
-        const customerId = AFIDBSheetsController.runRequest("createNewCustomer", customerRequest);
+        console.log(customerRequest)
+        const customerId = AFIDBSheetsController.runRequest("createNewCustomer", customerRequest)[0];
         return customerId;
+    }
+
+    function addAddress(address) {
+        const addressId = createNewAddress(address)
+        return JSON.stringify({id: addressId});
     }
 
     function createNewAddress(address) {
         const addressRequest = new AddressRequest(address);
-        const addressId = AFIDBSheetsController.runRequest("createNewAddress", addressRequest);
+        console.log(addressRequest)
+        const addressId = AFIDBSheetsController.runRequest("createNewAddress", addressRequest)[0];
         return addressId;
     }
 
@@ -189,7 +210,7 @@
 
     function addNewLead(formData) {
         const leadId = createNewLead(formData)
-        return leadId
+        return JSON.stringify({id: leadId})
     }
 
     function createNewLead(formData) {
@@ -241,7 +262,8 @@
         getCustomersData,
         getLeadsData,
         addCompoundedRequestToBuffer,
-        // addCustomer,
+        addCustomer,
+        addAddress,
         addCompoudedOrder,
         // updateCustomer,
         // updateOrder,
@@ -261,6 +283,18 @@ function getCustomersData() {
 
 function getCustomersData() {
     return AFI_ONLINE_ORDERS.getCustomersData()
+}
+
+function addCustomer(customerData) {
+    return AFI_ONLINE_ORDERS.addCustomer(customerData)
+}
+
+function addLead(lead) {
+    return AFI_ONLINE_ORDERS.addLead(lead)
+}
+
+function addAddress(address) {
+    return AFI_ONLINE_ORDERS.addAddress(address)
 }
 
 function addCompoundedRequestToBuffer(order) {
