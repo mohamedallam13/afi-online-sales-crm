@@ -2549,13 +2549,13 @@
     ];
 
     let districts = [
-      { district_id: '420000000000001', district_name: 'المعادي', governorate_name: 'القاهرة' },
-      { district_id: '420000000000002', district_name: 'مصر الجديدة', governorate_name: 'القاهرة' },
-      { district_id: '420000000000003', district_name: 'وسط البلد', governorate_name: 'القاهرة' },
-      { district_id: '420000000000004', district_name: 'النزهة', governorate_name: 'القاهرة' },
-      { district_id: '420000000000005', district_name: 'مدينة نصر', governorate_name: 'القاهرة' },
-      { district_id: '420000000000006', district_name: 'المهندسين', governorate_name: 'الجيزة' },
-      { district_id: '420000000000007', district_name: 'الزمالك', governorate_name: 'القاهرة' }
+      { area_id: '420000000000001', city_district_ar: 'المعادي', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
+      { area_id: '420000000000002', city_district_ar: 'مصر الجديدة', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
+      { area_id: '420000000000003', city_district_ar: 'وسط البلد', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
+      { area_id: '420000000000004', city_district_ar: 'النزهة', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
+      { area_id: '420000000000005', city_district_ar: 'مدينة نصر', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
+      { area_id: '420000000000006', city_district_ar: 'المهندسين', state_gov: 'Giza', state_gov_ar: 'الجيزة' },
+      { area_id: '420000000000007', city_district_ar: 'الزمالك', state_gov: 'Cairo', state_gov_ar: 'القاهرة' }
     ];
 
     let orders = [
@@ -2659,8 +2659,7 @@
             address_marking: 'قرب محطة المترو',
             address_district: 'المعادي',
             address_governorate: 'القاهرة',
-            district_id: '420000000000001',
-            area_id: '420000000000101',
+            area_id: '420000000000001',
             area: 'المعادي الجديدة',
             isPrimary: true
           },
@@ -2676,8 +2675,7 @@
             address_marking: '',
             address_district: 'وسط البلد',
             address_governorate: 'القاهرة',
-            district_id: '420000000000003',
-            area_id: '420000000000301',
+            area_id: '420000000000003',
             area: 'التحرير',
             isPrimary: false
           }
@@ -2704,8 +2702,7 @@
             address_marking: '',
             address_district: 'مصر الجديدة',
             address_governorate: 'القاهرة',
-            district_id: '420000000000002',
-            area_id: '420000000000201',
+            area_id: '420000000000002',
             area: 'هليوبوليس',
             isPrimary: true
           }
@@ -2732,8 +2729,7 @@
             address_marking: '',
             address_district: 'المهندسين',
             address_governorate: 'الجيزة',
-            district_id: '420000000000006',
-            area_id: '420000000000601',
+            area_id: '420000000000006',
             area: 'الدقي',
             isPrimary: true
           }
@@ -2760,8 +2756,7 @@
             address_marking: '',
             address_district: 'مدينة نصر',
             address_governorate: 'القاهرة',
-            district_id: '420000000000005',
-            area_id: '420000000000501',
+            area_id: '420000000000005',
             area: 'الحي الأول',
             isPrimary: true
           }
@@ -2821,6 +2816,7 @@
       orderFilter: 'all',
       selectedCustomer: null,
       selectedAddress: null,
+      orderCounter: 0, // Counter for generating order serials
       newOrderForm: {
         customer: null,
         address: null,
@@ -2841,10 +2837,18 @@
     const TEST_MODE_ADD_CUSTOMER = false;
     const TEST_MODE_GET_LEADS = true;
     const TEST_MODE_ADD_COMPOUNDED_REQUEST_TO_BUFFER = false;
+    const TEST_MODE_GET_STARTUP_DATA = false; // Set to false to fetch from backend
     // ...add more as needed
 
     const API = {
       activeRequests: {},
+
+      // ===== SERIAL GENERATION =====
+      createSerial: function(counter) {
+        const year = new Date().getFullYear();
+        const paddedCounter = String(counter).padStart(9, '0');
+        return `CO${paddedCounter}-${year}`;
+      },
 
       request: function (functionName, data = {}, options = {}) {
         // Show loader if not explicitly disabled
@@ -2896,6 +2900,23 @@
 
       getLocations: function () {
         return new Promise(resolve => setTimeout(() => resolve(districts), 500));
+      },
+
+      getStartupData: function () {
+        if (TEST_MODE_GET_STARTUP_DATA) {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve({
+                cutomersOrdersCounter: 42, // Match backend property name
+                districtsList: districts // Match backend property name
+              });
+            }, 500);
+          });
+        }
+        return this.request('getStartupData', {}, {
+          loaderMessage: 'جاري تحميل بيانات التطبيق...',
+          hideToastOnSuccess: true
+        });
       },
 
       getOrders: function () {
@@ -2982,7 +3003,7 @@
                   address_marking: customerData.address.address_marking || '',
                   address_district: customerData.address.address_district,
                   address_governorate: customerData.address.address_governorate,
-                  district_id: customerData.address.district_id,
+                  area_id: customerData.address.area_id,
                   area: customerData.address.address_district,
                   isPrimary: true
                 }],
@@ -3616,8 +3637,8 @@
           return;
         }
         results.innerHTML = filtered.map(d =>
-          `<div class="search-result" data-id="${d.district_id}" data-name="${d.district_name}" data-gov="${d.governorate_name}">
-            ${highlightMatch(d.district_name, term)} - ${highlightMatch(d.governorate_name, term)}
+          `<div class="search-result" data-id="${d.area_id}" data-name="${d.city_district_ar}" data-gov="${d.state_gov_ar}">
+            ${highlightMatch(d.city_district_ar, term)} - ${highlightMatch(d.state_gov_ar, term)}
           </div>`
         ).join('');
         results.classList.add('show');
@@ -3635,8 +3656,8 @@
         term = term.trim().toLowerCase();
         if (!term) return districts;
         return districts.filter(d =>
-          d.district_name.toLowerCase().includes(term) ||
-          d.governorate_name.toLowerCase().includes(term)
+          d.city_district_ar.toLowerCase().includes(term) ||
+          d.state_gov_ar.toLowerCase().includes(term)
         );
       }
 
@@ -3689,9 +3710,9 @@
         return;
       }
 
-      const selectedDistrict = districts.find(d => d.district_id === districtId);
-      const addressDistrict = selectedDistrict ? selectedDistrict.district_name : '';
-      const addressGovernorate = selectedDistrict ? selectedDistrict.governorate_name : '';
+      const selectedDistrict = districts.find(d => d.area_id === districtId);
+      const addressDistrict = selectedDistrict ? selectedDistrict.city_district_ar : '';
+      const addressGovernorate = selectedDistrict ? selectedDistrict.state_gov_ar : '';
 
       const newAddress = {
         id: `ADDR-${Date.now()}`,
@@ -3704,7 +3725,7 @@
         address_marking: marking,
         address_district: addressDistrict,
         address_governorate: addressGovernorate,
-        district_id: districtId,
+        area_id: districtId,
         isPrimary: false
       };
 
@@ -3749,7 +3770,7 @@
       // Populate districts
       districtSelect.innerHTML = '<option value="">اختر المنطقة</option>' +
         districts.map(district =>
-          `<option value="${district.id}">${district.name}</option>`
+          `<option value="${district.area_id}">${district.city_district_ar}</option>`
         ).join('');
 
       districtSelect.addEventListener('change', function () {
@@ -4446,7 +4467,7 @@ function submitAddCustomer() {
       address_marking: document.getElementById('addCustomerAddressMarking').value.trim(),
       address_district: document.getElementById('addCustomerAddressDistrict').value,
       address_governorate: document.getElementById('addCustomerAddressGovernorate').value,
-      district_id: document.getElementById('addCustomerDistrictId').value,
+      area_id: document.getElementById('addCustomerDistrictId').value,
       isPrimary: true
     }
   };
@@ -4498,7 +4519,7 @@ function submitAddCustomer() {
         address_marking: customerData.address.address_marking || '',
         address_district: customerData.address.address_district,
         address_governorate: customerData.address.address_governorate,
-        district_id: customerData.address.district_id,
+        area_id: customerData.address.area_id,
         area: customerData.address.address_district,
         isPrimary: true
       }],
@@ -4763,8 +4784,8 @@ function initializeProductDropdown(row, rowIndex) {
           return;
         }
         results.innerHTML = filtered.map(d =>
-          `<div class="search-result" data-id="${d.district_id}" data-name="${d.district_name}" data-gov="${d.governorate_name}">
-            ${highlightMatch(d.district_name, term)} - ${highlightMatch(d.governorate_name, term)}
+          `<div class="search-result" data-id="${d.area_id}" data-name="${d.city_district_ar}" data-gov="${d.state_gov_ar}">
+            ${highlightMatch(d.city_district_ar, term)} - ${highlightMatch(d.state_gov_ar, term)}
           </div>`
         ).join('');
         results.classList.add('show');
@@ -4782,8 +4803,8 @@ function initializeProductDropdown(row, rowIndex) {
         term = term.trim().toLowerCase();
         if (!term) return districts;
         return districts.filter(d =>
-          d.district_name.toLowerCase().includes(term) ||
-          d.governorate_name.toLowerCase().includes(term)
+          d.city_district_ar.toLowerCase().includes(term) ||
+          d.state_gov_ar.toLowerCase().includes(term)
         );
       }
 
@@ -4865,31 +4886,76 @@ function initializeProductDropdown(row, rowIndex) {
 
     // ===== MAIN INITIALIZATION =====
     function initializeApp() {
-      updateLoadingMessage('جاري تحميل البيانات...');
+      // The main loading screen is visible by default. We need to hide it when all initial data is loaded.
+      // API calls might show their own sub-loaders, but this handles the initial page load screen.
       
-      // Initialize components
-      initializeNavigation();
-      initializeOrderFilters();
-      
-      // Load initial data
-      Promise.all([
-        API.getOrders(),
-        API.getProducts(),
-        API.getLocations()
-      ]).then(([ordersData, productsData, locationsData]) => {
-        orders = ordersData;
-        products = productsData;
-        locations = locationsData;
-        
-        updateOrderCounts();
-        renderOrders();
-        hideGlobalLoader();
-        showToast('success', 'تم تحميل النظام بنجاح');
-      }).catch(error => {
-        hideGlobalLoader();
-        showToast('error', 'خطأ في تحميل البيانات');
-        console.error('App initialization failed:', error);
-      });
+      const startupPromise = API.getStartupData();
+      const ordersPromise = API.getOrders();
+      const customersPromise = API.getCustomers();
+      const leadsPromise = API.getLeads();
+
+      Promise.all([startupPromise, ordersPromise, customersPromise, leadsPromise])
+        .then(([startupData, ordersData, customersData, leadsData]) => {
+          console.log('All initial data loaded successfully.');
+
+          // 1. Handle startup data (districts and counter)
+          let startupDataObject;
+          if (typeof startupData === 'string' && startupData.trim() !== '') {
+            try {
+              startupDataObject = JSON.parse(startupData);
+            } catch (e) {
+              console.error('Failed to parse startup data JSON:', e, 'Raw data:', startupData);
+              showToast('error', 'فشل في تحليل بيانات بدء التشغيل');
+              startupDataObject = { cutomersOrdersCounter: 0, districtsList: districts }; // Fallback to hardcoded
+            }
+          } else if (typeof startupData === 'object' && startupData !== null) {
+            startupDataObject = startupData; // Already an object (from test mode)
+          } else {
+             console.error('Received invalid or empty startup data:', startupData);
+             showToast('error', 'تم استلام بيانات بدء تشغيل غير صالحة');
+             startupDataObject = { cutomersOrdersCounter: 0, districtsList: districts }; // Fallback
+          }
+          
+          console.log('Parsed startup data:', startupDataObject);
+          appState.orderCounter = startupDataObject.cutomersOrdersCounter || 0;
+          if (startupDataObject.districtsList && startupDataObject.districtsList.length > 0) {
+            districts = startupDataObject.districtsList;
+            console.log('Districts array updated from startup data.');
+          } else {
+            console.warn('Startup data did not contain a valid districtsList. Using hardcoded data.');
+          }
+
+          // 2. Populate global data arrays
+          orders = Array.isArray(ordersData) ? ordersData : [];
+          customers = Array.isArray(customersData) ? customersData : [];
+          leads = Array.isArray(leadsData) ? leadsData : [];
+          
+          // 3. Initialize UI components that don't depend on data
+          initializeNavigation();
+          initializeOrderFilters();
+
+          // 4. Render the initial view with the new data
+          updateOrderCounts();
+          renderOrders();
+          
+          // The other sections (customers, leads) will be rendered when the user navigates to them
+          // via `loadCustomers()` and `loadLeads()` which are called by `initializeNavigation`.
+
+          console.log('App initialized successfully.');
+          console.log('Next order serial:', API.createSerial(appState.orderCounter + 1));
+
+        }).catch(error => {
+          console.error('Failed to load one or more initial app data sets:', error);
+          showToast('error', 'حدث خطأ أثناء تحميل بيانات التطبيق الرئيسية');
+          // Still try to initialize the app structure with hardcoded data
+          initializeNavigation();
+          initializeOrderFilters();
+          updateOrderCounts();
+          renderOrders();
+        }).finally(() => {
+          // This is critical: ALWAYS hide the main page loader.
+          hideGlobalLoader();
+        });
     }
 
     // Initialize app when DOM is loaded
@@ -5063,7 +5129,7 @@ function initializeProductDropdown(row, rowIndex) {
 
         // Create local order object for immediate UI update
         const newOrder = {
-          id: `AFI-${String(orders.length + 1).padStart(3, '0')}`,
+          id: API.createSerial(appState.orderCounter + 1), // Use serial generation
           customerId: customer_id || `CUST-${Date.now()}`,
           customerName: isNewCustomer ? customer.name : appState.selectedCustomer.name,
           customerPhone: isNewCustomer ? customer.phone : appState.selectedCustomer.phone,
@@ -5080,6 +5146,9 @@ function initializeProductDropdown(row, rowIndex) {
 
         console.log('=== LOCAL ORDER CREATED ===');
         console.log('New Order:', newOrder);
+
+        // Increment the counter for next order
+        appState.orderCounter++;
 
         // Update UI immediately
         orders.unshift(newOrder);
@@ -5122,7 +5191,7 @@ function initializeProductDropdown(row, rowIndex) {
           address_marking: document.getElementById('newAddressMarking') ? document.getElementById('newAddressMarking').value.trim() : '',
           address_district: document.getElementById('newAddressDistrict') ? document.getElementById('newAddressDistrict').value : '',
           address_governorate: document.getElementById('newAddressGovernorate') ? document.getElementById('newAddressGovernorate').value : '',
-          district_id: document.getElementById('newDistrictId') ? document.getElementById('newDistrictId').value : '',
+          area_id: document.getElementById('newDistrictId') ? document.getElementById('newDistrictId').value : '',
           isPrimary: true
         }
       };
@@ -5151,7 +5220,7 @@ function initializeProductDropdown(row, rowIndex) {
             address_marking: customerData.address.address_marking || '',
             address_district: customerData.address.address_district,
             address_governorate: customerData.address.address_governorate,
-            district_id: customerData.address.district_id,
+            area_id: customerData.address.area_id,
             area: customerData.address.address_district,
             isPrimary: true
           }],

@@ -5,19 +5,34 @@
     const { Toolkit } = AFILibrary
     const { readFromJSON, writeToJSON, timestampCreate, groupBy } = Toolkit
 
+    // function getStartupData() {
+    //     const masterFile = readFromJSON(MASTER_INDEX_ID)
+    //     const { productsList, unitsForOrdersForm, areasFormulatedFile, counters } = masterFile
+    //     const districtsList = readFromJSON(areasFormulatedFile)
+    //     console.log("Districts Loaded")
+    //     const productsArray = readFromJSON(productsList)
+    //     console.log("Products Loaded")
+    //     const unitsArray = readFromJSON(unitsForOrdersForm)
+    //     console.log("Units Loaded")
+    //     const countersFile = readFromJSON(counters)
+    //     console.log("Counters Loaded")
+    //     const { cutomersOrdersCounter } = countersFile
+    //     return { districtsList, productsArray, unitsArray, cutomersOrdersCounter }
+    // }
+
     function getStartupData() {
         const masterFile = readFromJSON(MASTER_INDEX_ID)
-        const { productsList, unitsForOrdersForm, areasFormulatedFile, counters } = masterFile
-        const districtsList = readFromJSON(areasFormulatedFile)
-        console.log("Districts Loaded")
-        const productsArray = readFromJSON(productsList)
-        console.log("Products Loaded")
-        const unitsArray = readFromJSON(unitsForOrdersForm)
-        console.log("Units Loaded")
+        const {  areasFormulatedFile, counters } = masterFile
+        const districtsObject = readFromJSON(areasFormulatedFile)
+        console.log("Districts object loaded")
+
+        // Transform the object of arrays into a single flat array
+        const districtsList = Object.values(districtsObject).flat();
+
         const countersFile = readFromJSON(counters)
         console.log("Counters Loaded")
-        const { cutomersOrdersCounter } = countersFile
-        return { districtsList, productsArray, unitsArray, cutomersOrdersCounter }
+        const cutomersOrdersCounter = countersFile.cutomersOrdersCounter || 0
+        return JSON.stringify({ districtsList, cutomersOrdersCounter })
     }
 
     function getCustomersData() {
