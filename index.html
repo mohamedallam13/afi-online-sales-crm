@@ -3405,6 +3405,9 @@
       document.getElementById('newOrderModal').classList.add('show');
       resetNewOrderForm();
       
+      // Initialize customer search
+      initializeCustomerSearch();
+      
       // Initialize source dropdowns for order form
       initializeSourceDropdowns();
       
@@ -4696,6 +4699,7 @@ function initializeProductDropdown(row, rowIndex) {
     window.removeOrderItem = removeOrderItem;
     window.updateOrderItem = updateOrderItem;
     window.changeOrderStatus = changeOrderStatus;
+    window.initializeCustomerSearch = initializeCustomerSearch;
     
     // ===== ORDER SUBMISSION =====
     function submitOrder() {
@@ -4704,9 +4708,18 @@ function initializeProductDropdown(row, rowIndex) {
         return;
       }
 
-      // Collect order data
-      const orderData = {
-        customer: appState.selectedCustomer || {
+      // Generate a unique reference for this order (timestamp + random)
+      const reference = `REF-${Date.now()}-${Math.floor(Math.random()*100000)}`;
+
+      // Determine if this is a new customer or existing customer
+      const isNewCustomer = !appState.selectedCustomer;
+      const isNewAddress = !appState.selectedAddress;
+
+      // Prepare customer fields
+      let customer_id = null;
+      let customer = {};
+      if (isNewCustomer) {
+        customer = {
           name: document.getElementById('customerName').value.trim(),
           phone: document.getElementById('customerPhone').value.trim(),
           gender: document.getElementById('customerGender').value,
@@ -4716,8 +4729,18 @@ function initializeProductDropdown(row, rowIndex) {
           primarySource: document.getElementById('primarySourceOfSale').value,
           secondarySource: document.getElementById('secondarySourceOfSale').value,
           type: document.getElementById('customerType').value
-        },
-        address: appState.selectedAddress || {
+        };
+        customer_id = null;
+      } else {
+        customer_id = appState.selectedCustomer.id;
+        customer = {};
+      }
+
+      // Prepare address fields
+      let address_id = null;
+      let address = {};
+      if (isNewAddress) {
+        address = {
           street_name: document.getElementById('newStreetName').value.trim(),
           address_district: document.getElementById('newAddressDistrict').value,
           address_governorate: document.getElementById('newAddressGovernorate').value,
@@ -4727,12 +4750,28 @@ function initializeProductDropdown(row, rowIndex) {
           address_marking: document.getElementById('newAddressMarking').value.trim(),
           address_comment: document.getElementById('newAddressComment').value.trim(),
           area: document.getElementById('newAddressDistrict').value
-        },
+        };
+        address_id = null;
+      } else {
+        address_id = appState.selectedAddress.id;
+        address = {};
+      }
+
+      // Collect order data
+      const orderData = {
+        reference,
+        customer_id,
+        customer,
+        address_id,
+        address,
         items: appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0),
         notes: document.getElementById('orderComments').value.trim(),
         source: document.getElementById('orderSource').value,
         secondarySource: document.getElementById('orderSecondarySource').value
       };
+
+      console.log('=== ORDER PAYLOAD TO BE SENT ===');
+      console.log(orderData);
 
       // Validate that we have at least one item
       if (!orderData.items || orderData.items.length === 0) {
@@ -4740,15 +4779,47 @@ function initializeProductDropdown(row, rowIndex) {
         return;
       }
 
-      // Submit the order
-      API.addOrder(orderData).then(newOrder => {
+      // Step 1: Add to buffer (with loading)
+      API.addCompoundedRequestToBuffer(orderData).then(response => {
+        console.log('=== BUFFER RESPONSE ===');
+        console.log('Buffer Response:', response);
+        // Use the reference returned from the buffer (if present)
+        const bufferReference = response && response.reference ? response.reference : reference;
+        // Step 2: Fire-and-forget the actual order creation, attach reference
+        const fireAndForgetOrder = { ...orderData, reference: bufferReference };
+        API.addCompoudedOrder(fireAndForgetOrder).catch(error => {
+          console.error('Background order creation failed:', error);
+          // Don't show error to user since this is fire-and-forget
+        });
+
+        // Create local order object for immediate UI update
+        const newOrder = {
+          id: `AFI-${String(orders.length + 1).padStart(3, '0')}`,
+          customerId: customer_id || `CUST-${Date.now()}`,
+          customerName: isNewCustomer ? customer.name : appState.selectedCustomer.name,
+          customerPhone: isNewCustomer ? customer.phone : appState.selectedCustomer.phone,
+          date: new Date().toISOString().split('T')[0],
+          amount: orderData.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+          status: 'pending',
+          items: orderData.items,
+          area: isNewAddress ? address.area : appState.selectedAddress.area,
+          address_details: isNewAddress ? 
+            `${address.street_name}، منزل ${address.house_number}${address.flat_number ? '، شقة ' + address.flat_number : ''}${address.floor_number ? '، دور ' + address.floor_number : ''}<br>${address.address_district} - ${address.address_governorate}` :
+            `${appState.selectedAddress.street_name}، منزل ${appState.selectedAddress.house_number}${appState.selectedAddress.flat_number ? '، شقة ' + appState.selectedAddress.flat_number : ''}${appState.selectedAddress.floor_number ? '، دور ' + appState.selectedAddress.floor_number : ''}<br>${appState.selectedAddress.address_district} - ${appState.selectedAddress.address_governorate}`,
+          comments: orderData.notes || ''
+        };
+
+        console.log('=== LOCAL ORDER CREATED ===');
+        console.log('New Order:', newOrder);
+
+        // Update UI immediately
         orders.unshift(newOrder);
         updateOrderCounts();
         renderOrders();
         closeNewOrderModal();
         showToast('success', 'تم إنشاء الطلب بنجاح', `رقم الطلب: ${newOrder.id}`);
       }).catch(error => {
-        console.error('Failed to submit order:', error);
+        console.error('Failed to buffer order:', error);
         showToast('error', 'حدث خطأ أثناء إنشاء الطلب');
       });
     }
