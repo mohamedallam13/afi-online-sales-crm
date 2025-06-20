@@ -2478,7 +2478,6 @@
         ],
         area: 'المعادي الجديدة',
         address_details: 'شارع النيل، منزل 15، شقة 3، دور 2<br>المعادي - القاهرة',
-        address: 'المعادي الجديدة',
         comments: 'يرجى التوصيل قبل المغرب'
       },
       {
@@ -2495,7 +2494,6 @@
         ],
         area: 'هليوبوليس',
         address_details: 'شارع الجمهورية، منزل 8، شقة 5، دور 5<br>مصر الجديدة - القاهرة',
-        address: 'هليوبوليس',
         comments: ''
       },
       {
@@ -2512,7 +2510,6 @@
         ],
         area: 'الدقي',
         address_details: 'شارع أحمد عرابي، منزل 22<br>المهندسين - الجيزة',
-        address: 'الدقي',
         comments: 'طلب عاجل'
       },
       {
@@ -2528,7 +2525,6 @@
         ],
         area: 'المعادي الجديدة',
         address_details: 'شارع النيل، منزل 15، شقة 3، دور 2<br>المعادي - القاهرة',
-        address: 'المعادي الجديدة',
         comments: ''
       },
       {
@@ -2545,7 +2541,6 @@
         ],
         area: 'الحي الأول',
         address_details: 'شارع العروبة، منزل 10، شقة 2، دور 2<br>مدينة نصر - القاهرة',
-        address: 'مدينة نصر',
         comments: 'توصيل سريع'
       }
     ];
@@ -2828,7 +2823,6 @@
                 address_details: orderData.address ? 
                   `${orderData.address.street_name}، منزل ${orderData.address.house_number}${orderData.address.flat_number ? '، شقة ' + orderData.address.flat_number : ''}${orderData.address.floor_number ? '، دور ' + orderData.address.floor_number : ''}<br>${orderData.address.address_district} - ${orderData.address.address_governorate}` :
                   (orderData.customer.address || 'غير محدد'),
-                address: orderData.address ? `${orderData.address.area}` : orderData.customer.address,
                 comments: orderData.notes || ''
               };
               orders.unshift(newOrder);
