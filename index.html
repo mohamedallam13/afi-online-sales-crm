@@ -3951,7 +3951,6 @@
       if (address) {
         appState.selectedAddress = address;
         appState.newOrderForm.address = address;
-        showToast('success', 'تم اختيار العنوان', address.address_label);
 
         setTimeout(() => {
           showOrderDetailsSection();
@@ -5092,9 +5091,13 @@ function initializeProductDropdown(row, rowIndex) {
         address = {};
       }
 
+      // Generate the serial *before* creating the payload
+      const orderSerial = API.createSerial(appState.orderCounter + 1);
+
       // Collect order data
       const orderData = {
         reference,
+        orderSerial, // Add serial to the payload
         customer_id,
         customer,
         address_id,

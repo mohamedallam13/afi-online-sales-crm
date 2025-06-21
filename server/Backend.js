@@ -93,7 +93,7 @@
     }
 
     function OrderRequest(order) {
-        this.customer_order_serial = order.order_serial || '';
+        this.customer_order_serial = order.orderSerial || '';
         this.customer_original_serial = order.customer_original_serial || '';
         this.version_number = order.version_number || '1';
         this.change_type = order.change_type || 'New Order';
@@ -234,18 +234,18 @@
     }
 
     function saveOrderToDBSheet(formData) {
-        augmentNewParameters(formData)
+        // augmentNewParameters(formData)
         return AFIDBSheetsController.runRequest("createNewCustomerOrder", formData)
     }
 
-    function augmentNewParameters(formData) {
-        // Combine the date and time into a single string
-        const dateTimeString = `${formData.orderDate}T${formData.orderTime}`;
-        // Create a Date object
-        const dateObj = new Date(dateTimeString);
-        formData.order_date = timestampCreate(dateObj, "M/d/YYYY HH:mm:ss")
-        formData.changed_at = timestampCreate(dateObj, "M/d/YYYY HH:mm:ss")
-    }
+    // function augmentNewParameters(formData) {
+    //     // Combine the date and time into a single string
+    //     const dateTimeString = `${formData.orderDate}T${formData.orderTime}`;
+    //     // Create a Date object
+    //     const dateObj = new Date(dateTimeString);
+    //     formData.order_date = timestampCreate(dateObj, "M/d/YYYY HH:mm:ss")
+    //     formData.changed_at = timestampCreate(dateObj, "M/d/YYYY HH:mm:ss")
+    // }
 
     function increaseOrderCounter() {
         const masterFile = readFromJSON(MASTER_INDEX_ID)
