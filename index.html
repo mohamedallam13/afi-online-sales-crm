@@ -2323,6 +2323,69 @@
             إضافة منتج جديد
           </button>
 
+          <!-- Order Summary and Discount Section -->
+          <div class="order-summary-section" style="margin-top: 2rem; padding: 1.5rem; background: var(--glass-bg); border-radius: var(--border-radius-lg); border: 1px solid rgba(255, 255, 255, 0.3);">
+            <h4 style="margin-bottom: 1.5rem; color: var(--gray-700); text-align: center; font-size: 1.2rem;">
+              <i class="fas fa-calculator"></i>
+              ملخص الطلب والخصم
+            </h4>
+          
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+          
+              <!-- Total Amount -->
+              <div class="form-group">
+                <label class="form-label">إجمالي المبلغ</label>
+                <div class="summary-display" id="orderTotalAmount" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.8); border-radius: var(--border-radius); font-weight: 600; color: var(--gray-700); text-align: center; font-size: 1.1rem;">
+                  0.00 ج.م
+                </div>
+              </div>
+          
+              <!-- Discount Controls -->
+              <div style="padding: 1rem; background: var(--gray-75); border-radius: var(--border-radius);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
+                  <!-- Radio Buttons -->
+                  <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 2rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                      <input type="radio" name="discountType" value="percentage" checked onchange="switchDiscountType()">
+                      <span>خصم نسبة مئوية (%)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                      <input type="radio" name="discountType" value="amount" onchange="switchDiscountType()">
+                      <span>خصم مبلغ ثابت</span>
+                    </label>
+                  </div>
+                  
+                  <!-- Percentage Input -->
+                  <div class="form-group" id="discountPercentageContainer">
+                    <label class="form-label" for="orderDiscountPercentage">نسبة الخصم</label>
+                    <input type="number" class="form-input" id="orderDiscountPercentage" placeholder="0" min="0" max="100" step="0.01" oninput="updateOrderSummary()">
+                  </div>
+                  
+                  <!-- Amount Input -->
+                  <div class="form-group" id="discountAmountContainer" style="display: none;">
+                    <label class="form-label" for="orderDiscountAmount">مبلغ الخصم</label>
+                    <input type="number" class="form-input" id="orderDiscountAmount" placeholder="0.00" min="0" step="0.01" disabled oninput="updateOrderSummary()">
+                  </div>
+                </div>
+              </div>
+          
+              <!-- Discount Reason -->
+              <div class="form-group">
+                <label class="form-label" for="orderDiscountReason">سبب الخصم (اختياري)</label>
+                <input type="text" class="form-input" id="orderDiscountReason" placeholder="سبب الخصم">
+              </div>
+          
+              <!-- Net Amount -->
+              <div class="form-group">
+                <label class="form-label">المبلغ النهائي بعد الخصم</label>
+                <div class="summary-display" id="orderNetAmount" style="padding: 1rem; background: var(--success); color: white; border-radius: var(--border-radius); font-weight: 700; text-align: center; font-size: 1.25rem;">
+                  0.00 ج.م
+                </div>
+              </div>
+          
+            </div>
+          </div>
+
           <!-- Submit Buttons -->
           <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
             <button type="button" class="btn btn-success" onclick="submitOrder()">
@@ -3329,7 +3392,23 @@
                     </div>
                     <div class="summary-value">${formatDate(order.date)}</div>
                   </div>
+                  ${order.discount && order.discount > 0 ? `
+                    <div class="summary-item">
+                      <div class="summary-label">
+                        <i class="fas fa-percentage" style="color: var(--danger);"></i>
+                        الخصم
+                      </div>
+                      <div class="summary-value">${formatCurrency(order.discount)}</div>
+                    </div>
+                  ` : ''}
                 </div>
+                
+                ${order.discountReason ? `
+                  <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid var(--danger);">
+                    <h5 style="margin-bottom: 0.5rem; color: var(--gray-700);"><i class="fas fa-percentage"></i> سبب الخصم:</h5>
+                    <p style="margin: 0; color: var(--gray-600);">${order.discountReason}</p>
+                  </div>
+                ` : ''}
                 
                 ${order.comments ? `
                   <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid var(--info);">
@@ -3368,7 +3447,19 @@
                   <tfoot>
                     <tr style="background: var(--gray-100); font-weight: 600;">
                       <td colspan="4" style="text-align: left; padding: 1rem;">المجموع الكلي:</td>
-                      <td style="padding: 1rem;"><strong>${formatCurrency(order.amount)}</strong></td>
+                      <td style="padding: 1rem;"><strong>${formatCurrency(order.totalAmount || order.amount)}</strong></td>
+                      <td style="padding: 1rem;"></td>
+                    </tr>
+                    ${order.discount && order.discount > 0 ? `
+                      <tr style="background: var(--danger-light); font-weight: 600;">
+                        <td colspan="4" style="text-align: left; padding: 1rem; color: var(--danger);">الخصم:</td>
+                        <td style="padding: 1rem; color: var(--danger);"><strong>-${formatCurrency(order.discount)}</strong></td>
+                        <td style="padding: 1rem;"></td>
+                      </tr>
+                    ` : ''}
+                    <tr style="background: var(--success-light); font-weight: 600;">
+                      <td colspan="4" style="text-align: left; padding: 1rem; color: var(--success);">المبلغ النهائي:</td>
+                      <td style="padding: 1rem; color: var(--success);"><strong>${formatCurrency(order.amount)}</strong></td>
                       <td style="padding: 1rem;"></td>
                     </tr>
                   </tfoot>
@@ -3515,6 +3606,7 @@
       document.getElementById('newOrderModal').classList.add('show');
       resetNewOrderForm();
       
+      switchDiscountType();
       // Initialize customer search
       initializeCustomerSearch();
       // Initialize address grid listener
@@ -3557,6 +3649,12 @@
         if (element) element.value = '';
       });
 
+      // Reset discount fields
+      ['orderDiscount', 'orderDiscountReason'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = '';
+      });
+
       // Reset new address fields
       ['newAddressStreet', 'newAddressDistrict', 'newAddressArea', 'newAddressLabel'].forEach(id => {
         const element = document.getElementById(id);
@@ -3579,6 +3677,9 @@
       appState.selectedCustomer = null;
       appState.selectedAddress = null;
       appState.isAddingNewAddress = false;
+
+      // Reset order summary display
+      updateOrderSummary();
     }
 
     function hideAllFormSections() {
@@ -4041,6 +4142,9 @@
       if (appState.newOrderForm.items.length === 0) {
         addOrderItem();
       }
+      
+      // Update order summary after removing item
+      updateOrderSummary();
     }
 
     function updateOrderItem(rowIndex) {
@@ -4071,6 +4175,67 @@
         // Update price display
         priceDisplay.textContent = formatCurrency(price * quantity);
       }
+      
+      // Update order summary after item changes
+      updateOrderSummary();
+    }
+
+    function switchDiscountType() {
+      const isPercentage = document.querySelector('input[name="discountType"][value="percentage"]').checked;
+      
+      const percentageContainer = document.getElementById('discountPercentageContainer');
+      const amountContainer = document.getElementById('discountAmountContainer');
+      const percentageInput = document.getElementById('orderDiscountPercentage');
+      const amountInput = document.getElementById('orderDiscountAmount');
+
+      if (isPercentage) {
+        percentageContainer.style.display = 'block';
+        percentageInput.disabled = false;
+        
+        amountContainer.style.display = 'none';
+        amountInput.disabled = true;
+        amountInput.value = ''; // Clear inactive input
+      } else {
+        amountContainer.style.display = 'block';
+        amountInput.disabled = false;
+
+        percentageContainer.style.display = 'none';
+        percentageInput.disabled = true;
+        percentageInput.value = ''; // Clear inactive input
+      }
+      
+      updateOrderSummary();
+    }
+
+    function updateOrderSummary() {
+      const totalAmount = appState.newOrderForm.items.reduce((total, item) => {
+        return total + (item.price * item.quantity);
+      }, 0);
+
+      const isPercentage = document.querySelector('input[name="discountType"][value="percentage"]').checked;
+      let discountAmount = 0;
+
+      if (isPercentage) {
+        let percentage = parseFloat(document.getElementById('orderDiscountPercentage').value) || 0;
+        // Basic validation
+        if (percentage > 100) { percentage = 100; document.getElementById('orderDiscountPercentage').value = 100; }
+        if (percentage < 0)   { percentage = 0;   document.getElementById('orderDiscountPercentage').value = 0; }
+        discountAmount = (totalAmount * percentage) / 100;
+      } else {
+        let amount = parseFloat(document.getElementById('orderDiscountAmount').value) || 0;
+        // Basic validation
+        if (amount > totalAmount) { amount = totalAmount; document.getElementById('orderDiscountAmount').value = totalAmount.toFixed(2); }
+        if (amount < 0)           { amount = 0;           document.getElementById('orderDiscountAmount').value = 0; }
+        discountAmount = amount;
+      }
+      
+      const netAmount = Math.max(0, totalAmount - discountAmount);
+      
+      // Ensure elements exist before updating
+      const totalEl = document.getElementById('orderTotalAmount');
+      const netEl = document.getElementById('orderNetAmount');
+      if (totalEl) totalEl.textContent = formatCurrency(totalAmount);
+      if (netEl) netEl.textContent = formatCurrency(netAmount);
     }
 
     function initializeCustomerSearch() {
@@ -5106,14 +5271,33 @@ function initializeProductDropdown(row, rowIndex) {
       const validItems = appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0);
       const totalAmount = validItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
+      // Get discount data directly from the form state
+      const isPercentage = document.querySelector('input[name="discountType"][value="percentage"]').checked;
+      const discountType = isPercentage ? 'percentage' : 'amount';
+      let discountValue = 0;
+      let discountAmount = 0;
+
+      if (isPercentage) {
+        discountValue = parseFloat(document.getElementById('orderDiscountPercentage').value) || 0;
+        discountAmount = (totalAmount * discountValue) / 100;
+      } else {
+        discountValue = parseFloat(document.getElementById('orderDiscountAmount').value) || 0;
+        discountAmount = discountValue;
+      }
+      const netAmount = Math.max(0, totalAmount - discountAmount);
+      const discountReason = document.getElementById('orderDiscountReason').value.trim();
+      
       // Generate the serial *before* creating the payload
       const orderSerial = API.createSerial(appState.orderCounter + 1);
 
       // Collect order data
       const orderData = {
         reference,
-        orderSerial, // Add serial to the payload
-        totalAmount, // Add the calculated total amount
+        orderSerial,
+        totalAmount,
+        discountType,
+        discountValue, // The raw value entered by the user
+        discountReason,
         customer_id,
         customer,
         address_id,
@@ -5153,7 +5337,10 @@ function initializeProductDropdown(row, rowIndex) {
           customerName: isNewCustomer ? customer.name : appState.selectedCustomer.name,
           customerPhone: isNewCustomer ? customer.phone : appState.selectedCustomer.phone,
           date: new Date().toISOString().split('T')[0],
-          amount: totalAmount,
+          amount: netAmount, // Use net amount instead of total amount
+          totalAmount: totalAmount, // Keep total amount for reference
+          discount: discountAmount, // Add discount amount
+          discountReason: discountReason, // Add discount reason
           status: 'pending',
           items: validItems,
           area: isNewAddress ? address.area : appState.selectedAddress.area,
