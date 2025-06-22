@@ -22,7 +22,7 @@
 
     function getStartupData() {
         const masterFile = readFromJSON(MASTER_INDEX_ID)
-        const {  areasFormulatedFile, counters } = masterFile
+        const {  areasFormulatedFile, counters, unitsForOrdersForm } = masterFile
         const districtsObject = readFromJSON(areasFormulatedFile)
         console.log("Districts object loaded")
 
@@ -32,7 +32,11 @@
         const countersFile = readFromJSON(counters)
         console.log("Counters Loaded")
         const cutomersOrdersCounter = countersFile.cutomersOrdersCounter || 0
-        return JSON.stringify({ districtsList, cutomersOrdersCounter })
+
+        const unitsList = readFromJSON(unitsForOrdersForm) || []
+        console.log("Units Loaded")
+
+        return JSON.stringify({ districtsList, cutomersOrdersCounter, unitsList })
     }
 
     function getCustomersData() {

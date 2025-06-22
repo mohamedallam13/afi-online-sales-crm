@@ -2548,6 +2548,13 @@
       { id: 'PROD_010', name: 'قهوة نسكافيه - 200 جرام', category: 'مشروبات', price: 55.00 }
     ];
 
+    let units = [
+        { unit_id: '70000000000001', unit_name: 'carton', unit_name_ar: 'كرتونة' },
+        { unit_id: '70000000000002', unit_name: 'piece', unit_name_ar: 'قطعة' },
+        { unit_id: '70000000000003', unit_name: 'kg', unit_name_ar: 'كجم' },
+        { unit_id: '70000000000004', unit_name: 'g', unit_name_ar: 'جم' }
+    ];
+
     let districts = [
       { area_id: '420000000000001', city_district_ar: 'المعادي', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
       { area_id: '420000000000002', city_district_ar: 'مصر الجديدة', state_gov: 'Cairo', state_gov_ar: 'القاهرة' },
@@ -2907,8 +2914,9 @@
           return new Promise(resolve => {
             setTimeout(() => {
               resolve({
-                cutomersOrdersCounter: 42, // Match backend property name
-                districtsList: districts // Match backend property name
+                cutomersOrdersCounter: 42,
+                districtsList: districts,
+                unitsList: units // Add units to the mock response
               });
             }, 500);
           });
@@ -3988,12 +3996,7 @@
         </td>
         <td>
           <select class="form-select unit-select" onchange="updateOrderItem(${rowIndex})">
-            <option value="قطعة">قطعة</option>
-            <option value="كيلو">كيلو</option>
-            <option value="لتر">لتر</option>
-            <option value="عبوة">عبوة</option>
-            <option value="كيس">كيس</option>
-            <option value="زجاجة">زجاجة</option>
+            ${units.map(u => `<option value="${u.unit_id}">${u.unit_name_ar}</option>`).join('')}
           </select>
         </td>
         <td>
@@ -4059,7 +4062,8 @@
           productId: productId || '',
           productName: product ? product.name : '',
           quantity: quantity,
-          unit: unitSelect.value,
+          unitId: unitSelect.value, // Store the unit_id
+          unit: unitSelect.options[unitSelect.selectedIndex].text, // Store the unit name (text)
           comments: commentInput.value,
           price: price
         };
@@ -4924,6 +4928,13 @@ function initializeProductDropdown(row, rowIndex) {
             console.warn('Startup data did not contain a valid districtsList. Using hardcoded data.');
           }
 
+          if (startupDataObject.unitsList && startupDataObject.unitsList.length > 0) {
+            units = startupDataObject.unitsList;
+            console.log('Units array updated from startup data.');
+          } else {
+            console.warn('Startup data did not contain a valid unitsList. Using hardcoded data.');
+          }
+
           // 2. Populate global data arrays
           orders = Array.isArray(ordersData) ? ordersData : [];
           customers = Array.isArray(customersData) ? customersData : [];
@@ -5091,6 +5102,10 @@ function initializeProductDropdown(row, rowIndex) {
         address = {};
       }
 
+      // Filter items and calculate total amount *before* creating the payload
+      const validItems = appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0);
+      const totalAmount = validItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
       // Generate the serial *before* creating the payload
       const orderSerial = API.createSerial(appState.orderCounter + 1);
 
@@ -5098,11 +5113,12 @@ function initializeProductDropdown(row, rowIndex) {
       const orderData = {
         reference,
         orderSerial, // Add serial to the payload
+        totalAmount, // Add the calculated total amount
         customer_id,
         customer,
         address_id,
         address,
-        items: appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0),
+        items: validItems,
         notes: document.getElementById('orderComments').value.trim(),
         source: document.getElementById('orderSource').value,
         secondarySource: document.getElementById('orderSecondarySource').value
@@ -5132,14 +5148,14 @@ function initializeProductDropdown(row, rowIndex) {
 
         // Create local order object for immediate UI update
         const newOrder = {
-          id: API.createSerial(appState.orderCounter + 1), // Use serial generation
+          id: orderSerial, // Use the pre-generated serial
           customerId: customer_id || `CUST-${Date.now()}`,
           customerName: isNewCustomer ? customer.name : appState.selectedCustomer.name,
           customerPhone: isNewCustomer ? customer.phone : appState.selectedCustomer.phone,
           date: new Date().toISOString().split('T')[0],
-          amount: orderData.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+          amount: totalAmount,
           status: 'pending',
-          items: orderData.items,
+          items: validItems,
           area: isNewAddress ? address.area : appState.selectedAddress.area,
           address_details: isNewAddress ? 
             `${address.street_name}، منزل ${address.house_number}${address.flat_number ? '، شقة ' + address.flat_number : ''}${address.floor_number ? '، دور ' + address.floor_number : ''}<br>${address.address_district} - ${address.address_governorate}` :
