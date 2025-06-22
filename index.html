@@ -2294,6 +2294,10 @@
               <label class="form-label">المصدر الفرعي</label>
               <select class="form-select" id="orderSecondarySource" data-label="المصدر الفرعي"></select>
             </div>
+            <div class="form-group">
+              <label class="form-label" for="orderPaymentMethod">طريقة الدفع</label>
+              <select class="form-input" id="orderPaymentMethod"></select>
+            </div>
           </div>
 
           <!-- Order Comments -->
@@ -5057,6 +5061,9 @@ function initializeProductDropdown(row, rowIndex) {
       // The main loading screen is visible by default. We need to hide it when all initial data is loaded.
       // API calls might show their own sub-loaders, but this handles the initial page load screen.
       
+      populateSourceDropdowns('orderSource', 'orderSecondarySource');
+      populatePaymentMethodsDropdown('orderPaymentMethod');
+
       const startupPromise = API.getStartupData();
       const ordersPromise = API.getOrders();
       const customersPromise = API.getCustomers();
@@ -5188,6 +5195,21 @@ function initializeProductDropdown(row, rowIndex) {
       secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>';
     }
 
+    const PAYMENT_METHODS = [
+      { id: 'cod', name: 'كاش عند الإستلام (COD)' },
+      { id: 'vc_01012345678', name: 'فودافون كاش - 01012345678' },
+      { id: 'vc_01098765432', name: 'فودافون كاش - 01098765432' },
+      { id: 'insta_account1', name: 'إنستاباي - account1@instapay' },
+      { id: 'insta_account2', name: 'إنستاباي - account2@instapay' }
+    ];
+
+    function populatePaymentMethodsDropdown(selectId) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      select.innerHTML = '<option value="">اختر طريقة الدفع</option>' +
+        PAYMENT_METHODS.map(method => `<option value="${method.id}">${method.name}</option>`).join('');
+    }
+
     // Global function assignments
     window.openAddCustomerModal = openAddCustomerModal;
     window.closeAddCustomerModal = closeAddCustomerModal;
@@ -5213,6 +5235,13 @@ function initializeProductDropdown(row, rowIndex) {
     
     // ===== ORDER SUBMISSION =====
     function submitOrder() {
+      // Validate that a payment method is selected
+      const paymentMethod = document.getElementById('orderPaymentMethod').value;
+      if (!paymentMethod) {
+        showToast('error', 'الرجاء اختيار طريقة الدفع لإتمام الطلب');
+        return;
+      }
+
       // Validate the order form
       if (!validateOrderForm()) {
         return;
@@ -5305,7 +5334,8 @@ function initializeProductDropdown(row, rowIndex) {
         items: validItems,
         notes: document.getElementById('orderComments').value.trim(),
         source: document.getElementById('orderSource').value,
-        secondarySource: document.getElementById('orderSecondarySource').value
+        secondarySource: document.getElementById('orderSecondarySource').value,
+        paymentMethod: document.getElementById('orderPaymentMethod').value
       };
 
       console.log('=== ORDER PAYLOAD TO BE SENT ===');

@@ -104,7 +104,7 @@
         this.change_type = order.change_type || 'New Order';
         this.status = order.status || 'Pending';
         this.sales_person_id = order.sales_person_id || '600000000000001';
-        this.payment_type = order.payment_type || 'cash';
+        this.payment_type = order.paymentMethod || order.payment_type || 'cod'; // 'cod' as default
         this.customer_id = order.customer_id || order.customerId || '';
         this.address_id = order.address_id || order.addressId || '';
         this.customer_order_comment = order.notes || order.customer_order_comment || '';
