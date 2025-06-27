@@ -22,7 +22,7 @@
 
     function getStartupData() {
         const masterFile = readFromJSON(MASTER_INDEX_ID)
-        const {  areasFormulatedFile, counters } = masterFile
+        const {  areasFormulatedFile, counters, unitsForOrdersForm } = masterFile
         const districtsObject = readFromJSON(areasFormulatedFile)
         console.log("Districts object loaded")
 
@@ -32,7 +32,11 @@
         const countersFile = readFromJSON(counters)
         console.log("Counters Loaded")
         const cutomersOrdersCounter = countersFile.cutomersOrdersCounter || 0
-        return JSON.stringify({ districtsList, cutomersOrdersCounter })
+
+        const unitsList = readFromJSON(unitsForOrdersForm) || []
+        console.log("Units Loaded")
+
+        return JSON.stringify({ districtsList, cutomersOrdersCounter, unitsList })
     }
 
     function getCustomersData() {
@@ -48,6 +52,7 @@
     }
 
     function addCompoundedRequestToBuffer(request) {
+        console.log("buffered:",request)
         try {
             const timestamp = timestampCreate(undefined, "M/d/YYYY HH:mm:ss");
             const masterFile = readFromJSON(MASTER_INDEX_ID);
@@ -93,35 +98,55 @@
     }
 
     function OrderRequest(order) {
-        this.customer_order_serial = order.orderSerial || '';
+        this.customer_order_serial = order.orderSerial || order.customer_order_serial || '';
         this.customer_original_serial = order.customer_original_serial || '';
         this.version_number = order.version_number || '1';
         this.change_type = order.change_type || 'New Order';
         this.status = order.status || 'Pending';
         this.sales_person_id = order.sales_person_id || '600000000000001';
-        this.payment_type = order.payment_type || 'cash';
+        this.payment_type = order.paymentMethod || order.payment_type || 'cod'; // 'cod' as default
         this.customer_id = order.customer_id || order.customerId || '';
         this.address_id = order.address_id || order.addressId || '';
         this.customer_order_comment = order.notes || order.customer_order_comment || '';
         this.customer_order_date = order.customer_order_date || timestampCreate(new Date(), "M/d/YYYY HH:mm:ss");
-        this.customer_order_deadline = order.customer_order_deadline || '';
+        this.customer_order_deadline = order.deadline || order.customer_order_deadline || '';
         this.changed_at = order.changed_at || timestampCreate(new Date(), "M/d/YYYY HH:mm:ss");
         this.change_reason = order.change_reason || 'Initial entry';
         this.order_url = order.order_url || '';
         this.order_invoice_number = order.order_invoice_number || '';
-        this.order_invoice_value = order.order_invoice_value || 0;
+        this.order_invoice_value = order.totalAmount || order.order_invoice_value || 0;
+        
+        // Discount and Amount Fields
+        this.amount = order.totalAmount || order.amount || 0;
+        const discountType = order.discountType || 'amount'; // Default to 'amount' for legacy
+        const discountValue = order.discountValue !== undefined ? order.discountValue : (order.discount || 0);
+        
+        let calculatedDiscount = 0;
+        if (discountType === 'percentage') {
+            calculatedDiscount = (this.amount * discountValue) / 100;
+        } else {
+            calculatedDiscount = discountValue;
+        }
+
+        this.discount_type = discountType;
+        this.discount_value = discountValue; // The raw value (e.g., 15 for 15% or 50 for 50 EGP)
+        this.discount = calculatedDiscount; // The final monetary value of the discount
+        this.discount_reason = order.discountReason || order.discount_reason || '';
+        this.net_amount = this.amount - calculatedDiscount;
+
         this.primary_source_of_sale = order.source || order.primary_source_of_sale || '';
         this.secondary_source_of_sale = order.secondarySource || order.secondary_source_of_sale || '';
         this.items = (order.items || []).map(item => ({
             productData: item.productData || {
-                product_id: item.productId || '',
-                product_name_ar: item.productName || ''
+                product_id: item.productId || item.product_id || '',
+                product_name_ar: item.productName || item.product_name_ar || '',
+                product_price: item.price || item.product_price || 0
             },
             quantity: item.quantity,
-            unit: item.unit || {
-                unit_id: item.unit_id || '',
-                unit_name_ar: item.unit_name_ar || item.unit || '',
-                unit_name: item.unit_name || ''
+            unit: item.unitData || {
+                unit_id: item.unitId || item.unit_id || '',
+                unit_name_ar: item.unitName || item.unit_name_ar || item.unit || '',
+                unit_name: item.unitName || item.unit_name || ''
             },
             item_comment: item.comments || item.item_comment || ''
         }));

@@ -2294,6 +2294,10 @@
               <label class="form-label">المصدر الفرعي</label>
               <select class="form-select" id="orderSecondarySource" data-label="المصدر الفرعي"></select>
             </div>
+            <div class="form-group">
+              <label class="form-label" for="orderPaymentMethod">طريقة الدفع</label>
+              <select class="form-input" id="orderPaymentMethod"></select>
+            </div>
           </div>
 
           <!-- Order Comments -->
@@ -2322,6 +2326,69 @@
             <i class="fas fa-plus"></i>
             إضافة منتج جديد
           </button>
+
+          <!-- Order Summary and Discount Section -->
+          <div class="order-summary-section" style="margin-top: 2rem; padding: 1.5rem; background: var(--glass-bg); border-radius: var(--border-radius-lg); border: 1px solid rgba(255, 255, 255, 0.3);">
+            <h4 style="margin-bottom: 1.5rem; color: var(--gray-700); text-align: center; font-size: 1.2rem;">
+              <i class="fas fa-calculator"></i>
+              ملخص الطلب والخصم
+            </h4>
+          
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+          
+              <!-- Total Amount -->
+              <div class="form-group">
+                <label class="form-label">إجمالي المبلغ</label>
+                <div class="summary-display" id="orderTotalAmount" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.8); border-radius: var(--border-radius); font-weight: 600; color: var(--gray-700); text-align: center; font-size: 1.1rem;">
+                  0.00 ج.م
+                </div>
+              </div>
+          
+              <!-- Discount Controls -->
+              <div style="padding: 1rem; background: var(--gray-75); border-radius: var(--border-radius);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
+                  <!-- Radio Buttons -->
+                  <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 2rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                      <input type="radio" name="discountType" value="percentage" checked onchange="switchDiscountType()">
+                      <span>خصم نسبة مئوية (%)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                      <input type="radio" name="discountType" value="amount" onchange="switchDiscountType()">
+                      <span>خصم مبلغ ثابت</span>
+                    </label>
+                  </div>
+                  
+                  <!-- Percentage Input -->
+                  <div class="form-group" id="discountPercentageContainer">
+                    <label class="form-label" for="orderDiscountPercentage">نسبة الخصم</label>
+                    <input type="number" class="form-input" id="orderDiscountPercentage" placeholder="0" min="0" max="100" step="0.01" oninput="updateOrderSummary()">
+                  </div>
+                  
+                  <!-- Amount Input -->
+                  <div class="form-group" id="discountAmountContainer" style="display: none;">
+                    <label class="form-label" for="orderDiscountAmount">مبلغ الخصم</label>
+                    <input type="number" class="form-input" id="orderDiscountAmount" placeholder="0.00" min="0" step="0.01" disabled oninput="updateOrderSummary()">
+                  </div>
+                </div>
+              </div>
+          
+              <!-- Discount Reason -->
+              <div class="form-group">
+                <label class="form-label" for="orderDiscountReason">سبب الخصم (اختياري)</label>
+                <input type="text" class="form-input" id="orderDiscountReason" placeholder="سبب الخصم">
+              </div>
+          
+              <!-- Net Amount -->
+              <div class="form-group">
+                <label class="form-label">المبلغ النهائي بعد الخصم</label>
+                <div class="summary-display" id="orderNetAmount" style="padding: 1rem; background: var(--success); color: white; border-radius: var(--border-radius); font-weight: 700; text-align: center; font-size: 1.25rem;">
+                  0.00 ج.م
+                </div>
+              </div>
+          
+            </div>
+          </div>
 
           <!-- Submit Buttons -->
           <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
@@ -2546,6 +2613,13 @@
       { id: 'PROD_008', name: 'دقيق فاخر - كيس 2 كيلو', category: 'دقيق', price: 18.00 },
       { id: 'PROD_009', name: 'شاي أحمد - 100 كيس', category: 'مشروبات', price: 30.00 },
       { id: 'PROD_010', name: 'قهوة نسكافيه - 200 جرام', category: 'مشروبات', price: 55.00 }
+    ];
+
+    let units = [
+        { unit_id: '70000000000001', unit_name: 'carton', unit_name_ar: 'كرتونة' },
+        { unit_id: '70000000000002', unit_name: 'piece', unit_name_ar: 'قطعة' },
+        { unit_id: '70000000000003', unit_name: 'kg', unit_name_ar: 'كجم' },
+        { unit_id: '70000000000004', unit_name: 'g', unit_name_ar: 'جم' }
     ];
 
     let districts = [
@@ -2907,8 +2981,9 @@
           return new Promise(resolve => {
             setTimeout(() => {
               resolve({
-                cutomersOrdersCounter: 42, // Match backend property name
-                districtsList: districts // Match backend property name
+                cutomersOrdersCounter: 42,
+                districtsList: districts,
+                unitsList: units // Add units to the mock response
               });
             }, 500);
           });
@@ -3321,7 +3396,23 @@
                     </div>
                     <div class="summary-value">${formatDate(order.date)}</div>
                   </div>
+                  ${order.discount && order.discount > 0 ? `
+                    <div class="summary-item">
+                      <div class="summary-label">
+                        <i class="fas fa-percentage" style="color: var(--danger);"></i>
+                        الخصم
+                      </div>
+                      <div class="summary-value">${formatCurrency(order.discount)}</div>
+                    </div>
+                  ` : ''}
                 </div>
+                
+                ${order.discountReason ? `
+                  <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid var(--danger);">
+                    <h5 style="margin-bottom: 0.5rem; color: var(--gray-700);"><i class="fas fa-percentage"></i> سبب الخصم:</h5>
+                    <p style="margin: 0; color: var(--gray-600);">${order.discountReason}</p>
+                  </div>
+                ` : ''}
                 
                 ${order.comments ? `
                   <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid var(--info);">
@@ -3360,7 +3451,19 @@
                   <tfoot>
                     <tr style="background: var(--gray-100); font-weight: 600;">
                       <td colspan="4" style="text-align: left; padding: 1rem;">المجموع الكلي:</td>
-                      <td style="padding: 1rem;"><strong>${formatCurrency(order.amount)}</strong></td>
+                      <td style="padding: 1rem;"><strong>${formatCurrency(order.totalAmount || order.amount)}</strong></td>
+                      <td style="padding: 1rem;"></td>
+                    </tr>
+                    ${order.discount && order.discount > 0 ? `
+                      <tr style="background: var(--danger-light); font-weight: 600;">
+                        <td colspan="4" style="text-align: left; padding: 1rem; color: var(--danger);">الخصم:</td>
+                        <td style="padding: 1rem; color: var(--danger);"><strong>-${formatCurrency(order.discount)}</strong></td>
+                        <td style="padding: 1rem;"></td>
+                      </tr>
+                    ` : ''}
+                    <tr style="background: var(--success-light); font-weight: 600;">
+                      <td colspan="4" style="text-align: left; padding: 1rem; color: var(--success);">المبلغ النهائي:</td>
+                      <td style="padding: 1rem; color: var(--success);"><strong>${formatCurrency(order.amount)}</strong></td>
                       <td style="padding: 1rem;"></td>
                     </tr>
                   </tfoot>
@@ -3507,6 +3610,7 @@
       document.getElementById('newOrderModal').classList.add('show');
       resetNewOrderForm();
       
+      switchDiscountType();
       // Initialize customer search
       initializeCustomerSearch();
       // Initialize address grid listener
@@ -3549,6 +3653,12 @@
         if (element) element.value = '';
       });
 
+      // Reset discount fields
+      ['orderDiscount', 'orderDiscountReason'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = '';
+      });
+
       // Reset new address fields
       ['newAddressStreet', 'newAddressDistrict', 'newAddressArea', 'newAddressLabel'].forEach(id => {
         const element = document.getElementById(id);
@@ -3571,6 +3681,9 @@
       appState.selectedCustomer = null;
       appState.selectedAddress = null;
       appState.isAddingNewAddress = false;
+
+      // Reset order summary display
+      updateOrderSummary();
     }
 
     function hideAllFormSections() {
@@ -3988,12 +4101,7 @@
         </td>
         <td>
           <select class="form-select unit-select" onchange="updateOrderItem(${rowIndex})">
-            <option value="قطعة">قطعة</option>
-            <option value="كيلو">كيلو</option>
-            <option value="لتر">لتر</option>
-            <option value="عبوة">عبوة</option>
-            <option value="كيس">كيس</option>
-            <option value="زجاجة">زجاجة</option>
+            ${units.map(u => `<option value="${u.unit_id}">${u.unit_name_ar}</option>`).join('')}
           </select>
         </td>
         <td>
@@ -4038,6 +4146,9 @@
       if (appState.newOrderForm.items.length === 0) {
         addOrderItem();
       }
+      
+      // Update order summary after removing item
+      updateOrderSummary();
     }
 
     function updateOrderItem(rowIndex) {
@@ -4059,7 +4170,8 @@
           productId: productId || '',
           productName: product ? product.name : '',
           quantity: quantity,
-          unit: unitSelect.value,
+          unitId: unitSelect.value, // Store the unit_id
+          unit: unitSelect.options[unitSelect.selectedIndex].text, // Store the unit name (text)
           comments: commentInput.value,
           price: price
         };
@@ -4067,6 +4179,67 @@
         // Update price display
         priceDisplay.textContent = formatCurrency(price * quantity);
       }
+      
+      // Update order summary after item changes
+      updateOrderSummary();
+    }
+
+    function switchDiscountType() {
+      const isPercentage = document.querySelector('input[name="discountType"][value="percentage"]').checked;
+      
+      const percentageContainer = document.getElementById('discountPercentageContainer');
+      const amountContainer = document.getElementById('discountAmountContainer');
+      const percentageInput = document.getElementById('orderDiscountPercentage');
+      const amountInput = document.getElementById('orderDiscountAmount');
+
+      if (isPercentage) {
+        percentageContainer.style.display = 'block';
+        percentageInput.disabled = false;
+        
+        amountContainer.style.display = 'none';
+        amountInput.disabled = true;
+        amountInput.value = ''; // Clear inactive input
+      } else {
+        amountContainer.style.display = 'block';
+        amountInput.disabled = false;
+
+        percentageContainer.style.display = 'none';
+        percentageInput.disabled = true;
+        percentageInput.value = ''; // Clear inactive input
+      }
+      
+      updateOrderSummary();
+    }
+
+    function updateOrderSummary() {
+      const totalAmount = appState.newOrderForm.items.reduce((total, item) => {
+        return total + (item.price * item.quantity);
+      }, 0);
+
+      const isPercentage = document.querySelector('input[name="discountType"][value="percentage"]').checked;
+      let discountAmount = 0;
+
+      if (isPercentage) {
+        let percentage = parseFloat(document.getElementById('orderDiscountPercentage').value) || 0;
+        // Basic validation
+        if (percentage > 100) { percentage = 100; document.getElementById('orderDiscountPercentage').value = 100; }
+        if (percentage < 0)   { percentage = 0;   document.getElementById('orderDiscountPercentage').value = 0; }
+        discountAmount = (totalAmount * percentage) / 100;
+      } else {
+        let amount = parseFloat(document.getElementById('orderDiscountAmount').value) || 0;
+        // Basic validation
+        if (amount > totalAmount) { amount = totalAmount; document.getElementById('orderDiscountAmount').value = totalAmount.toFixed(2); }
+        if (amount < 0)           { amount = 0;           document.getElementById('orderDiscountAmount').value = 0; }
+        discountAmount = amount;
+      }
+      
+      const netAmount = Math.max(0, totalAmount - discountAmount);
+      
+      // Ensure elements exist before updating
+      const totalEl = document.getElementById('orderTotalAmount');
+      const netEl = document.getElementById('orderNetAmount');
+      if (totalEl) totalEl.textContent = formatCurrency(totalAmount);
+      if (netEl) netEl.textContent = formatCurrency(netAmount);
     }
 
     function initializeCustomerSearch() {
@@ -4888,6 +5061,9 @@ function initializeProductDropdown(row, rowIndex) {
       // The main loading screen is visible by default. We need to hide it when all initial data is loaded.
       // API calls might show their own sub-loaders, but this handles the initial page load screen.
       
+      populateSourceDropdowns('orderSource', 'orderSecondarySource');
+      populatePaymentMethodsDropdown('orderPaymentMethod');
+
       const startupPromise = API.getStartupData();
       const ordersPromise = API.getOrders();
       const customersPromise = API.getCustomers();
@@ -4922,6 +5098,13 @@ function initializeProductDropdown(row, rowIndex) {
             console.log('Districts array updated from startup data.');
           } else {
             console.warn('Startup data did not contain a valid districtsList. Using hardcoded data.');
+          }
+
+          if (startupDataObject.unitsList && startupDataObject.unitsList.length > 0) {
+            units = startupDataObject.unitsList;
+            console.log('Units array updated from startup data.');
+          } else {
+            console.warn('Startup data did not contain a valid unitsList. Using hardcoded data.');
           }
 
           // 2. Populate global data arrays
@@ -5012,6 +5195,21 @@ function initializeProductDropdown(row, rowIndex) {
       secondarySelect.innerHTML = '<option value="">اختر المصدر الفرعي</option>';
     }
 
+    const PAYMENT_METHODS = [
+      { id: 'cod', name: 'كاش عند الإستلام (COD)' },
+      { id: 'vc_01012345678', name: 'فودافون كاش - 01012345678' },
+      { id: 'vc_01098765432', name: 'فودافون كاش - 01098765432' },
+      { id: 'insta_account1', name: 'إنستاباي - account1@instapay' },
+      { id: 'insta_account2', name: 'إنستاباي - account2@instapay' }
+    ];
+
+    function populatePaymentMethodsDropdown(selectId) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      select.innerHTML = '<option value="">اختر طريقة الدفع</option>' +
+        PAYMENT_METHODS.map(method => `<option value="${method.id}">${method.name}</option>`).join('');
+    }
+
     // Global function assignments
     window.openAddCustomerModal = openAddCustomerModal;
     window.closeAddCustomerModal = closeAddCustomerModal;
@@ -5037,6 +5235,13 @@ function initializeProductDropdown(row, rowIndex) {
     
     // ===== ORDER SUBMISSION =====
     function submitOrder() {
+      // Validate that a payment method is selected
+      const paymentMethod = document.getElementById('orderPaymentMethod').value;
+      if (!paymentMethod) {
+        showToast('error', 'الرجاء اختيار طريقة الدفع لإتمام الطلب');
+        return;
+      }
+
       // Validate the order form
       if (!validateOrderForm()) {
         return;
@@ -5091,21 +5296,46 @@ function initializeProductDropdown(row, rowIndex) {
         address = {};
       }
 
+      // Filter items and calculate total amount *before* creating the payload
+      const validItems = appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0);
+      const totalAmount = validItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+      // Get discount data directly from the form state
+      const isPercentage = document.querySelector('input[name="discountType"][value="percentage"]').checked;
+      const discountType = isPercentage ? 'percentage' : 'amount';
+      let discountValue = 0;
+      let discountAmount = 0;
+
+      if (isPercentage) {
+        discountValue = parseFloat(document.getElementById('orderDiscountPercentage').value) || 0;
+        discountAmount = (totalAmount * discountValue) / 100;
+      } else {
+        discountValue = parseFloat(document.getElementById('orderDiscountAmount').value) || 0;
+        discountAmount = discountValue;
+      }
+      const netAmount = Math.max(0, totalAmount - discountAmount);
+      const discountReason = document.getElementById('orderDiscountReason').value.trim();
+      
       // Generate the serial *before* creating the payload
       const orderSerial = API.createSerial(appState.orderCounter + 1);
 
       // Collect order data
       const orderData = {
         reference,
-        orderSerial, // Add serial to the payload
+        orderSerial,
+        totalAmount,
+        discountType,
+        discountValue, // The raw value entered by the user
+        discountReason,
         customer_id,
         customer,
         address_id,
         address,
-        items: appState.newOrderForm.items.filter(item => item.productId && item.quantity > 0),
+        items: validItems,
         notes: document.getElementById('orderComments').value.trim(),
         source: document.getElementById('orderSource').value,
-        secondarySource: document.getElementById('orderSecondarySource').value
+        secondarySource: document.getElementById('orderSecondarySource').value,
+        paymentMethod: document.getElementById('orderPaymentMethod').value
       };
 
       console.log('=== ORDER PAYLOAD TO BE SENT ===');
@@ -5132,14 +5362,17 @@ function initializeProductDropdown(row, rowIndex) {
 
         // Create local order object for immediate UI update
         const newOrder = {
-          id: API.createSerial(appState.orderCounter + 1), // Use serial generation
+          id: orderSerial, // Use the pre-generated serial
           customerId: customer_id || `CUST-${Date.now()}`,
           customerName: isNewCustomer ? customer.name : appState.selectedCustomer.name,
           customerPhone: isNewCustomer ? customer.phone : appState.selectedCustomer.phone,
           date: new Date().toISOString().split('T')[0],
-          amount: orderData.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+          amount: netAmount, // Use net amount instead of total amount
+          totalAmount: totalAmount, // Keep total amount for reference
+          discount: discountAmount, // Add discount amount
+          discountReason: discountReason, // Add discount reason
           status: 'pending',
-          items: orderData.items,
+          items: validItems,
           area: isNewAddress ? address.area : appState.selectedAddress.area,
           address_details: isNewAddress ? 
             `${address.street_name}، منزل ${address.house_number}${address.flat_number ? '، شقة ' + address.flat_number : ''}${address.floor_number ? '، دور ' + address.floor_number : ''}<br>${address.address_district} - ${address.address_governorate}` :
