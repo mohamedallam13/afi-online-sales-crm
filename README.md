@@ -1,85 +1,109 @@
-# AFI CRM - Customer & Order Management
+# AFI CRM — Customer & Order Management
 
-A web-based CRM system for managing customers, orders, and leads, with a modern UI and robust feature set.
+A web-based CRM for Advanced Food Industries (AFI) to manage customers, orders, and leads. Built on Google Apps Script with a tabbed SPA interface, real-time search, and direct Google Sheets integration.
+
+![Google Apps Script](https://img.shields.io/badge/Google%20Apps%20Script-4285F4?style=flat&logo=google&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-WebApp-blue)
+![Status](https://img.shields.io/badge/Status-Production-green)
 
 ---
 
 ## Features
 
-### 1. Navigation & Layout
-- Tabbed navigation: Switch between Orders, Customers, and Leads sections.
-- Responsive design: Works on desktop and mobile devices.
-- Loading screen & toast notifications: User feedback for actions and loading states.
+### Orders
+- Filter orders by status: All · Pending · In Progress · Out for Delivery · Delivered
+- Expandable order rows with full product breakdown, quantities, prices, and comments
+- Update order status directly from the table
 
-### 2. Orders Management
-- Order filters: Filter orders by status (All, Pending, In Progress, Out for Delivery, Delivered).
-- Orders table: View all orders with details like order number, customer, date, amount, status, and actions.
-- Order details expansion: Click an order to view full details, including products, quantities, prices, and comments.
-- Change order status: Update the status of any order directly from the table.
+### Customers
+- Customer grid with aggregated stats: total orders, total spent, last order date
+- Add customers with full details (name, phone, address, district, area)
+- Debounced real-time search by name or phone
+- Multiple delivery addresses per customer
 
-### 3. Customers Management
-- Customers grid: View all customers with stats (total orders, total spent, last order date).
-- Add customer: Add new customers with full details (name, phone, address, district, area).
-- Customer search: Search for customers by name or phone, with instant results and highlight.
-- Select customer: Choose an existing customer for a new order, or add a new one if not found.
+### Leads
+- Leads grid with name, phone, email, district, source, status, and notes
+- Add and manage potential customers through the pipeline
 
-### 4. Leads Management
-- Leads grid: Manage potential customers (leads) with details like name, phone, email, district, source, status, and notes.
-- Add lead: Add new leads with all relevant information.
+### Order Creation
+- Guided modal: customer search → address selection → product rows → validation → submit
+- Dynamic product rows — add or remove lines as needed
+- Searchable dropdowns for customers, products, and units
 
-### 5. Order Creation Workflow
-- New order modal: Guided modal for creating a new order.
-  - Customer search: Find or add a customer.
-  - Address selection: Choose or add a delivery address for the customer.
-  - Order details: Add products, quantities, units, prices, and comments.
-  - Order comments: Add general notes for the order.
-  - Order source: Specify where the order came from (website, social, etc.).
-  - Validation: Ensures all required fields are filled and at least one product is added.
-  - Submit order: Save the order and update the orders list.
+---
 
-### 6. Address Management
-- Multiple addresses: Customers can have multiple addresses (home, work, other).
-- Add/edit address: Add new addresses for customers during order creation.
+## Tech Stack
 
-### 7. Product Management (Mock Data)
-- Product list: Select products from a predefined list with prices and categories.
-- Dynamic pricing: Product price is shown and updated in the order form.
+| Layer    | Technology                      |
+|----------|---------------------------------|
+| Platform | Google Apps Script              |
+| UI       | HTML5, CSS3, Vanilla JavaScript |
+| Database | Google Sheets                   |
+| Deploy   | clasp CLI                       |
 
-### 8. State Management & Mock API
-- App state: All UI and data state is managed in a central appState object.
-- Mock API: Simulates backend operations for orders, customers, leads, and products.
+---
 
-### 9. Utilities
-- Currency & date formatting: Consistent display of prices and dates.
-- Debounced search: Efficient customer search with debouncing.
-- Form validation: Highlights missing or invalid fields and prevents submission.
+## Project Structure
+
+```
+afi-online-sales-crm/
+├── README.md
+├── AGENT.md
+├── .gitignore
+└── src/
+    ├── env.js          # Sheet IDs and config
+    ├── Backend.js      # Data access layer (Sheets read/write)
+    ├── Helpers.js      # Pure utility functions
+    ├── Middleware.js   # Server-side routing and validation
+    ├── Server.js       # doGet() / doPost() entry points
+    └── index.html      # SPA shell (Orders, Customers, Leads tabs)
+```
 
 ---
 
 ## Getting Started
 
-1. Clone the repository
-2. Open `index.html` in your browser
-3. No backend required (all data is mock/in-memory)
+### Prerequisites
+
+- A Google account with Google Apps Script access
+- [clasp](https://github.com/google/clasp) installed globally
+
+```bash
+npm install -g @google/clasp
+clasp login
+```
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/mohamedallam13/afi-online-sales-crm.git
+   cd afi-online-sales-crm
+   ```
+
+2. Link to your Apps Script project:
+   ```bash
+   clasp create --type webapp --title "AFI CRM" --rootDir src
+   ```
+
+3. Push source files:
+   ```bash
+   clasp push
+   ```
+
+4. Set Sheet IDs in `env.js`.
 
 ---
 
-## File Structure
+## Deployment
 
-- `index.html` - Main application file (HTML, CSS, JS in one)
-- `.gitignore` - Ignores `.clasp.json` and `appsscript.json`
-- `server/` - (If present) Backend scripts (not used in the browser app)
-
----
-
-## Customization
-
-- Add more products: Edit the `mockProducts` array in the script section.
-- Add more customers/leads: Edit the `mockCustomers` and `mockLeads` arrays.
-- Integrate with a real backend: Replace the mock API functions with real API calls.
+1. In the Apps Script editor, go to **Deploy > New deployment**
+2. Select type: **Web app**
+3. Set access permissions as required
+4. Click **Deploy** and share the Web App URL
 
 ---
 
-## License
+## Author
 
-MIT (or your preferred license) 
+**Mohamed Allam** — [GitHub](https://github.com/mohamedallam13) · [Email](mailto:mohamedallam.tu@gmail.com)
